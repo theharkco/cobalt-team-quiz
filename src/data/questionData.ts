@@ -40,6 +40,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     correctAnswer: 'Chain-of-thought',
     category: 'LLM Technology',
     difficulty: 'medium',
+    explanation: 'Chain-of-thought prompting encourages the model to "think step by step," breaking complex reasoning into intermediate steps — dramatically improving accuracy on math and logic tasks.',
   },
   {
     id: 5,
