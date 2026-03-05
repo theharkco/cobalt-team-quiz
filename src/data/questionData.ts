@@ -209,7 +209,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     question: '🎵 Which artist performs this song?',
     options: ['Roxy Music', 'Japan', 'Duran Duran', 'Spandau Ballet'],
     correctAnswer: 'Roxy Music',
-    spotifyEmbedUrl: 'https://open.spotify.com/embed/track/3rKCEBl2VPupMkNZnGFbjF?utm_source=generator&theme=0',
+    spotifyEmbedUrl: 'https://open.spotify.com/embed/track/6N7gPTru90HYLRUIVDQ185?utm_source=generator&theme=0',
     category: 'Music',
     difficulty: 'hard',
   },
