@@ -28,6 +28,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     correctAnswer: '2 and 20',
     category: 'Private Equity',
     difficulty: 'medium',
+    explanation: '"2 and 20" means a 2% annual management fee on committed capital plus a 20% carried interest (performance fee) on profits above a hurdle rate.',
   },
   {
     id: 4,
