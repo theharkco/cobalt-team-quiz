@@ -137,6 +137,61 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     spotifyEmbedUrl: 'https://open.spotify.com/embed/track/5kAGSAVFjBJlIFH3jSHJnz?utm_source=generator&theme=0',
     category: 'Music',
   },
+
+  // --- EXTRA: One more per category ---
+  {
+    id: 16,
+    type: 'multiple-choice',
+    question: '💰 What does "dry powder" refer to in private equity?',
+    options: ['Uninvested capital', 'Debt financing', 'Dividend recaps', 'Management fees'],
+    correctAnswer: 'Uninvested capital',
+    category: 'Private Equity',
+  },
+  {
+    id: 17,
+    type: 'multiple-choice',
+    question: '🧠 What mechanism allows Transformers to weigh the importance of different input tokens?',
+    options: ['Backpropagation', 'Self-attention', 'Dropout', 'Batch normalization'],
+    correctAnswer: 'Self-attention',
+    category: 'LLM Technology',
+  },
+  {
+    id: 18,
+    type: 'multiple-choice',
+    question: '🎬 In "The Terminator," what is the name of the AI system that becomes self-aware?',
+    options: ['Skynet', 'WOPR', 'Ultron', 'The Matrix'],
+    correctAnswer: 'Skynet',
+    category: 'AI Pop Culture',
+  },
+  {
+    id: 19,
+    type: 'blurred-image',
+    question: '👤 Who is this famous person?',
+    correctAnswer: 'Elon Musk',
+    acceptableAnswers: ['elon musk', 'musk', 'elon'],
+    imageUrl: '/images/elon-musk.jpg',
+    blurLevels: [50, 38, 28, 18, 10, 4, 0],
+    category: 'Famous People',
+  },
+  {
+    id: 20,
+    type: 'blurred-image',
+    question: '🗽 What famous landmark is this?',
+    correctAnswer: 'Statue of Liberty',
+    acceptableAnswers: ['statue of liberty', 'the statue of liberty', 'liberty statue'],
+    imageUrl: '/images/statue-of-liberty-photo.jpg',
+    blurLevels: [50, 35, 25, 15, 8, 3, 0],
+    category: 'Landmarks',
+  },
+  {
+    id: 21,
+    type: 'music',
+    question: '🎵 Which artist performs this song?',
+    options: ['Roxy Music', 'Japan', 'Duran Duran', 'Spandau Ballet'],
+    correctAnswer: 'Roxy Music',
+    spotifyEmbedUrl: 'https://open.spotify.com/embed/track/3rKCEBl2VPupMkNZnGFbjF?utm_source=generator&theme=0',
+    category: 'Music',
+  },
 ];
 
 export const PLAYER_COLORS = [
