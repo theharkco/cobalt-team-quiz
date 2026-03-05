@@ -45,6 +45,7 @@ export default function PlayerView() {
       stopTicking();
       if (preCountdownRef.current) clearInterval(preCountdownRef.current);
       setPreCountdown(3);
+      playCountdownBeep(3);
       let count = 3;
       preCountdownRef.current = setInterval(() => {
         count--;
