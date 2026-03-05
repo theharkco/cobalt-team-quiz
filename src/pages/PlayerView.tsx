@@ -9,6 +9,7 @@ import PlayerAnswerInput from '@/components/quiz/PlayerAnswerInput';
 import CountdownTimer from '@/components/quiz/CountdownTimer';
 import FloatingShapes from '@/components/quiz/FloatingShapes';
 import confetti from 'canvas-confetti';
+import { playCorrect, playWrong, startTicking, stopTicking } from '@/lib/sounds';
 
 export default function PlayerView() {
   const { sessionId, playerId } = useParams<{ sessionId: string; playerId: string }>();
