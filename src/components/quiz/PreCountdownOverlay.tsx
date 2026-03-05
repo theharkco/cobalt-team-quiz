@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import type { QuizQuestion } from '@/data/questionTypes';
+import Emoji from '@/components/quiz/Emoji';
 
 interface PreCountdownOverlayProps {
   countdown: number;
@@ -19,9 +20,9 @@ export default function PreCountdownOverlay({ countdown, question }: PreCountdow
           <motion.span
             animate={{ rotate: [0, -10, 10, -10, 0] }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-5xl md:text-7xl block"
+            className="text-5xl md:text-7xl"
           >
-            {question.question.match(/^\p{Emoji_Presentation}/u)?.[0] || '❓'}
+            <Emoji label="category">{question.question.match(/^\p{Emoji_Presentation}/u)?.[0] || '❓'}</Emoji>
           </motion.span>
           <motion.span
             initial={{ letterSpacing: '0.5em', opacity: 0 }}

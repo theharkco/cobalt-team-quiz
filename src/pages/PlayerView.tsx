@@ -15,6 +15,7 @@ import { usePreCountdown } from '@/hooks/usePreCountdown';
 import { retryOnce } from '@/lib/retryAsync';
 import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
+import Emoji from '@/components/quiz/Emoji';
 import confetti from 'canvas-confetti';
 import { playCorrect, playWrong, startTicking, stopTicking } from '@/lib/sounds';
 
@@ -252,7 +253,7 @@ export default function PlayerView() {
             transition={{ type: 'spring', bounce: 0.5 }}
             className="text-center"
           >
-            <span className="text-8xl block mb-4 animate-bounce-in">🎮</span>
+            <Emoji className="text-8xl mb-4 animate-bounce-in" label="game">🎮</Emoji>
             <h2 className="text-3xl font-display font-bold text-foreground mb-2">You&apos;re in!</h2>
             <p className="text-lg font-body text-muted-foreground">
               Welcome, <span className="text-primary font-bold">{player?.name}</span>
@@ -301,9 +302,9 @@ export default function PlayerView() {
               transition={{ type: 'spring', bounce: 0.5 }}
               className={`text-center p-6 rounded-2xl ${isCorrectResult ? 'bg-quiz-green/20' : 'bg-destructive/20'}`}
             >
-              <span className="text-5xl block mb-2">
+              <Emoji className="text-5xl mb-2" label="result">
                 {resultKind === 'exact' ? '🎉' : resultKind === 'close' ? '👍' : resultKind === 'timeout' ? '⏰' : '💥'}
-              </span>
+              </Emoji>
               <p className="text-xl font-display font-bold text-foreground">
                 {resultKind === 'exact'
                   ? `+${lastPoints} points!`
@@ -335,9 +336,9 @@ export default function PlayerView() {
             animate={{ scale: 1 }}
             transition={{ type: 'spring', bounce: 0.5 }}
           >
-            <span className="text-6xl block mb-4">
+            <Emoji className="text-6xl mb-4" label="rank">
               {rank <= 3 ? ['🥇', '🥈', '🥉'][rank - 1] : '📊'}
-            </span>
+            </Emoji>
             <h2 className="text-4xl font-display font-bold text-foreground mb-2">#{rank}</h2>
             <p className="text-2xl font-display font-bold text-primary">{player?.score ?? 0} points</p>
             <p className="text-muted-foreground mt-4 animate-pulse">Next question coming up...</p>
