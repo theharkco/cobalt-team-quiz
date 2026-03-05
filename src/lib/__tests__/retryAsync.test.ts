@@ -10,11 +10,11 @@ describe('retryOnce', () => {
   });
 
   it('retries once on failure and returns second result', async () => {
+    vi.useFakeTimers();
     const fn = vi.fn()
       .mockRejectedValueOnce(new Error('fail'))
       .mockResolvedValueOnce('recovered');
     
-    vi.useFakeTimers();
     const promise = retryOnce(fn);
     await vi.advanceTimersByTimeAsync(1000);
     const result = await promise;
@@ -25,11 +25,13 @@ describe('retryOnce', () => {
   });
 
   it('throws if both attempts fail', async () => {
-    const fn = vi.fn()
-      .mockRejectedValueOnce(new Error('first'))
-      .mockRejectedValueOnce(new Error('second'));
-    
     vi.useFakeTimers();
+    const err1 = new Error('first');
+    const err2 = new Error('second');
+    const fn = vi.fn()
+      .mockRejectedValueOnce(err1)
+      .mockRejectedValueOnce(err2);
+    
     const promise = retryOnce(fn);
     await vi.advanceTimersByTimeAsync(1000);
     
