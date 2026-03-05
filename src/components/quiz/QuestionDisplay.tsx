@@ -70,7 +70,7 @@ function MusicEmbed({ spotifyEmbedUrl, revealAnswer }: { spotifyEmbedUrl: string
         {/* Iframe - visible when exposing or revealed */}
         <iframe
           ref={iframeRef}
-          src={`${spotifyEmbedUrl}&autoplay=1`}
+          src={spotifyEmbedUrl}
           width="100%"
           height="152"
           allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
