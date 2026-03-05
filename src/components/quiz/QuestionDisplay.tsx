@@ -105,14 +105,21 @@ export default function QuestionDisplay({ question, questionNumber, totalQuestio
           transition={{ delay: 0.2 }}
           className="flex justify-center mb-8"
         >
-          <div className="w-72 md:w-96 rounded-2xl overflow-hidden border-4 border-border">
+          <div className="relative w-72 md:w-96 rounded-2xl overflow-hidden border-4 border-border">
+            {/* Overlay to hide song title/artist */}
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-card rounded-xl pointer-events-none">
+              <span className="text-5xl animate-pulse mb-2">🎵</span>
+              <span className="font-display font-bold text-foreground text-lg">Listen carefully...</span>
+              <span className="text-muted-foreground text-sm mt-1">Name the song or artist!</span>
+            </div>
+            {/* Iframe is rendered behind the overlay so audio plays */}
             <iframe
               src={`${question.spotifyEmbedUrl}&autoplay=1`}
               width="100%"
               height="152"
               allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
               loading="lazy"
-              style={{ border: 'none', borderRadius: '12px' }}
+              style={{ border: 'none', borderRadius: '12px', opacity: 0 }}
             />
           </div>
         </motion.div>
