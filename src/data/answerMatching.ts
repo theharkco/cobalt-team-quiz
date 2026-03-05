@@ -27,6 +27,11 @@ export function checkAnswer(question: QuizQuestion, answer: string): MatchQualit
   const normalizedAnswer = answer.trim().toLowerCase();
   const correctNorm = question.correctAnswer.toLowerCase();
 
+  // Multiple-choice and music: strict exact match only
+  if (question.type === 'multiple-choice' || question.type === 'music') {
+    return normalizedAnswer === correctNorm ? 'exact' : 'none';
+  }
+
   // Exact match against correct answer
   if (normalizedAnswer === correctNorm) return 'exact';
 
