@@ -31,14 +31,14 @@ function MusicEmbed({ spotifyEmbedUrl }: { spotifyEmbedUrl: string }) {
       className="flex flex-col items-center mb-8"
     >
       <span className="text-4xl mb-2">🎵</span>
-      <div className="relative w-72 md:w-96 rounded-2xl overflow-hidden border-4 border-border h-[80px]">
+      <div className="relative w-72 md:w-96 rounded-2xl overflow-hidden border-4 border-border h-[30px]">
         <iframe
           src={spotifyEmbedUrl}
           width="100%"
           height="152"
           allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
           loading="lazy"
-          style={{ border: 'none', borderRadius: '12px', marginTop: '-72px' }}
+          style={{ border: 'none', borderRadius: '12px', marginTop: '-108px' }}
         />
       </div>
     </motion.div>
