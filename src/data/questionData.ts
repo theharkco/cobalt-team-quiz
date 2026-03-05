@@ -138,7 +138,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     question: '🎵 Which artist performs this hit?',
     options: ['Supertramp', 'Electric Light Orchestra', '10cc', 'Alan Parsons Project'],
     correctAnswer: 'Supertramp',
-    spotifyEmbedUrl: 'https://open.spotify.com/embed/track/2kN5sBeGBOM2MfaRhscRFp?utm_source=generator&theme=0',
+    spotifyEmbedUrl: 'https://open.spotify.com/embed/track/7JyvxcUhMVptzt01hWjGz9?utm_source=generator&theme=0',
     category: 'Music',
     difficulty: 'medium',
   },
