@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 import type { QuizQuestion } from '@/data/questions';
 
