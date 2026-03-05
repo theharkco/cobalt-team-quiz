@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import CountdownTimer from '../CountdownTimer';
 
 describe('CountdownTimer', () => {
@@ -16,31 +16,39 @@ describe('CountdownTimer', () => {
     expect(circles.length).toBe(2);
   });
 
-  it('counts down when running', () => {
+  it('counts down when running', async () => {
     vi.useFakeTimers();
     const onComplete = vi.fn();
     render(<CountdownTimer duration={15} onComplete={onComplete} isRunning={true} />);
     
-    // After 1 second, should show 14
-    vi.advanceTimersByTime(1100);
+    await act(async () => {
+      vi.advanceTimersByTime(1100);
+    });
     expect(screen.getByText('14')).toBeInTheDocument();
     vi.useRealTimers();
   });
 
-  it('calls onComplete when time runs out', () => {
+  it('calls onComplete when time runs out', async () => {
     vi.useFakeTimers();
     const onComplete = vi.fn();
-    render(<CountdownTimer duration={2} onComplete={onComplete} isRunning={true} />);
+    render(<CountdownTimer duration={1} onComplete={onComplete} isRunning={true} />);
     
-    vi.advanceTimersByTime(2200);
+    // Advance past the full duration in small increments to trigger state updates
+    for (let i = 0; i < 12; i++) {
+      await act(async () => {
+        vi.advanceTimersByTime(100);
+      });
+    }
     expect(onComplete).toHaveBeenCalled();
     vi.useRealTimers();
   });
 
-  it('does not count down when not running', () => {
+  it('does not count down when not running', async () => {
     vi.useFakeTimers();
     render(<CountdownTimer duration={15} onComplete={vi.fn()} isRunning={false} />);
-    vi.advanceTimersByTime(5000);
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
     expect(screen.getByText('15')).toBeInTheDocument();
     vi.useRealTimers();
   });
