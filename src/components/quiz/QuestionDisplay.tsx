@@ -20,7 +20,7 @@ const optionColors = [
 
 const optionIcons = ['▲', '◆', '●', '★'];
 
-export default function QuestionDisplay({ question, questionNumber, totalQuestions, isHost, timeElapsedMs = 0 }: QuestionDisplayProps) {
+export default function QuestionDisplay({ question, questionNumber, totalQuestions, isHost, timeElapsedMs = 0, hideOptions }: QuestionDisplayProps) {
   const [blurAmount, setBlurAmount] = useState(40);
 
   // Calculate blur based on time elapsed for image questions
