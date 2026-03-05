@@ -136,6 +136,7 @@ export default function HostView() {
       await updateStatus('finished');
       await refreshPlayers();
     } else {
+      setAnswerCount(0);
       await updateStatus('question', next);
       timer.start();
       setShowAnswer(false);
