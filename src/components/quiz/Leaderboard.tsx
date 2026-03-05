@@ -49,7 +49,7 @@ export default function Leaderboard({ players, previousScores, isFinal }: Leader
                 transition={{ delay: 0.3 + idx * 0.3, type: 'spring', bounce: 0.5 }}
                 className="flex flex-col items-center"
               >
-                <span className="text-3xl mb-2">{medals[idx]}</span>
+                <Emoji className="text-3xl mb-2" label="medal">{medals[idx]}</Emoji>
                 <div
                   className="w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold mb-2 border-4 border-foreground/20"
                   style={{ backgroundColor: p.color }}
