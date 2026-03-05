@@ -332,9 +332,12 @@ export default function HostView() {
               transition={{ type: 'spring', bounce: 0.5 }}
               className="text-center mt-4"
             >
-              <div className="bg-card border-2 border-quiz-green rounded-2xl p-6 inline-block">
+              <div className="bg-card border-2 border-quiz-green rounded-2xl p-6 inline-block max-w-lg">
                 <p className="text-muted-foreground font-body mb-1">Correct answer:</p>
                 <p className="text-3xl font-display font-bold text-quiz-green">{currentQ.correctAnswer}</p>
+                {currentQ.explanation && (
+                  <p className="text-sm font-body text-muted-foreground mt-3 leading-relaxed">{currentQ.explanation}</p>
+                )}
               </div>
               <div className="mt-6">
                 <Button
