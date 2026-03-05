@@ -302,9 +302,9 @@ export default function PlayerView() {
               transition={{ type: 'spring', bounce: 0.5 }}
               className={`text-center p-6 rounded-2xl ${isCorrectResult ? 'bg-quiz-green/20' : 'bg-destructive/20'}`}
             >
-              <span className="text-5xl block mb-2">
+              <Emoji className="text-5xl mb-2" label="result">
                 {resultKind === 'exact' ? '🎉' : resultKind === 'close' ? '👍' : resultKind === 'timeout' ? '⏰' : '💥'}
-              </span>
+              </Emoji>
               <p className="text-xl font-display font-bold text-foreground">
                 {resultKind === 'exact'
                   ? `+${lastPoints} points!`
