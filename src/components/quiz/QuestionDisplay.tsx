@@ -24,15 +24,19 @@ const optionIcons = ['▲', '◆', '●', '★'];
 
 function MusicEmbed({ spotifyEmbedUrl, revealAnswer }: { spotifyEmbedUrl: string; revealAnswer?: boolean }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [manualPlay, setManualPlay] = useState(false);
+  const [playState, setPlayState] = useState<'idle' | 'exposing' | 'playing'>('idle');
 
   const handlePlay = useCallback(() => {
-    // Reload iframe within user gesture context to satisfy autoplay policy
+    // Reload iframe with autoplay within user gesture context
     if (iframeRef.current) {
       iframeRef.current.src = `${spotifyEmbedUrl}&autoplay=1`;
     }
-    setManualPlay(true);
+    // Briefly expose the Spotify player so user can tap its play button if autoplay fails
+    setPlayState('exposing');
+    setTimeout(() => setPlayState('playing'), 3000);
   }, [spotifyEmbedUrl]);
+
+  const showOverlay = !revealAnswer && playState !== 'exposing';
 
   return (
     <motion.div
@@ -45,14 +49,14 @@ function MusicEmbed({ spotifyEmbedUrl, revealAnswer }: { spotifyEmbedUrl: string
         {/* Overlay to hide song title/artist */}
         <motion.div
           initial={{ opacity: 1 }}
-          animate={{ opacity: revealAnswer ? 0 : 1 }}
-          transition={{ duration: 0.5 }}
+          animate={{ opacity: showOverlay ? 1 : 0 }}
+          transition={{ duration: 0.3 }}
           className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-card rounded-xl"
-          style={{ pointerEvents: revealAnswer ? 'none' : 'auto' }}
+          style={{ pointerEvents: showOverlay ? 'auto' : 'none' }}
         >
           <span className="text-5xl animate-pulse mb-2">🎵</span>
           <span className="font-display font-bold text-foreground text-lg">Listen carefully...</span>
-          {!manualPlay ? (
+          {playState === 'idle' ? (
             <button
               onClick={handlePlay}
               className="mt-3 px-5 py-2 rounded-full bg-primary text-primary-foreground font-display font-bold text-sm hover:opacity-90 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
@@ -63,7 +67,7 @@ function MusicEmbed({ spotifyEmbedUrl, revealAnswer }: { spotifyEmbedUrl: string
             <span className="text-muted-foreground text-sm mt-1">Name the song or artist!</span>
           )}
         </motion.div>
-        {/* Iframe behind overlay */}
+        {/* Iframe - visible when exposing or revealed */}
         <iframe
           ref={iframeRef}
           src={`${spotifyEmbedUrl}&autoplay=1`}
