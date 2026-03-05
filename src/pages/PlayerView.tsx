@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { QUIZ_QUESTIONS, checkAnswer, calculateScore } from '@/data/questions';
@@ -13,6 +13,7 @@ import { useTimer } from '@/hooks/useTimer';
 import { usePreCountdown } from '@/hooks/usePreCountdown';
 import { retryOnce } from '@/lib/retryAsync';
 import { toast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
 import confetti from 'canvas-confetti';
 import { playCorrect, playWrong, startTicking, stopTicking } from '@/lib/sounds';
 
@@ -20,6 +21,7 @@ type ResultKind = 'exact' | 'close' | 'wrong' | 'timeout';
 
 export default function PlayerView() {
   const { sessionId, playerId } = useParams<{ sessionId: string; playerId: string }>();
+  const navigate = useNavigate();
   const [session, setSession] = useState<QuizSession | null>(null);
   const [player, setPlayer] = useState<Player | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
@@ -27,27 +29,39 @@ export default function PlayerView() {
   const [lastPoints, setLastPoints] = useState(0);
   const [resultKind, setResultKind] = useState<ResultKind>('timeout');
   const timer = useTimer();
-  const { preCountdown, setPreCountdown, clearPreCountdown, preCountdownRef } = usePreCountdown();
+  const { preCountdown, startPreCountdown, clearPreCountdown } = usePreCountdown();
+  const lastQuestionRef = useRef(-1);
 
   const refreshPlayer = useCallback(async () => {
     if (!playerId) return;
-    const { data } = await supabase.from('players').select('*').eq('id', playerId).single();
+    const { data, error } = await supabase.from('players').select('*').eq('id', playerId).single();
+    if (error) {
+      console.error('Failed to load player:', error);
+      toast({ title: 'Connection issue', description: 'Failed to load player data.', variant: 'destructive' });
+      return;
+    }
     if (data) setPlayer(data as Player);
   }, [playerId]);
 
   const refreshPlayers = useCallback(async () => {
     if (!sessionId) return;
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('players')
       .select('*')
       .eq('session_id', sessionId)
       .order('score', { ascending: false });
+    if (error) {
+      console.error('Failed to load players:', error);
+      return;
+    }
     if (data) setPlayers(data as Player[]);
   }, [sessionId]);
 
   const handleSessionTransition = useCallback(
     (prev: QuizSession | null, next: QuizSession) => {
-      if (prev && next.current_question !== prev.current_question) {
+      // New question transition
+      if (prev && next.current_question !== prev.current_question && next.current_question !== lastQuestionRef.current) {
+        lastQuestionRef.current = next.current_question;
         setAnswered(false);
         setLastPoints(0);
         setResultKind('timeout');
@@ -55,49 +69,40 @@ export default function PlayerView() {
         stopTicking();
         clearPreCountdown();
 
-        import('@/lib/sounds').then(({ playCountdownBeep }) => {
-          setPreCountdown(3);
-          playCountdownBeep(3);
-          let count = 3;
-          preCountdownRef.current = setInterval(() => {
-            count--;
-            setPreCountdown(count);
-            if (count > 0) playCountdownBeep(count);
-            if (count <= 0) {
-              if (preCountdownRef.current) clearInterval(preCountdownRef.current);
-              preCountdownRef.current = null;
-              const serverStart = next.question_started_at
-                ? new Date(next.question_started_at).getTime()
-                : Date.now();
-              timer.start(serverStart);
-              startTicking(
-                () =>
-                  (15000 -
-                    (Date.now() -
-                      (next.question_started_at
-                        ? new Date(next.question_started_at).getTime()
-                        : timer.startTimeRef.current))) /
-                  1000
-              );
-            }
-          }, 1000);
+        // Use the unified usePreCountdown hook
+        startPreCountdown(() => {
+          // After pre-countdown, start timer synced to server timestamp
+          const serverStart = next.question_started_at
+            ? new Date(next.question_started_at).getTime()
+            : Date.now();
+          timer.start(serverStart);
+          startTicking(() => {
+            const elapsed = Date.now() - serverStart;
+            return Math.max(0, (15000 - elapsed) / 1000);
+          });
         });
       }
 
       if (next.status === 'leaderboard' || next.status === 'finished') {
         timer.stop();
         stopTicking();
+        clearPreCountdown();
         refreshPlayer();
         refreshPlayers();
       }
     },
-    [timer, refreshPlayer, refreshPlayers, clearPreCountdown, setPreCountdown, preCountdownRef]
+    [timer, refreshPlayer, refreshPlayers, clearPreCountdown, startPreCountdown]
   );
 
   useEffect(() => {
     const loadSession = async () => {
       if (!sessionId) return;
-      const { data } = await supabase.from('quiz_sessions').select('*').eq('id', sessionId).single();
+      const { data, error } = await supabase.from('quiz_sessions').select('*').eq('id', sessionId).single();
+      if (error) {
+        console.error('Failed to load session:', error);
+        toast({ title: 'Error', description: 'Could not load quiz session. Check the link.', variant: 'destructive' });
+        return;
+      }
       if (data) setSession(data as QuizSession);
     };
     loadSession();
@@ -277,14 +282,16 @@ export default function PlayerView() {
               className={`text-center p-6 rounded-2xl ${isCorrectResult ? 'bg-quiz-green/20' : 'bg-destructive/20'}`}
             >
               <span className="text-5xl block mb-2">
-                {resultKind === 'exact' ? '🎉' : resultKind === 'close' ? '👍' : '😅'}
+                {resultKind === 'exact' ? '🎉' : resultKind === 'close' ? '👍' : resultKind === 'timeout' ? '⏰' : '😅'}
               </span>
               <p className="text-xl font-display font-bold text-foreground">
                 {resultKind === 'exact'
                   ? `+${lastPoints} points!`
                   : resultKind === 'close'
                     ? `Close enough! +${lastPoints} points`
-                    : 'Wrong answer!'}
+                    : resultKind === 'timeout'
+                      ? "Time's up!"
+                      : 'Wrong answer!'}
               </p>
               <p className="text-muted-foreground mt-1 text-sm">Waiting for results...</p>
             </motion.div>
@@ -326,7 +333,7 @@ export default function PlayerView() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4">
         <FloatingShapes />
-        <div className="relative z-10 text-center">
+        <div className="relative z-10 text-center flex flex-col items-center gap-6">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -339,6 +346,12 @@ export default function PlayerView() {
             <p className="text-3xl font-display font-bold text-primary mb-4">{player?.score ?? 0} points</p>
             <p className="text-muted-foreground">Thanks for playing! 🎮</p>
           </motion.div>
+          <Button
+            onClick={() => navigate('/')}
+            className="h-14 px-10 text-lg font-display font-bold rounded-xl bg-primary text-primary-foreground hover:opacity-90 hover:scale-105 active:scale-95 transition-all"
+          >
+            🎮 Play Again
+          </Button>
         </div>
       </div>
     );

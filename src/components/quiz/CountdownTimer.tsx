@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 interface CountdownTimerProps {
   duration: number; // seconds
@@ -9,21 +9,24 @@ interface CountdownTimerProps {
 
 export default function CountdownTimer({ duration, onComplete, isRunning, size = 120 }: CountdownTimerProps) {
   const [timeLeft, setTimeLeft] = useState(duration);
+  const completedRef = useRef(false);
   const radius = (size - 12) / 2;
   const circumference = 2 * Math.PI * radius;
   const progress = timeLeft / duration;
   const dashOffset = circumference * (1 - progress);
 
-  // Reset when duration changes or when timer starts running (new question)
+  // Reset when timer starts running (new question)
   useEffect(() => {
     if (isRunning) {
       setTimeLeft(duration);
+      completedRef.current = false;
     }
   }, [duration, isRunning]);
 
   useEffect(() => {
-    if (!isRunning) return;
+    if (!isRunning || completedRef.current) return;
     if (timeLeft <= 0) {
+      completedRef.current = true;
       onComplete();
       return;
     }
@@ -39,9 +42,10 @@ export default function CountdownTimer({ duration, onComplete, isRunning, size =
     return () => clearInterval(interval);
   }, [isRunning]); // only re-run when isRunning changes
 
-  // Separate effect to detect completion
+  // Detect completion
   useEffect(() => {
-    if (timeLeft <= 0 && isRunning) {
+    if (timeLeft <= 0 && isRunning && !completedRef.current) {
+      completedRef.current = true;
       onComplete();
     }
   }, [timeLeft <= 0]);
