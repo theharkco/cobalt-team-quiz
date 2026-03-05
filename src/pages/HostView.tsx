@@ -70,8 +70,30 @@ export default function HostView() {
     }
   }, [answerCount, players.length, session?.status, timer.isRunning]);
 
+  // Mid-question sync: if host reloads while a question is active, resume timer
   useEffect(() => {
-    refreshSession();
+    if (!sessionId) return;
+    (async () => {
+      const { data: s } = await supabase
+        .from('quiz_sessions')
+        .select('*')
+        .eq('id', sessionId)
+        .single();
+      if (s) {
+        setSession(s as QuizSession);
+        if (s.status === 'question' && s.question_started_at && s.current_question >= 0) {
+          setCurrentQuestionIndex(s.current_question);
+          const serverStart = new Date(s.question_started_at).getTime();
+          const elapsed = Date.now() - serverStart;
+          if (elapsed < 15000) {
+            timer.start(serverStart);
+          } else {
+            // Timer already expired — show answer
+            setShowAnswer(true);
+          }
+        }
+      }
+    })();
     refreshPlayers();
 
     const channel = supabase
@@ -90,7 +112,6 @@ export default function HostView() {
       })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'answers', filter: `session_id=eq.${sessionId}` }, (payload) => {
         const answer = payload.new as { question_index: number };
-        // Only count answers for the current question
         setCurrentQuestionIndex((curIdx) => {
           if (answer.question_index === curIdx) {
             setAnswerCount((prev) => prev + 1);
