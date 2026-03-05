@@ -1,4 +1,5 @@
 export type QuestionType = 'multiple-choice' | 'free-text' | 'blurred-image' | 'music';
+export type Difficulty = 'easy' | 'medium' | 'hard';
 
 export interface QuizQuestion {
   id: number;
@@ -11,6 +12,7 @@ export interface QuizQuestion {
   blurLevels?: number[]; // blur values at different time points (px)
   spotifyEmbedUrl?: string;
   category?: string;
+  difficulty?: Difficulty;
 }
 
 export type MatchQuality = 'exact' | 'close' | 'none';

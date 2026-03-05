@@ -96,6 +96,19 @@ export default function QuestionDisplay({
             {question.category}
           </span>
         )}
+        {question.difficulty && (
+          <span
+            className={`ml-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${
+              question.difficulty === 'easy'
+                ? 'bg-quiz-green/20 text-quiz-green'
+                : question.difficulty === 'medium'
+                  ? 'bg-quiz-orange/20 text-quiz-orange'
+                  : 'bg-quiz-pink/20 text-quiz-pink'
+            }`}
+          >
+            {question.difficulty}
+          </span>
+        )}
       </motion.div>
 
       {/* Question text */}
