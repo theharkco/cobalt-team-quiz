@@ -4,8 +4,38 @@ import {
   calculateScore,
   QUIZ_QUESTIONS,
   PLAYER_COLORS,
-  type MatchQuality,
-} from '../questions';
+} from '@/data/questions';
+// Also verify direct imports from split modules work
+import { checkAnswer as checkAnswerDirect } from '@/data/answerMatching';
+import { calculateScore as calculateScoreDirect } from '@/data/scoring';
+import { QUIZ_QUESTIONS as questionsDirect, PLAYER_COLORS as colorsDirect } from '@/data/questionData';
+import type { QuizQuestion, MatchQuality, QuestionType } from '@/data/questionTypes';
+
+describe('Re-exports match direct imports', () => {
+  it('checkAnswer is the same function', () => {
+    expect(checkAnswer).toBe(checkAnswerDirect);
+  });
+  it('calculateScore is the same function', () => {
+    expect(calculateScore).toBe(calculateScoreDirect);
+  });
+  it('QUIZ_QUESTIONS is the same array', () => {
+    expect(QUIZ_QUESTIONS).toBe(questionsDirect);
+  });
+  it('PLAYER_COLORS is the same array', () => {
+    expect(PLAYER_COLORS).toBe(colorsDirect);
+  });
+});
+
+describe('Types are importable', () => {
+  it('QuestionType is valid', () => {
+    const t: QuestionType = 'multiple-choice';
+    expect(t).toBe('multiple-choice');
+  });
+  it('MatchQuality is valid', () => {
+    const m: MatchQuality = 'exact';
+    expect(m).toBe('exact');
+  });
+});
 
 describe('QUIZ_QUESTIONS', () => {
   it('has 15 questions', () => {
@@ -82,15 +112,14 @@ describe('checkAnswer', () => {
   });
 
   it('returns close for similar answers (fuzzy match)', () => {
-    // "Tokyo" -> "Tokyoo" should be close (similarity >= 0.75)
     const tokyoQ = QUIZ_QUESTIONS.find((q) => q.correctAnswer === 'Tokyo')!;
     expect(checkAnswer(tokyoQ, 'Tokyoo')).toBe('close');
   });
 
   it('returns close for substring containment', () => {
     const daVinciQ = QUIZ_QUESTIONS.find((q) => q.correctAnswer === 'Leonardo da Vinci')!;
-    expect(checkAnswer(daVinciQ, 'leonardo')).toBe('exact'); // in acceptable answers
-    expect(checkAnswer(daVinciQ, 'vinci')).toBe('close'); // substring of "da vinci"
+    expect(checkAnswer(daVinciQ, 'leonardo')).toBe('exact');
+    expect(checkAnswer(daVinciQ, 'vinci')).toBe('close');
   });
 
   it('returns none for completely wrong free-text answer', () => {
@@ -113,13 +142,11 @@ describe('calculateScore', () => {
   });
 
   it('gives max points for instant exact answer', () => {
-    const score = calculateScore('exact', 0);
-    expect(score).toBe(1500); // 1000 base + 500 bonus
+    expect(calculateScore('exact', 0)).toBe(1500);
   });
 
   it('gives max points for instant close answer', () => {
-    const score = calculateScore('close', 0);
-    expect(score).toBe(800); // 600 base + 200 bonus
+    expect(calculateScore('close', 0)).toBe(800);
   });
 
   it('reduces bonus over bonusWindow (3s)', () => {
@@ -128,15 +155,12 @@ describe('calculateScore', () => {
     const noBonus = calculateScore('exact', 3000);
     expect(fullBonus).toBeGreaterThan(halfBonus);
     expect(halfBonus).toBeGreaterThan(noBonus);
-    expect(noBonus).toBe(1000); // base, no bonus
+    expect(noBonus).toBe(1000);
   });
 
   it('penalizes after bonus window, never below minimum', () => {
-    const atEnd = calculateScore('exact', 15000);
-    expect(atEnd).toBeGreaterThanOrEqual(500);
-
-    const closeAtEnd = calculateScore('close', 15000);
-    expect(closeAtEnd).toBeGreaterThanOrEqual(300);
+    expect(calculateScore('exact', 15000)).toBeGreaterThanOrEqual(500);
+    expect(calculateScore('close', 15000)).toBeGreaterThanOrEqual(300);
   });
 
   it('score decreases monotonically with time', () => {
@@ -148,8 +172,7 @@ describe('calculateScore', () => {
   });
 
   it('close match scores are always less than exact match scores at same time', () => {
-    const times = [0, 1500, 3000, 7000, 15000];
-    times.forEach((t) => {
+    [0, 1500, 3000, 7000, 15000].forEach((t) => {
       expect(calculateScore('exact', t)).toBeGreaterThan(calculateScore('close', t));
     });
   });
