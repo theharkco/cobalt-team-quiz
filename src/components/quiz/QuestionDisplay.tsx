@@ -109,7 +109,7 @@ export default function QuestionDisplay({
       </motion.h2>
 
       {/* Blurred image */}
-      {question.type === "blurred-image" && question.imageUrl && (
+      {question.type === "blurred-image" && question.imageUrl && !hideOptions && (
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
