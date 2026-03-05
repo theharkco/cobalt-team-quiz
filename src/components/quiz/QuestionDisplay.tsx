@@ -23,6 +23,14 @@ const optionIcons = ['▲', '◆', '●', '★'];
 
 export default function QuestionDisplay({ question, questionNumber, totalQuestions, isHost, timeElapsedMs = 0, hideOptions }: QuestionDisplayProps) {
   const [blurAmount, setBlurAmount] = useState(40);
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  // Reset loaded state when question changes
+  useEffect(() => {
+    setImageLoaded(false);
+  }, [question.id]);
+
+  const handleImageLoad = useCallback(() => setImageLoaded(true), []);
 
   // Calculate blur based on time elapsed for image questions
   useEffect(() => {
