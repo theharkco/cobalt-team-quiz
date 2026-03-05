@@ -107,6 +107,7 @@ export default function PlayerView() {
 
     return () => {
       supabase.removeChannel(channel);
+      clearInterval(pollInterval);
       if (timerInterval.current) clearInterval(timerInterval.current);
     };
   }, [sessionId, playerId]);
