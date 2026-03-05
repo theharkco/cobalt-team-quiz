@@ -110,6 +110,7 @@ export default function HostView() {
 
   const startQuiz = async () => {
     setPreviousScores({});
+    setAnswerCount(0);
     await updateStatus('question', 0);
     timer.start();
     setShowAnswer(false);
