@@ -85,3 +85,24 @@ export function startTicking(getTimeLeft: () => number) {
 export function stopTicking() {
   if (tickInterval) { clearInterval(tickInterval); tickInterval = null; }
 }
+
+export function playCountdownBeep(count: number) {
+  try {
+    const c = getCtx();
+    if (!c) return;
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.connect(gain);
+    gain.connect(c.destination);
+    osc.type = 'sine';
+    // Higher pitch and louder on final beep (count === 1)
+    const freq = count === 1 ? 880 : 587;
+    const vol = count === 1 ? 0.4 : 0.25;
+    const duration = count === 1 ? 0.3 : 0.15;
+    gain.gain.setValueAtTime(vol, c.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, c.currentTime + duration);
+    osc.frequency.setValueAtTime(freq, c.currentTime);
+    osc.start(c.currentTime);
+    osc.stop(c.currentTime + duration);
+  } catch { /* silently fail */ }
+}
