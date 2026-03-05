@@ -8,6 +8,7 @@ interface QuestionDisplayProps {
   totalQuestions: number;
   isHost?: boolean;
   timeElapsedMs?: number;
+  hideOptions?: boolean;
 }
 
 const optionColors = [
