@@ -184,7 +184,7 @@ export default function HostView() {
 
   const startQuiz = async () => {
     setPreviousScores({});
-    await updateStatus('question', 0);
+    await updateStatus('question', 0, { question_started_at: null });
     startQuestionWithPreCountdown(0);
   };
 
