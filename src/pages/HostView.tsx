@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { QUIZ_QUESTIONS } from '@/data/questions';
@@ -17,31 +17,43 @@ import { Button } from '@/components/ui/button';
 
 export default function HostView() {
   const { sessionId } = useParams<{ sessionId: string }>();
+  const navigate = useNavigate();
   const [session, setSession] = useState<QuizSession | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
   const [showAnswer, setShowAnswer] = useState(false);
   const [previousScores, setPreviousScores] = useState<Record<string, number>>({});
   const [answerCount, setAnswerCount] = useState(0);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(-1);
   const timer = useTimer();
   const { preCountdown, startPreCountdown, clearPreCountdown } = usePreCountdown();
 
   const refreshPlayers = useCallback(async () => {
     if (!sessionId) return;
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('players')
       .select('*')
       .eq('session_id', sessionId)
       .order('score', { ascending: false });
+    if (error) {
+      console.error('Failed to load players:', error);
+      toast({ title: 'Connection issue', description: 'Failed to load players.', variant: 'destructive' });
+      return;
+    }
     if (data) setPlayers(data as Player[]);
   }, [sessionId]);
 
   const refreshSession = useCallback(async () => {
     if (!sessionId) return;
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('quiz_sessions')
       .select('*')
       .eq('id', sessionId)
       .single();
+    if (error) {
+      console.error('Failed to load session:', error);
+      toast({ title: 'Connection issue', description: 'Failed to load quiz session.', variant: 'destructive' });
+      return;
+    }
     if (data) setSession(data as QuizSession);
   }, [sessionId]);
 
@@ -76,8 +88,15 @@ export default function HostView() {
         const row = payload.new as Player;
         if (row && row.session_id === sessionId) refreshPlayers();
       })
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'answers', filter: `session_id=eq.${sessionId}` }, () => {
-        setAnswerCount((prev) => prev + 1);
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'answers', filter: `session_id=eq.${sessionId}` }, (payload) => {
+        const answer = payload.new as { question_index: number };
+        // Only count answers for the current question
+        setCurrentQuestionIndex((curIdx) => {
+          if (answer.question_index === curIdx) {
+            setAnswerCount((prev) => prev + 1);
+          }
+          return curIdx;
+        });
       })
       .subscribe();
 
@@ -93,11 +112,10 @@ export default function HostView() {
     };
   }, [sessionId]);
 
-  const updateStatus = async (status: SessionStatus, q?: number) => {
+  const updateStatus = async (status: SessionStatus, q?: number, extraFields?: Record<string, unknown>) => {
     if (!sessionId) return;
-    const update: Record<string, unknown> = { status };
+    const update: Record<string, unknown> = { status, ...extraFields };
     if (q !== undefined) update.current_question = q;
-    if (status === 'question') update.question_started_at = new Date().toISOString();
 
     setSession((prev) =>
       prev
@@ -105,7 +123,7 @@ export default function HostView() {
             ...prev,
             status,
             ...(q !== undefined ? { current_question: q } : {}),
-            ...(status === 'question' ? { question_started_at: update.question_started_at as string } : {}),
+            ...extraFields,
           }
         : prev
     );
@@ -127,12 +145,26 @@ export default function HostView() {
     }
   };
 
+  const startQuestionWithPreCountdown = (questionIndex: number) => {
+    setAnswerCount(0);
+    setCurrentQuestionIndex(questionIndex);
+    setShowAnswer(false);
+    startPreCountdown(async () => {
+      // Set question_started_at AFTER the 3s pre-countdown finishes
+      const now = new Date().toISOString();
+      await supabase
+        .from('quiz_sessions')
+        .update({ question_started_at: now })
+        .eq('id', sessionId!);
+      setSession((prev) => prev ? { ...prev, question_started_at: now } : prev);
+      timer.start();
+    });
+  };
+
   const startQuiz = async () => {
     setPreviousScores({});
-    setAnswerCount(0);
-    setShowAnswer(false);
     await updateStatus('question', 0);
-    startPreCountdown(() => timer.start());
+    startQuestionWithPreCountdown(0);
   };
 
   const onTimerComplete = () => {
@@ -157,10 +189,8 @@ export default function HostView() {
       await updateStatus('finished');
       await refreshPlayers();
     } else {
-      setAnswerCount(0);
-      setShowAnswer(false);
       await updateStatus('question', next);
-      startPreCountdown(() => timer.start());
+      startQuestionWithPreCountdown(next);
     }
   };
 
@@ -311,8 +341,14 @@ export default function HostView() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4 py-8">
         <FloatingShapes />
-        <div className="relative z-10 w-full max-w-2xl">
+        <div className="relative z-10 w-full max-w-2xl flex flex-col items-center gap-6">
           <Leaderboard players={players} isFinal />
+          <Button
+            onClick={() => navigate('/')}
+            className="h-14 px-10 text-lg font-display font-bold rounded-xl bg-primary text-primary-foreground hover:opacity-90 hover:scale-105 active:scale-95 transition-all"
+          >
+            🎮 New Quiz
+          </Button>
         </div>
       </div>
     );
