@@ -156,7 +156,7 @@ export default function QuestionDisplay({ question, questionNumber, totalQuestio
               src={question.imageUrl}
               alt="Mystery"
               className={`w-full h-full object-cover ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-              style={{ filter: `blur(${blurAmount}px)`, transition: 'filter 0.3s ease' }}
+              style={{ filter: `blur(${blurAmount}px)`, transition: hasStartedUnblurring ? 'filter 0.3s ease' : 'none' }}
               onLoad={handleImageLoad}
             />
           </div>
