@@ -342,23 +342,11 @@ export default function PlayerView() {
 
   // FINISHED
   if (session.status === 'finished') {
-    const rank = players.findIndex((p) => p.id === playerId) + 1;
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4">
+      <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4 py-8">
         <FloatingShapes />
-        <div className="relative z-10 text-center flex flex-col items-center gap-6">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', bounce: 0.5 }}
-          >
-            <span className="text-8xl block mb-4 animate-bounce-in">{rank === 1 ? '🏆' : '🎉'}</span>
-            <h2 className="text-4xl font-display font-bold text-foreground mb-2">
-              {rank === 1 ? 'You Won!' : `#${rank} Place!`}
-            </h2>
-            <p className="text-3xl font-display font-bold text-primary mb-4">{player?.score ?? 0} points</p>
-            <p className="text-muted-foreground">Thanks for playing! 🎮</p>
-          </motion.div>
+        <div className="relative z-10 w-full max-w-2xl flex flex-col items-center gap-6">
+          <Leaderboard players={players} isFinal />
           <Button
             onClick={() => navigate('/')}
             className="h-14 px-10 text-lg font-display font-bold rounded-xl bg-primary text-primary-foreground hover:opacity-90 hover:scale-105 active:scale-95 transition-all"
