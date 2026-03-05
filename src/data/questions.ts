@@ -107,7 +107,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     question: '🏛️ What famous landmark is this?',
     correctAnswer: 'Eiffel Tower',
     acceptableAnswers: ['eiffel tower', 'eiffel', 'the eiffel tower', 'tour eiffel'],
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg/800px-Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg',
+    imageUrl: '/images/eiffel-tower.jpg',
     blurLevels: [50, 35, 25, 15, 8, 3, 0],
     category: 'Landmarks',
   },
