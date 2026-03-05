@@ -164,8 +164,8 @@ export default function PlayerView() {
 
     const serverStart = session.question_started_at
       ? new Date(session.question_started_at).getTime()
-      : timer.startTimeRef.current;
-    const timeTaken = Date.now() - serverStart;
+      : timer.startTimeRef.current || Date.now();
+    const timeTaken = Math.min(Date.now() - serverStart, 15000);
     const mq = checkAnswer(question, answer);
     const isCorrect = mq !== 'none';
     const points = calculateScore(mq, timeTaken);
