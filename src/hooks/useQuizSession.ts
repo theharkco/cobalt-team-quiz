@@ -134,31 +134,6 @@ export function useQuizSession() {
     await supabase.from('quiz_sessions').update(update).eq('id', session.id);
   }, [session]);
 
-  const submitAnswer = useCallback(async (
-    questionIndex: number,
-    answer: string,
-    isCorrect: boolean,
-    timeTakenMs: number,
-    pointsEarned: number,
-  ) => {
-    if (!currentPlayer || !session) return;
-
-    await supabase.from('answers').insert({
-      player_id: currentPlayer.id,
-      session_id: session.id,
-      question_index: questionIndex,
-      answer,
-      is_correct: isCorrect,
-      time_taken_ms: timeTakenMs,
-      points_earned: pointsEarned,
-    });
-
-    // Update player score
-    const newScore = currentPlayer.score + pointsEarned;
-    await supabase.from('players').update({ score: newScore }).eq('id', currentPlayer.id);
-    setCurrentPlayer(prev => prev ? { ...prev, score: newScore } : null);
-  }, [currentPlayer, session]);
-
   useEffect(() => {
     return () => {
       if (channelRef.current) {
