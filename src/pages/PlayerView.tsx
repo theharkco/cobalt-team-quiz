@@ -270,7 +270,7 @@ export default function PlayerView() {
       <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4 py-6">
         {!isPreCountdown && (
           <div className="absolute top-4 right-4">
-            <CountdownTimer duration={15} onComplete={onTimerComplete} isRunning={timer.isRunning} size={70} />
+            <CountdownTimer duration={15} timeElapsed={timer.timeElapsed} onComplete={onTimerComplete} isRunning={timer.isRunning} size={70} />
           </div>
         )}
         <div className="absolute top-4 left-4 bg-card rounded-xl px-3 py-1">

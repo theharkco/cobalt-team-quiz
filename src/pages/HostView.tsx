@@ -297,7 +297,7 @@ export default function HostView() {
       <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4 py-8">
         {!isPreCountdown && (
           <div className="absolute top-6 right-6">
-            <CountdownTimer duration={15} onComplete={onTimerComplete} isRunning={timer.isRunning} size={100} />
+            <CountdownTimer duration={15} timeElapsed={timer.timeElapsed} onComplete={onTimerComplete} isRunning={timer.isRunning} size={100} />
           </div>
         )}
 
