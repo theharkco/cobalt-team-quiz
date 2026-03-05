@@ -70,13 +70,15 @@ describe('QuestionDisplay', () => {
     expect(screen.getByText('🎵')).toBeInTheDocument();
   });
 
-  it('renders iframe with autoplay for music questions', () => {
+  it('renders iframe in a cropped container for music questions', () => {
     const { container } = render(
       <QuestionDisplay question={musicQuestion} questionNumber={1} totalQuestions={15} />
     );
     const iframe = container.querySelector('iframe');
     expect(iframe).toBeInTheDocument();
-    expect(iframe?.getAttribute('src')).toContain('autoplay=1');
+    const wrapper = iframe?.closest('.overflow-hidden');
+    expect(wrapper).toBeInTheDocument();
+    expect(wrapper?.classList.contains('h-[80px]')).toBe(true);
   });
 
   it('does not render category when not provided', () => {

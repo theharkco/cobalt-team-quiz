@@ -132,10 +132,7 @@ export default function QuestionDisplay({ question, questionNumber, totalQuestio
 
       {/* Spotify embed */}
       {question.type === 'music' && question.spotifyEmbedUrl && (
-        <MusicEmbed
-          spotifyEmbedUrl={question.spotifyEmbedUrl}
-          revealAnswer={revealAnswer}
-        />
+        <MusicEmbed spotifyEmbedUrl={question.spotifyEmbedUrl} />
       )}
 
       {/* Multiple choice options (host view - display only) */}
