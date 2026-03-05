@@ -79,12 +79,18 @@ function MusicEmbed({ spotifyEmbedUrl, revealAnswer }: { spotifyEmbedUrl: string
 }
 
 export default function QuestionDisplay({ question, questionNumber, totalQuestions, isHost, timeElapsedMs = 0, hideOptions, revealAnswer }: QuestionDisplayProps) {
-  const [blurAmount, setBlurAmount] = useState(40);
+  const initialBlur = question.type === 'blurred-image' && question.blurLevels ? question.blurLevels[0] : 40;
+  const [blurAmount, setBlurAmount] = useState(initialBlur);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [hasStartedUnblurring, setHasStartedUnblurring] = useState(false);
 
-  // Reset loaded state when question changes
+  // Reset state when question changes
   useEffect(() => {
     setImageLoaded(false);
+    setHasStartedUnblurring(false);
+    if (question.type === 'blurred-image' && question.blurLevels) {
+      setBlurAmount(question.blurLevels[0]);
+    }
   }, [question.id]);
 
   const handleImageLoad = useCallback(() => setImageLoaded(true), []);
@@ -94,6 +100,9 @@ export default function QuestionDisplay({ question, questionNumber, totalQuestio
     if (question.type === 'blurred-image' && question.blurLevels) {
       const levels = question.blurLevels;
       const totalDuration = 15000;
+      if (timeElapsedMs > 0) {
+        setHasStartedUnblurring(true);
+      }
       const progress = Math.min(timeElapsedMs / totalDuration, 1);
       const index = Math.min(Math.floor(progress * (levels.length - 1)), levels.length - 2);
       const nextIndex = index + 1;
@@ -147,7 +156,7 @@ export default function QuestionDisplay({ question, questionNumber, totalQuestio
               src={question.imageUrl}
               alt="Mystery"
               className={`w-full h-full object-cover ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-              style={{ filter: `blur(${blurAmount}px)`, transition: 'filter 0.3s ease' }}
+              style={{ filter: `blur(${blurAmount}px)`, transition: hasStartedUnblurring ? 'filter 0.3s ease' : 'none' }}
               onLoad={handleImageLoad}
             />
           </div>
