@@ -20,6 +20,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     correctAnswer: 'Transformer',
     category: 'LLM Technology',
     difficulty: 'easy',
+    explanation: 'GPT = Generative Pre-trained Transformer. The Transformer architecture, introduced in the 2017 paper "Attention Is All You Need," is the foundation of all modern LLMs.',
   },
   {
     id: 3,
