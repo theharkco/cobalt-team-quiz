@@ -1,46 +1,28 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface CountdownTimerProps {
   duration: number; // seconds
+  timeElapsed: number; // ms elapsed since question started
   onComplete: () => void;
   isRunning: boolean;
   size?: number;
 }
 
-export default function CountdownTimer({ duration, onComplete, isRunning, size = 120 }: CountdownTimerProps) {
-  const [timeLeft, setTimeLeft] = useState(duration);
+export default function CountdownTimer({ duration, timeElapsed, onComplete, isRunning, size = 120 }: CountdownTimerProps) {
   const completedRef = useRef(false);
   const radius = (size - 12) / 2;
   const circumference = 2 * Math.PI * radius;
+
+  const timeLeft = Math.max(0, duration - timeElapsed / 1000);
   const progress = timeLeft / duration;
   const dashOffset = circumference * (1 - progress);
 
-  // Reset when timer starts running (new question)
+  // Reset completed flag when timer restarts
   useEffect(() => {
-    if (isRunning) {
-      setTimeLeft(duration);
+    if (isRunning && timeElapsed < 500) {
       completedRef.current = false;
     }
-  }, [duration, isRunning]);
-
-  useEffect(() => {
-    if (!isRunning || completedRef.current) return;
-    if (timeLeft <= 0) {
-      completedRef.current = true;
-      onComplete();
-      return;
-    }
-    const interval = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 0.1) {
-          clearInterval(interval);
-          return 0;
-        }
-        return prev - 0.1;
-      });
-    }, 100);
-    return () => clearInterval(interval);
-  }, [isRunning]); // only re-run when isRunning changes
+  }, [isRunning, timeElapsed]);
 
   // Detect completion
   useEffect(() => {
@@ -48,7 +30,7 @@ export default function CountdownTimer({ duration, onComplete, isRunning, size =
       completedRef.current = true;
       onComplete();
     }
-  }, [timeLeft <= 0]);
+  }, [timeLeft <= 0, isRunning, onComplete]);
 
   const color = timeLeft > 10 ? 'hsl(var(--quiz-green))' : timeLeft > 5 ? 'hsl(var(--quiz-orange))' : 'hsl(var(--destructive))';
   const displayTime = Math.ceil(timeLeft);
