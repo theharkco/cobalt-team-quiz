@@ -161,6 +161,8 @@ export default function PlayerView() {
       setAnswered(true);
       setLastResult({ correct: false, points: 0 });
       setTimerRunning(false);
+      stopTicking();
+      playWrong();
     }
   };
 
