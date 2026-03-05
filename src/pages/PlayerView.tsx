@@ -253,7 +253,7 @@ export default function PlayerView() {
             transition={{ type: 'spring', bounce: 0.5 }}
             className="text-center"
           >
-            <span className="text-8xl block mb-4 animate-bounce-in">🎮</span>
+            <Emoji className="text-8xl mb-4 animate-bounce-in" label="game">🎮</Emoji>
             <h2 className="text-3xl font-display font-bold text-foreground mb-2">You&apos;re in!</h2>
             <p className="text-lg font-body text-muted-foreground">
               Welcome, <span className="text-primary font-bold">{player?.name}</span>
