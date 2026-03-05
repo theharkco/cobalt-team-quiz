@@ -200,11 +200,14 @@ export default function PlayerView() {
 
   // QUESTION
   if (session.status === 'question' && currentQ) {
+    const isPreCountdown = preCountdown > 0;
     return (
       <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4 py-6">
-        <div className="absolute top-4 right-4">
-          <CountdownTimer duration={15} onComplete={onTimerComplete} isRunning={timer.isRunning} size={70} />
-        </div>
+        {!isPreCountdown && (
+          <div className="absolute top-4 right-4">
+            <CountdownTimer duration={15} onComplete={onTimerComplete} isRunning={timer.isRunning} size={70} />
+          </div>
+        )}
         <div className="absolute top-4 left-4 bg-card rounded-xl px-3 py-1">
           <span className="font-display font-bold text-primary text-sm">{player?.score ?? 0} pts</span>
         </div>
@@ -215,9 +218,21 @@ export default function PlayerView() {
             questionNumber={session.current_question + 1}
             totalQuestions={QUIZ_QUESTIONS.length}
             timeElapsedMs={timer.timeElapsed}
+            hideOptions={isPreCountdown}
           />
 
-          {answered && lastResult ? (
+          {isPreCountdown ? (
+            <motion.div
+              key={preCountdown}
+              initial={{ scale: 2, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+              transition={{ type: 'spring', bounce: 0.4 }}
+              className="text-7xl font-display font-bold text-primary"
+            >
+              {preCountdown}
+            </motion.div>
+          ) : answered && lastResult ? (
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
