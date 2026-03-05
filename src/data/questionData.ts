@@ -148,7 +148,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     question: '🎵 Who sings this classic?',
     options: ['King Crimson', 'Yes', 'Genesis', 'Jethro Tull'],
     correctAnswer: 'King Crimson',
-    spotifyEmbedUrl: 'https://open.spotify.com/embed/track/5kAGSAVFjBJlIFH3jSHJnz?utm_source=generator&theme=0',
+    spotifyEmbedUrl: 'https://open.spotify.com/embed/track/0vd4EJwjK6rJxMjtSQ5mU5?utm_source=generator&theme=0',
     category: 'Music',
     difficulty: 'hard',
   },
