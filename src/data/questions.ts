@@ -97,7 +97,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     question: '👤 Who is this famous person?',
     correctAnswer: 'Albert Einstein',
     acceptableAnswers: ['einstein', 'albert einstein'],
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Albert_Einstein_Head.jpg/800px-Albert_Einstein_Head.jpg',
+    imageUrl: '/images/einstein.jpg',
     blurLevels: [40, 30, 20, 12, 6, 2, 0],
     category: 'Famous People',
   },
