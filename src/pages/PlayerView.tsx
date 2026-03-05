@@ -9,6 +9,7 @@ import PlayerAnswerInput from '@/components/quiz/PlayerAnswerInput';
 import CountdownTimer from '@/components/quiz/CountdownTimer';
 import PreCountdownOverlay from '@/components/quiz/PreCountdownOverlay';
 import FloatingShapes from '@/components/quiz/FloatingShapes';
+import Leaderboard from '@/components/quiz/Leaderboard';
 import { useTimer } from '@/hooks/useTimer';
 import { usePreCountdown } from '@/hooks/usePreCountdown';
 import { retryOnce } from '@/lib/retryAsync';
