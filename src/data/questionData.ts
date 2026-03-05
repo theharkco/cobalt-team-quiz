@@ -128,7 +128,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     question: '🎵 Name the artist of this song!',
     options: ['Steely Dan', 'The Doobie Brothers', 'Chicago', 'Toto'],
     correctAnswer: 'Steely Dan',
-    spotifyEmbedUrl: 'https://open.spotify.com/embed/track/27OeeYzk6klgBh23ENUkXL?utm_source=generator&theme=0',
+    spotifyEmbedUrl: 'https://open.spotify.com/embed/track/1x1XQqhBViz4opcpwc7FVs?utm_source=generator&theme=0',
     category: 'Music',
     difficulty: 'hard',
   },
