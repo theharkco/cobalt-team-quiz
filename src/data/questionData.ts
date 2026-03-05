@@ -80,6 +80,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     acceptableAnswers: ['fine-tuning', 'fine tuning', 'finetuning'],
     category: 'LLM Technology',
     difficulty: 'medium',
+    explanation: 'Fine-tuning adapts a general-purpose model to a specific task or domain by training it further on a curated dataset, adjusting its weights while preserving its broad knowledge.',
   },
   {
     id: 9,
