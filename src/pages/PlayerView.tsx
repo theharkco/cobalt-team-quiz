@@ -50,6 +50,7 @@ export default function PlayerView() {
       preCountdownRef.current = setInterval(() => {
         count--;
         setPreCountdown(count);
+        if (count > 0) playCountdownBeep(count);
         if (count <= 0) {
           if (preCountdownRef.current) clearInterval(preCountdownRef.current);
           preCountdownRef.current = null;
