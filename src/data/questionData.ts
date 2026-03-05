@@ -178,6 +178,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     correctAnswer: 'Self-attention',
     category: 'LLM Technology',
     difficulty: 'hard',
+    explanation: 'Self-attention lets each token "look at" every other token in the sequence and compute relevance scores. This is what allows Transformers to capture long-range dependencies — unlike RNNs which process tokens sequentially.',
   },
   {
     id: 18,
