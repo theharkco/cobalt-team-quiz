@@ -210,7 +210,7 @@ export default function HostView() {
       await updateStatus('finished');
       await refreshPlayers();
     } else {
-      await updateStatus('question', next);
+      await updateStatus('question', next, { question_started_at: null });
       startQuestionWithPreCountdown(next);
     }
   };
