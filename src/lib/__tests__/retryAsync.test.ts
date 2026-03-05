@@ -25,18 +25,12 @@ describe('retryOnce', () => {
   });
 
   it('throws if both attempts fail', async () => {
-    vi.useFakeTimers();
-    const err1 = new Error('first');
-    const err2 = new Error('second');
+    // Use real timers to avoid unhandled rejection with fake timers
     const fn = vi.fn()
-      .mockRejectedValueOnce(err1)
-      .mockRejectedValueOnce(err2);
+      .mockRejectedValueOnce(new Error('first'))
+      .mockRejectedValueOnce(new Error('second'));
     
-    const promise = retryOnce(fn);
-    await vi.advanceTimersByTimeAsync(1000);
-    
-    await expect(promise).rejects.toThrow('second');
+    await expect(retryOnce(fn)).rejects.toThrow('second');
     expect(fn).toHaveBeenCalledTimes(2);
-    vi.useRealTimers();
   });
 });
