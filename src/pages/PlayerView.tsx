@@ -21,6 +21,8 @@ export default function PlayerView() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [answered, setAnswered] = useState(false);
   const [lastResult, setLastResult] = useState<{ correct: boolean; points: number } | null>(null);
+  const [preCountdown, setPreCountdown] = useState(0);
+  const preCountdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timer = useTimer();
 
   const refreshPlayer = useCallback(async () => {
