@@ -312,6 +312,8 @@ export default function HostView() {
             revealAnswer={showAnswer}
           />
 
+          {isPreCountdown && <PreCountdownOverlay countdown={preCountdown} question={currentQ} />}
+
           {!isPreCountdown && !showAnswer && (
             <Button
               onClick={onTimerComplete}
