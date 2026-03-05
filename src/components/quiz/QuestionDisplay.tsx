@@ -27,14 +27,9 @@ function MusicEmbed({ spotifyEmbedUrl, revealAnswer }: { spotifyEmbedUrl: string
   const [playState, setPlayState] = useState<'idle' | 'exposing' | 'playing'>('idle');
 
   const handlePlay = useCallback(() => {
-    // Reload iframe with autoplay within user gesture context
-    if (iframeRef.current) {
-      iframeRef.current.src = `${spotifyEmbedUrl}&autoplay=1`;
-    }
-    // Briefly expose the Spotify player so user can tap its play button if autoplay fails
+    // Expose the real Spotify player so the user can tap its native play button
     setPlayState('exposing');
-    setTimeout(() => setPlayState('playing'), 3000);
-  }, [spotifyEmbedUrl]);
+  }, []);
 
   const showOverlay = !revealAnswer && playState !== 'exposing';
 
