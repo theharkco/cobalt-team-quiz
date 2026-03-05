@@ -67,6 +67,8 @@ export default function HostView() {
     if (!sessionId) return;
     const update: Record<string, unknown> = { status };
     if (q !== undefined) update.current_question = q;
+    // Optimistically update local state
+    setSession(prev => prev ? { ...prev, status, ...(q !== undefined ? { current_question: q } : {}) } : prev);
     await supabase.from('quiz_sessions').update(update).eq('id', sessionId);
   };
 
@@ -100,11 +102,8 @@ export default function HostView() {
   };
 
   const showLeaderboard = async () => {
-    // Save previous scores for delta display
     const prev: Record<string, number> = {};
     players.forEach(p => { prev[p.id] = p.score; });
-
-    // Refresh players to get updated scores from answers
     await refreshPlayers();
     setPreviousScores(prev);
     await updateStatus('leaderboard');
