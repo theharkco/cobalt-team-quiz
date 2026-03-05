@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 import type { QuizQuestion } from '@/data/questions';
@@ -21,6 +21,62 @@ const optionColors = [
 ];
 
 const optionIcons = ['▲', '◆', '●', '★'];
+
+function MusicEmbed({ spotifyEmbedUrl, revealAnswer }: { spotifyEmbedUrl: string; revealAnswer?: boolean }) {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [manualPlay, setManualPlay] = useState(false);
+
+  const handlePlay = useCallback(() => {
+    // Reload iframe within user gesture context to satisfy autoplay policy
+    if (iframeRef.current) {
+      iframeRef.current.src = `${spotifyEmbedUrl}&autoplay=1`;
+    }
+    setManualPlay(true);
+  }, [spotifyEmbedUrl]);
+
+  return (
+    <motion.div
+      initial={{ scale: 0.8, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ delay: 0.2 }}
+      className="flex justify-center mb-8"
+    >
+      <div className="relative w-72 md:w-96 rounded-2xl overflow-hidden border-4 border-border">
+        {/* Overlay to hide song title/artist */}
+        <motion.div
+          initial={{ opacity: 1 }}
+          animate={{ opacity: revealAnswer ? 0 : 1 }}
+          transition={{ duration: 0.5 }}
+          className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-card rounded-xl"
+          style={{ pointerEvents: revealAnswer ? 'none' : 'auto' }}
+        >
+          <span className="text-5xl animate-pulse mb-2">🎵</span>
+          <span className="font-display font-bold text-foreground text-lg">Listen carefully...</span>
+          {!manualPlay ? (
+            <button
+              onClick={handlePlay}
+              className="mt-3 px-5 py-2 rounded-full bg-primary text-primary-foreground font-display font-bold text-sm hover:opacity-90 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+            >
+              ▶ Tap to Play
+            </button>
+          ) : (
+            <span className="text-muted-foreground text-sm mt-1">Name the song or artist!</span>
+          )}
+        </motion.div>
+        {/* Iframe behind overlay */}
+        <iframe
+          ref={iframeRef}
+          src={`${spotifyEmbedUrl}&autoplay=1`}
+          width="100%"
+          height="152"
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          loading="lazy"
+          style={{ border: 'none', borderRadius: '12px' }}
+        />
+      </div>
+    </motion.div>
+  );
+}
 
 export default function QuestionDisplay({ question, questionNumber, totalQuestions, isHost, timeElapsedMs = 0, hideOptions, revealAnswer }: QuestionDisplayProps) {
   const [blurAmount, setBlurAmount] = useState(40);
@@ -100,36 +156,10 @@ export default function QuestionDisplay({ question, questionNumber, totalQuestio
 
       {/* Spotify embed */}
       {question.type === 'music' && question.spotifyEmbedUrl && (
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="flex justify-center mb-8"
-        >
-          <div className="relative w-72 md:w-96 rounded-2xl overflow-hidden border-4 border-border">
-            {/* Overlay to hide song title/artist - fades out when answer is revealed */}
-            <motion.div
-              initial={{ opacity: 1 }}
-              animate={{ opacity: revealAnswer ? 0 : 1 }}
-              transition={{ duration: 0.5 }}
-              className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-card rounded-xl"
-              style={{ pointerEvents: revealAnswer ? 'none' : 'auto' }}
-            >
-              <span className="text-5xl animate-pulse mb-2">🎵</span>
-              <span className="font-display font-bold text-foreground text-lg">Listen carefully...</span>
-              <span className="text-muted-foreground text-sm mt-1">Name the song or artist!</span>
-            </motion.div>
-            {/* Iframe rendered behind overlay; becomes visible when revealed */}
-            <iframe
-              src={`${question.spotifyEmbedUrl}&autoplay=1`}
-              width="100%"
-              height="152"
-              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-              loading="lazy"
-              style={{ border: 'none', borderRadius: '12px' }}
-            />
-          </div>
-        </motion.div>
+        <MusicEmbed
+          spotifyEmbedUrl={question.spotifyEmbedUrl}
+          revealAnswer={revealAnswer}
+        />
       )}
 
       {/* Multiple choice options (host view - display only) */}
