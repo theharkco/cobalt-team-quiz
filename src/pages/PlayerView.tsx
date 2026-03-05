@@ -336,9 +336,9 @@ export default function PlayerView() {
             animate={{ scale: 1 }}
             transition={{ type: 'spring', bounce: 0.5 }}
           >
-            <span className="text-6xl block mb-4">
+            <Emoji className="text-6xl mb-4" label="rank">
               {rank <= 3 ? ['🥇', '🥈', '🥉'][rank - 1] : '📊'}
-            </span>
+            </Emoji>
             <h2 className="text-4xl font-display font-bold text-foreground mb-2">#{rank}</h2>
             <p className="text-2xl font-display font-bold text-primary">{player?.score ?? 0} points</p>
             <p className="text-muted-foreground mt-4 animate-pulse">Next question coming up...</p>
