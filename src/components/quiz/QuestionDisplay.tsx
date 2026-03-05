@@ -78,7 +78,7 @@ function MusicEmbed({ spotifyEmbedUrl, revealAnswer }: { spotifyEmbedUrl: string
   );
 }
 
-
+export default function QuestionDisplay({ question, questionNumber, totalQuestions, isHost, timeElapsedMs = 0, hideOptions, revealAnswer }: QuestionDisplayProps) {
   const [blurAmount, setBlurAmount] = useState(40);
   const [imageLoaded, setImageLoaded] = useState(false);
 
