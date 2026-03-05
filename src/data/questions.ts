@@ -161,37 +161,79 @@ export const PLAYER_COLORS = [
   '#D4EFDF', '#F9E79F', '#AEB6BF', '#F5CBA7', '#A2D9CE',
 ];
 
-export function calculateScore(isCorrect: boolean, timeTakenMs: number): number {
-  if (!isCorrect) return 0;
-  const basePoints = 1000;
-  const maxBonus = 500;
-  const bonusWindow = 3000; // 3 seconds
-  const totalTime = 15000; // 15 seconds
+export type MatchQuality = 'exact' | 'close' | 'none';
+
+export function calculateScore(match: MatchQuality, timeTakenMs: number): number {
+  if (match === 'none') return 0;
+  const basePoints = match === 'exact' ? 1000 : 600;
+  const maxBonus = match === 'exact' ? 500 : 200;
+  const bonusWindow = 3000;
+  const totalTime = 15000;
 
   if (timeTakenMs <= bonusWindow) {
-    // Linear scale: faster = more bonus
     const bonus = Math.round(maxBonus * (1 - timeTakenMs / bonusWindow));
     return basePoints + bonus;
   }
-  // After 3s, scale down from 1000 to 500
   const remaining = totalTime - bonusWindow;
   const elapsed = timeTakenMs - bonusWindow;
-  const penalty = Math.round(500 * (elapsed / remaining));
-  return Math.max(500, basePoints - penalty);
+  const minPoints = match === 'exact' ? 500 : 300;
+  const penalty = Math.round((basePoints - minPoints) * (elapsed / remaining));
+  return Math.max(minPoints, basePoints - penalty);
 }
 
-export function checkAnswer(question: QuizQuestion, answer: string): boolean {
-  const normalizedAnswer = answer.trim().toLowerCase();
-  if (question.acceptableAnswers) {
-    return question.acceptableAnswers.some(a => {
-      const normalizedAcceptable = a.toLowerCase();
-      // Exact match or close enough (Levenshtein-like simple check)
-      if (normalizedAnswer === normalizedAcceptable) return true;
-      // Allow partial match for longer answers
-      if (normalizedAcceptable.length > 4 && normalizedAnswer.includes(normalizedAcceptable)) return true;
-      if (normalizedAnswer.length > 4 && normalizedAcceptable.includes(normalizedAnswer)) return true;
-      return false;
-    });
+function levenshtein(a: string, b: string): number {
+  const m = a.length, n = b.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+  const dp: number[] = Array.from({ length: n + 1 }, (_, i) => i);
+  for (let i = 1; i <= m; i++) {
+    let prev = i - 1;
+    dp[0] = i;
+    for (let j = 1; j <= n; j++) {
+      const temp = dp[j];
+      dp[j] = a[i - 1] === b[j - 1] ? prev : 1 + Math.min(prev, dp[j], dp[j - 1]);
+      prev = temp;
+    }
   }
-  return normalizedAnswer === question.correctAnswer.toLowerCase();
+  return dp[n];
+}
+
+function similarity(a: string, b: string): number {
+  const maxLen = Math.max(a.length, b.length);
+  if (maxLen === 0) return 1;
+  return 1 - levenshtein(a, b) / maxLen;
+}
+
+export function checkAnswer(question: QuizQuestion, answer: string): MatchQuality {
+  const normalizedAnswer = answer.trim().toLowerCase();
+  const correctNorm = question.correctAnswer.toLowerCase();
+
+  // Exact match against correct answer
+  if (normalizedAnswer === correctNorm) return 'exact';
+
+  // Exact match against acceptable answers
+  if (question.acceptableAnswers) {
+    for (const a of question.acceptableAnswers) {
+      if (normalizedAnswer === a.toLowerCase()) return 'exact';
+    }
+  }
+
+  // Fuzzy matching — check all acceptable answers + correct answer
+  const candidates = [correctNorm, ...(question.acceptableAnswers?.map(a => a.toLowerCase()) || [])];
+  let bestSim = 0;
+
+  for (const candidate of candidates) {
+    // Substring containment
+    if (candidate.length > 3 && normalizedAnswer.includes(candidate)) return 'close';
+    if (normalizedAnswer.length > 3 && candidate.includes(normalizedAnswer)) return 'close';
+
+    // Levenshtein similarity
+    const sim = similarity(normalizedAnswer, candidate);
+    bestSim = Math.max(bestSim, sim);
+  }
+
+  // Threshold: >= 0.75 similarity = close match
+  if (bestSim >= 0.75) return 'close';
+
+  return 'none';
 }
