@@ -20,6 +20,8 @@ export default function HostView() {
   const [showAnswer, setShowAnswer] = useState(false);
   const [previousScores, setPreviousScores] = useState<Record<string, number>>({});
   const [answerCount, setAnswerCount] = useState(0);
+  const [preCountdown, setPreCountdown] = useState(0);
+  const preCountdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timer = useTimer();
 
   const refreshPlayers = useCallback(async () => {
