@@ -2,23 +2,9 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { PLAYER_COLORS } from '@/data/questions';
 import type { RealtimeChannel } from '@supabase/supabase-js';
+import type { Player, QuizSession, SessionStatus } from '@/types/quiz';
 
-export type SessionStatus = 'lobby' | 'playing' | 'question' | 'leaderboard' | 'finished';
-
-export interface Player {
-  id: string;
-  name: string;
-  score: number;
-  color: string;
-  session_id: string;
-}
-
-export interface QuizSession {
-  id: string;
-  join_code: string;
-  status: SessionStatus;
-  current_question: number;
-}
+export type { Player, QuizSession, SessionStatus };
 
 function generateJoinCode(): string {
   return Math.floor(1000 + Math.random() * 9000).toString();

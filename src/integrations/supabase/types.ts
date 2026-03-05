@@ -106,6 +106,7 @@ export type Database = {
           current_question: number
           id: string
           join_code: string
+          question_started_at: string | null
           status: string
         }
         Insert: {
@@ -113,6 +114,7 @@ export type Database = {
           current_question?: number
           id?: string
           join_code: string
+          question_started_at?: string | null
           status?: string
         }
         Update: {
@@ -120,6 +122,7 @@ export type Database = {
           current_question?: number
           id?: string
           join_code?: string
+          question_started_at?: string | null
           status?: string
         }
         Relationships: []

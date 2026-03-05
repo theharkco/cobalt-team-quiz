@@ -14,13 +14,17 @@ export default function CountdownTimer({ duration, onComplete, isRunning, size =
   const progress = timeLeft / duration;
   const dashOffset = circumference * (1 - progress);
 
+  // Reset when duration changes or when timer starts running (new question)
   useEffect(() => {
-    setTimeLeft(duration);
-  }, [duration]);
+    if (isRunning) {
+      setTimeLeft(duration);
+    }
+  }, [duration, isRunning]);
 
   useEffect(() => {
-    if (!isRunning || timeLeft <= 0) {
-      if (timeLeft <= 0) onComplete();
+    if (!isRunning) return;
+    if (timeLeft <= 0) {
+      onComplete();
       return;
     }
     const interval = setInterval(() => {
@@ -33,7 +37,14 @@ export default function CountdownTimer({ duration, onComplete, isRunning, size =
       });
     }, 100);
     return () => clearInterval(interval);
-  }, [isRunning, timeLeft <= 0]);
+  }, [isRunning]); // only re-run when isRunning changes
+
+  // Separate effect to detect completion
+  useEffect(() => {
+    if (timeLeft <= 0 && isRunning) {
+      onComplete();
+    }
+  }, [timeLeft <= 0]);
 
   const color = timeLeft > 10 ? 'hsl(var(--quiz-green))' : timeLeft > 5 ? 'hsl(var(--quiz-orange))' : 'hsl(var(--destructive))';
   const displayTime = Math.ceil(timeLeft);
@@ -41,7 +52,6 @@ export default function CountdownTimer({ duration, onComplete, isRunning, size =
   return (
     <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className={timeLeft <= 5 && isRunning ? 'animate-pulse-ring' : ''}>
-        {/* Background circle */}
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -50,7 +60,6 @@ export default function CountdownTimer({ duration, onComplete, isRunning, size =
           stroke="hsl(var(--muted))"
           strokeWidth="8"
         />
-        {/* Progress circle */}
         <circle
           cx={size / 2}
           cy={size / 2}

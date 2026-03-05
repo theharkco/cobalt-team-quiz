@@ -1,13 +1,16 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { QUIZ_QUESTIONS, checkAnswer, calculateScore } from '@/data/questions';
-import type { Player, QuizSession } from '@/hooks/useQuizSession';
+import type { Player, QuizSession } from '@/types/quiz';
 import QuestionDisplay from '@/components/quiz/QuestionDisplay';
 import PlayerAnswerInput from '@/components/quiz/PlayerAnswerInput';
 import CountdownTimer from '@/components/quiz/CountdownTimer';
 import FloatingShapes from '@/components/quiz/FloatingShapes';
+import { useTimer } from '@/hooks/useTimer';
+import { retryOnce } from '@/lib/retryAsync';
+import { toast } from '@/hooks/use-toast';
 import confetti from 'canvas-confetti';
 import { playCorrect, playWrong, startTicking, stopTicking } from '@/lib/sounds';
 
@@ -18,10 +21,7 @@ export default function PlayerView() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [answered, setAnswered] = useState(false);
   const [lastResult, setLastResult] = useState<{ correct: boolean; points: number } | null>(null);
-  const [timerRunning, setTimerRunning] = useState(false);
-  const questionStartRef = useRef<number>(Date.now());
-  const [timeElapsed, setTimeElapsed] = useState(0);
-  const timerInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timer = useTimer();
 
   const refreshPlayer = useCallback(async () => {
     if (!playerId) return;
@@ -34,6 +34,25 @@ export default function PlayerView() {
     const { data } = await supabase.from('players').select('*').eq('session_id', sessionId).order('score', { ascending: false });
     if (data) setPlayers(data as Player[]);
   }, [sessionId]);
+
+  const handleSessionTransition = useCallback((prev: QuizSession | null, next: QuizSession) => {
+    // New question started
+    if (prev && next.current_question !== prev.current_question) {
+      setAnswered(false);
+      setLastResult(null);
+      // Use server timestamp for timing sync, fallback to local
+      const serverStart = next.question_started_at ? new Date(next.question_started_at).getTime() : Date.now();
+      timer.start(serverStart);
+      startTicking(() => (15000 - (Date.now() - (next.question_started_at ? new Date(next.question_started_at).getTime() : timer.startTimeRef.current))) / 1000);
+    }
+    // Transition to leaderboard or finished
+    if (next.status === 'leaderboard' || next.status === 'finished') {
+      timer.stop();
+      stopTicking();
+      refreshPlayer();
+      refreshPlayers();
+    }
+  }, [timer, refreshPlayer, refreshPlayers]);
 
   useEffect(() => {
     const loadSession = async () => {
@@ -51,58 +70,20 @@ export default function PlayerView() {
         const newSession = payload.new as QuizSession;
         if (!newSession || newSession.id !== sessionId) return;
         setSession(prev => {
-          // Reset answered state when question changes
-          if (prev && newSession.current_question !== prev.current_question) {
-            setAnswered(false);
-            setLastResult(null);
-            questionStartRef.current = Date.now();
-            setTimeElapsed(0);
-            // Start timer tracking
-            if (timerInterval.current) clearInterval(timerInterval.current);
-            timerInterval.current = setInterval(() => {
-              setTimeElapsed(Date.now() - questionStartRef.current);
-            }, 100);
-            setTimerRunning(true);
-            startTicking(() => (15000 - (Date.now() - questionStartRef.current)) / 1000);
-          }
-          if (newSession.status === 'leaderboard' || newSession.status === 'finished') {
-            setTimerRunning(false);
-            stopTicking();
-            if (timerInterval.current) clearInterval(timerInterval.current);
-            refreshPlayer();
-            refreshPlayers();
-          }
+          handleSessionTransition(prev, newSession);
           return newSession;
         });
       })
       .subscribe();
 
-    // Polling fallback for session state changes
+    // Polling fallback
     const pollInterval = setInterval(async () => {
       const { data } = await supabase.from('quiz_sessions').select('*').eq('id', sessionId).single();
       if (data) {
         const s = data as QuizSession;
         setSession(prev => {
           if (prev && (prev.status !== s.status || prev.current_question !== s.current_question)) {
-            if (s.current_question !== prev.current_question) {
-              setAnswered(false);
-              setLastResult(null);
-              questionStartRef.current = Date.now();
-              setTimeElapsed(0);
-              if (timerInterval.current) clearInterval(timerInterval.current);
-              timerInterval.current = setInterval(() => {
-                setTimeElapsed(Date.now() - questionStartRef.current);
-              }, 100);
-              setTimerRunning(true);
-              startTicking(() => (15000 - (Date.now() - questionStartRef.current)) / 1000);
-            }
-            if (s.status === 'leaderboard' || s.status === 'finished') {
-              setTimerRunning(false);
-              stopTicking();
-              if (timerInterval.current) clearInterval(timerInterval.current);
-              refreshPlayer();
-              refreshPlayers();
-            }
+            handleSessionTransition(prev, s);
             return s;
           }
           return prev;
@@ -114,7 +95,7 @@ export default function PlayerView() {
       supabase.removeChannel(channel);
       clearInterval(pollInterval);
       stopTicking();
-      if (timerInterval.current) clearInterval(timerInterval.current);
+      timer.cleanup();
     };
   }, [sessionId, playerId]);
 
@@ -123,15 +104,15 @@ export default function PlayerView() {
     const question = QUIZ_QUESTIONS[session.current_question];
     if (!question) return;
 
-    const timeTaken = Date.now() - questionStartRef.current;
+    const serverStart = session.question_started_at ? new Date(session.question_started_at).getTime() : timer.startTimeRef.current;
+    const timeTaken = Date.now() - serverStart;
     const isCorrect = checkAnswer(question, answer);
     const points = calculateScore(isCorrect, timeTaken);
 
     setAnswered(true);
     setLastResult({ correct: isCorrect, points });
-    setTimerRunning(false);
+    timer.stop();
     stopTicking();
-    if (timerInterval.current) clearInterval(timerInterval.current);
 
     if (isCorrect) {
       playCorrect();
@@ -140,28 +121,36 @@ export default function PlayerView() {
       playWrong();
     }
 
-    // Save to DB
-    await supabase.from('answers').insert({
-      player_id: player.id,
-      session_id: session.id,
-      question_index: session.current_question,
-      answer,
-      is_correct: isCorrect,
-      time_taken_ms: timeTaken,
-      points_earned: points,
-    });
+    try {
+      await retryOnce(() =>
+        supabase.from('answers').insert({
+          player_id: player.id,
+          session_id: session.id,
+          question_index: session.current_question,
+          answer,
+          is_correct: isCorrect,
+          time_taken_ms: timeTaken,
+          points_earned: points,
+        }).then(({ error }) => { if (error) throw error; })
+      );
 
-    // Update score
-    const newScore = player.score + points;
-    await supabase.from('players').update({ score: newScore }).eq('id', player.id);
-    setPlayer(prev => prev ? { ...prev, score: newScore } : null);
+      const newScore = player.score + points;
+      await retryOnce(() =>
+        supabase.from('players').update({ score: newScore }).eq('id', player.id)
+          .then(({ error }) => { if (error) throw error; })
+      );
+      setPlayer(prev => prev ? { ...prev, score: newScore } : null);
+    } catch (err) {
+      console.error('Failed to save answer:', err);
+      toast({ title: 'Connection issue', description: 'Your answer may not have been saved. Don\'t worry, it\'ll sync up!', variant: 'destructive' });
+    }
   };
 
   const onTimerComplete = () => {
     if (!answered) {
       setAnswered(true);
       setLastResult({ correct: false, points: 0 });
-      setTimerRunning(false);
+      timer.stop();
       stopTicking();
       playWrong();
     }
@@ -198,7 +187,7 @@ export default function PlayerView() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4 py-6">
         <div className="absolute top-4 right-4">
-          <CountdownTimer duration={15} onComplete={onTimerComplete} isRunning={timerRunning} size={70} />
+          <CountdownTimer duration={15} onComplete={onTimerComplete} isRunning={timer.isRunning} size={70} />
         </div>
         <div className="absolute top-4 left-4 bg-card rounded-xl px-3 py-1">
           <span className="font-display font-bold text-primary text-sm">{player?.score ?? 0} pts</span>
@@ -209,7 +198,7 @@ export default function PlayerView() {
             question={currentQ}
             questionNumber={session.current_question + 1}
             totalQuestions={QUIZ_QUESTIONS.length}
-            timeElapsedMs={timeElapsed}
+            timeElapsedMs={timer.timeElapsed}
           />
 
           {answered && lastResult ? (
