@@ -1,18 +1,19 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { QUIZ_QUESTIONS } from '@/data/questions';
 import type { Player, QuizSession, SessionStatus } from '@/types/quiz';
 import { useTimer } from '@/hooks/useTimer';
+import { usePreCountdown } from '@/hooks/usePreCountdown';
 import { retryOnce } from '@/lib/retryAsync';
 import { toast } from '@/hooks/use-toast';
 import CountdownTimer from '@/components/quiz/CountdownTimer';
 import QuestionDisplay from '@/components/quiz/QuestionDisplay';
+import PreCountdownOverlay from '@/components/quiz/PreCountdownOverlay';
 import Leaderboard from '@/components/quiz/Leaderboard';
 import FloatingShapes from '@/components/quiz/FloatingShapes';
 import { Button } from '@/components/ui/button';
-import { playCountdownBeep } from '@/lib/sounds';
 
 export default function HostView() {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -21,35 +22,37 @@ export default function HostView() {
   const [showAnswer, setShowAnswer] = useState(false);
   const [previousScores, setPreviousScores] = useState<Record<string, number>>({});
   const [answerCount, setAnswerCount] = useState(0);
-  const [preCountdown, setPreCountdown] = useState(0);
-  const preCountdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timer = useTimer();
+  const { preCountdown, startPreCountdown, clearPreCountdown } = usePreCountdown();
 
   const refreshPlayers = useCallback(async () => {
     if (!sessionId) return;
-    const { data } = await supabase.from('players').select('*').eq('session_id', sessionId).order('score', { ascending: false });
+    const { data } = await supabase
+      .from('players')
+      .select('*')
+      .eq('session_id', sessionId)
+      .order('score', { ascending: false });
     if (data) setPlayers(data as Player[]);
   }, [sessionId]);
 
   const refreshSession = useCallback(async () => {
     if (!sessionId) return;
-    const { data } = await supabase.from('quiz_sessions').select('*').eq('id', sessionId).single();
+    const { data } = await supabase
+      .from('quiz_sessions')
+      .select('*')
+      .eq('id', sessionId)
+      .single();
     if (data) setSession(data as QuizSession);
-  }, [sessionId]);
-
-  const refreshAnswerCount = useCallback(async (questionIndex: number) => {
-    if (!sessionId) return;
-    const { count } = await supabase
-      .from('answers')
-      .select('*', { count: 'exact', head: true })
-      .eq('session_id', sessionId)
-      .eq('question_index', questionIndex);
-    setAnswerCount(count ?? 0);
   }, [sessionId]);
 
   // Auto-skip timer when all players have answered
   useEffect(() => {
-    if (session?.status === 'question' && timer.isRunning && players.length > 0 && answerCount >= players.length) {
+    if (
+      session?.status === 'question' &&
+      timer.isRunning &&
+      players.length > 0 &&
+      answerCount >= players.length
+    ) {
       timer.stop();
       setShowAnswer(true);
     }
@@ -74,17 +77,19 @@ export default function HostView() {
         if (row && row.session_id === sessionId) refreshPlayers();
       })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'answers', filter: `session_id=eq.${sessionId}` }, () => {
-        setAnswerCount(prev => prev + 1);
+        setAnswerCount((prev) => prev + 1);
       })
       .subscribe();
 
-    const pollInterval = setInterval(() => { refreshPlayers(); }, 3000);
+    const pollInterval = setInterval(() => {
+      refreshPlayers();
+    }, 3000);
 
     return () => {
       supabase.removeChannel(channel);
       clearInterval(pollInterval);
       timer.cleanup();
-      if (preCountdownRef.current) clearInterval(preCountdownRef.current);
+      clearPreCountdown();
     };
   }, [sessionId]);
 
@@ -94,36 +99,32 @@ export default function HostView() {
     if (q !== undefined) update.current_question = q;
     if (status === 'question') update.question_started_at = new Date().toISOString();
 
-    // Optimistic update
-    setSession(prev => prev ? { ...prev, status, ...(q !== undefined ? { current_question: q } : {}), ...(status === 'question' ? { question_started_at: update.question_started_at as string } : {}) } : prev);
+    setSession((prev) =>
+      prev
+        ? {
+            ...prev,
+            status,
+            ...(q !== undefined ? { current_question: q } : {}),
+            ...(status === 'question' ? { question_started_at: update.question_started_at as string } : {}),
+          }
+        : prev
+    );
 
     try {
       await retryOnce(() =>
-        supabase.from('quiz_sessions').update(update).eq('id', sessionId)
-          .then(({ error }) => { if (error) throw error; })
+        supabase
+          .from('quiz_sessions')
+          .update(update)
+          .eq('id', sessionId)
+          .then(({ error }) => {
+            if (error) throw error;
+          })
       );
     } catch (err) {
       console.error('Failed to update session:', err);
       toast({ title: 'Connection issue', description: 'Failed to update quiz state. Retrying...', variant: 'destructive' });
-      refreshSession(); // revert optimistic update
+      refreshSession();
     }
-  };
-
-  const startPreCountdown = (onDone: () => void) => {
-    if (preCountdownRef.current) clearInterval(preCountdownRef.current);
-    setPreCountdown(3);
-    playCountdownBeep(3);
-    let count = 3;
-    preCountdownRef.current = setInterval(() => {
-      count--;
-      setPreCountdown(count);
-      if (count > 0) playCountdownBeep(count);
-      if (count <= 0) {
-        if (preCountdownRef.current) clearInterval(preCountdownRef.current);
-        preCountdownRef.current = null;
-        onDone();
-      }
-    }, 1000);
   };
 
   const startQuiz = async () => {
@@ -141,7 +142,9 @@ export default function HostView() {
 
   const showLeaderboard = async () => {
     const prev: Record<string, number> = {};
-    players.forEach(p => { prev[p.id] = p.score; });
+    players.forEach((p) => {
+      prev[p.id] = p.score;
+    });
     await refreshPlayers();
     setPreviousScores(prev);
     await updateStatus('leaderboard');
@@ -208,7 +211,10 @@ export default function HostView() {
                     transition={{ type: 'spring', bounce: 0.6 }}
                     className="flex items-center gap-2 bg-card border border-border rounded-full px-4 py-2"
                   >
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs" style={{ backgroundColor: p.color }}>
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs"
+                      style={{ backgroundColor: p.color }}
+                    >
                       {p.name.charAt(0).toUpperCase()}
                     </div>
                     <span className="font-body font-bold text-foreground">{p.name}</span>
@@ -240,12 +246,7 @@ export default function HostView() {
       <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4 py-8">
         {!isPreCountdown && (
           <div className="absolute top-6 right-6">
-            <CountdownTimer
-              duration={15}
-              onComplete={onTimerComplete}
-              isRunning={timer.isRunning}
-              size={100}
-            />
+            <CountdownTimer duration={15} onComplete={onTimerComplete} isRunning={timer.isRunning} size={100} />
           </div>
         )}
 
@@ -259,44 +260,7 @@ export default function HostView() {
             hideOptions={isPreCountdown}
           />
 
-          {isPreCountdown && (
-            <div className="flex flex-col items-center gap-6">
-              {currentQ.category && (
-                <motion.div
-                  initial={{ y: -40, opacity: 0, scale: 0.5 }}
-                  animate={{ y: 0, opacity: 1, scale: 1 }}
-                  transition={{ type: 'spring', bounce: 0.6, duration: 0.8 }}
-                  className="flex flex-col items-center gap-2"
-                >
-                  <motion.span
-                    animate={{ rotate: [0, -10, 10, -10, 0] }}
-                    transition={{ duration: 0.6, delay: 0.3 }}
-                    className="text-6xl md:text-7xl block"
-                  >
-                    {currentQ.question.match(/^\p{Emoji_Presentation}/u)?.[0] || '❓'}
-                  </motion.span>
-                  <motion.span
-                    initial={{ letterSpacing: '0.5em', opacity: 0 }}
-                    animate={{ letterSpacing: '0.15em', opacity: 1 }}
-                    transition={{ delay: 0.2, duration: 0.6 }}
-                    className="text-2xl md:text-3xl font-display font-bold text-accent-foreground uppercase"
-                  >
-                    {currentQ.category}
-                  </motion.span>
-                </motion.div>
-              )}
-              <motion.div
-                key={preCountdown}
-                initial={{ scale: 2, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0, opacity: 0 }}
-                transition={{ type: 'spring', bounce: 0.4 }}
-                className="text-8xl md:text-9xl font-display font-bold text-primary"
-              >
-                {preCountdown}
-              </motion.div>
-            </div>
-          )}
+          {isPreCountdown && <PreCountdownOverlay countdown={preCountdown} question={currentQ} />}
 
           {showAnswer && (
             <motion.div
