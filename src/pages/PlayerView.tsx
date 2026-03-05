@@ -72,14 +72,19 @@ export default function PlayerView() {
 
         // Use the unified usePreCountdown hook
         startPreCountdown(() => {
-          // After pre-countdown, start timer synced to server timestamp
-          const serverStart = next.question_started_at
-            ? new Date(next.question_started_at).getTime()
-            : Date.now();
-          timer.start(serverStart);
-          startTicking(() => {
-            const elapsed = Date.now() - serverStart;
-            return Math.max(0, (15000 - elapsed) / 1000);
+          // After pre-countdown, sync to server timestamp if available,
+          // otherwise fall back to now (host hasn't set it yet)
+          // Re-read session from state to get the latest question_started_at
+          setSession((currentSession) => {
+            const serverStart = currentSession?.question_started_at
+              ? new Date(currentSession.question_started_at).getTime()
+              : Date.now();
+            timer.start(serverStart);
+            startTicking(() => {
+              const elapsed = Date.now() - serverStart;
+              return Math.max(0, (15000 - elapsed) / 1000);
+            });
+            return currentSession;
           });
         });
       }
