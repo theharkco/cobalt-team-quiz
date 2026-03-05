@@ -103,7 +103,20 @@ export default function PlayerView() {
         toast({ title: 'Error', description: 'Could not load quiz session. Check the link.', variant: 'destructive' });
         return;
       }
-      if (data) setSession(data as QuizSession);
+      if (data) {
+        const s = data as QuizSession;
+        setSession(s);
+        // If we join mid-question, start the timer synced to server
+        if (s.status === 'question' && s.question_started_at && s.current_question >= 0) {
+          lastQuestionRef.current = s.current_question;
+          const serverStart = new Date(s.question_started_at).getTime();
+          const elapsed = Date.now() - serverStart;
+          if (elapsed < 15000) {
+            timer.start(serverStart);
+            startTicking(() => Math.max(0, (15000 - (Date.now() - serverStart)) / 1000));
+          }
+        }
+      }
     };
     loadSession();
     refreshPlayer();
@@ -151,8 +164,8 @@ export default function PlayerView() {
 
     const serverStart = session.question_started_at
       ? new Date(session.question_started_at).getTime()
-      : timer.startTimeRef.current;
-    const timeTaken = Date.now() - serverStart;
+      : timer.startTimeRef.current || Date.now();
+    const timeTaken = Math.min(Date.now() - serverStart, 15000);
     const mq = checkAnswer(question, answer);
     const isCorrect = mq !== 'none';
     const points = calculateScore(mq, timeTaken);
