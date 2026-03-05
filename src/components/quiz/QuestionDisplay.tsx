@@ -105,7 +105,7 @@ export default function QuestionDisplay({ question, questionNumber, totalQuestio
       )}
 
       {/* Multiple choice options (host view - display only) */}
-      {isHost && question.options && (
+      {isHost && !hideOptions && question.options && (
         <div className="grid grid-cols-2 gap-4 mt-4">
           {question.options.map((option, i) => (
             <motion.div
