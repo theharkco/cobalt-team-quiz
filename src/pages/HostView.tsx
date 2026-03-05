@@ -238,7 +238,7 @@ export default function HostView() {
             className="bg-card border-2 border-border rounded-2xl p-6 text-center w-full"
           >
             <p className="text-muted-foreground font-body mb-1 text-sm">Go to</p>
-            <p className="text-lg md:text-2xl font-display font-bold text-accent-foreground mb-3 select-all">
+            <p className="text-lg md:text-2xl font-display font-bold text-accent mb-3 select-all">
               {window.location.origin}
             </p>
             <p className="text-muted-foreground font-body mb-2">Enter code:</p>
