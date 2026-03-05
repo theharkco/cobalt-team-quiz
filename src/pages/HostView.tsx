@@ -107,12 +107,27 @@ export default function HostView() {
     }
   };
 
+  const startPreCountdown = (onDone: () => void) => {
+    if (preCountdownRef.current) clearInterval(preCountdownRef.current);
+    setPreCountdown(3);
+    let count = 3;
+    preCountdownRef.current = setInterval(() => {
+      count--;
+      setPreCountdown(count);
+      if (count <= 0) {
+        if (preCountdownRef.current) clearInterval(preCountdownRef.current);
+        preCountdownRef.current = null;
+        onDone();
+      }
+    }, 1000);
+  };
+
   const startQuiz = async () => {
     setPreviousScores({});
     setAnswerCount(0);
-    await updateStatus('question', 0);
-    timer.start();
     setShowAnswer(false);
+    await updateStatus('question', 0);
+    startPreCountdown(() => timer.start());
   };
 
   const onTimerComplete = () => {
@@ -136,9 +151,9 @@ export default function HostView() {
       await refreshPlayers();
     } else {
       setAnswerCount(0);
-      await updateStatus('question', next);
-      timer.start();
       setShowAnswer(false);
+      await updateStatus('question', next);
+      startPreCountdown(() => timer.start());
     }
   };
 
