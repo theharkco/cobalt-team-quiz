@@ -309,6 +309,7 @@ export default function HostView() {
             isHost
             timeElapsedMs={timer.timeElapsed}
             hideOptions={isPreCountdown}
+            revealAnswer={showAnswer}
           />
 
           {isPreCountdown && <PreCountdownOverlay countdown={preCountdown} question={currentQ} />}

@@ -284,6 +284,7 @@ export default function PlayerView() {
             totalQuestions={QUIZ_QUESTIONS.length}
             timeElapsedMs={timer.timeElapsed}
             hideOptions={isPreCountdown}
+            revealAnswer={answered || timer.timeElapsed >= 15000}
           />
 
           {isPreCountdown ? (

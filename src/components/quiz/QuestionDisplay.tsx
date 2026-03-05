@@ -10,6 +10,7 @@ interface QuestionDisplayProps {
   isHost?: boolean;
   timeElapsedMs?: number;
   hideOptions?: boolean;
+  revealAnswer?: boolean;
 }
 
 const optionColors = [
@@ -21,7 +22,7 @@ const optionColors = [
 
 const optionIcons = ['▲', '◆', '●', '★'];
 
-export default function QuestionDisplay({ question, questionNumber, totalQuestions, isHost, timeElapsedMs = 0, hideOptions }: QuestionDisplayProps) {
+export default function QuestionDisplay({ question, questionNumber, totalQuestions, isHost, timeElapsedMs = 0, hideOptions, revealAnswer }: QuestionDisplayProps) {
   const [blurAmount, setBlurAmount] = useState(40);
   const [imageLoaded, setImageLoaded] = useState(false);
 
@@ -106,20 +107,26 @@ export default function QuestionDisplay({ question, questionNumber, totalQuestio
           className="flex justify-center mb-8"
         >
           <div className="relative w-72 md:w-96 rounded-2xl overflow-hidden border-4 border-border">
-            {/* Overlay to hide song title/artist */}
-            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-card rounded-xl pointer-events-none">
+            {/* Overlay to hide song title/artist - fades out when answer is revealed */}
+            <motion.div
+              initial={{ opacity: 1 }}
+              animate={{ opacity: revealAnswer ? 0 : 1 }}
+              transition={{ duration: 0.5 }}
+              className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-card rounded-xl"
+              style={{ pointerEvents: revealAnswer ? 'none' : 'auto' }}
+            >
               <span className="text-5xl animate-pulse mb-2">🎵</span>
               <span className="font-display font-bold text-foreground text-lg">Listen carefully...</span>
               <span className="text-muted-foreground text-sm mt-1">Name the song or artist!</span>
-            </div>
-            {/* Iframe is rendered behind the overlay so audio plays */}
+            </motion.div>
+            {/* Iframe rendered behind overlay; becomes visible when revealed */}
             <iframe
               src={`${question.spotifyEmbedUrl}&autoplay=1`}
               width="100%"
               height="152"
               allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
               loading="lazy"
-              style={{ border: 'none', borderRadius: '12px', opacity: 0 }}
+              style={{ border: 'none', borderRadius: '12px' }}
             />
           </div>
         </motion.div>
