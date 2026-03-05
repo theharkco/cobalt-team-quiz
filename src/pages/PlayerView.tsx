@@ -112,6 +112,7 @@ export default function PlayerView() {
       clearInterval(pollInterval);
       stopTicking();
       timer.cleanup();
+      if (preCountdownRef.current) clearInterval(preCountdownRef.current);
     };
   }, [sessionId, playerId]);
 

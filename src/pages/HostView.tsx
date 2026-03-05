@@ -83,6 +83,7 @@ export default function HostView() {
       supabase.removeChannel(channel);
       clearInterval(pollInterval);
       timer.cleanup();
+      if (preCountdownRef.current) clearInterval(preCountdownRef.current);
     };
   }, [sessionId]);
 
