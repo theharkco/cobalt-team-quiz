@@ -117,7 +117,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     question: '🗽 What famous landmark is this?',
     correctAnswer: 'Statue of Liberty',
     acceptableAnswers: ['statue of liberty', 'liberty statue', 'the statue of liberty'],
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Statue_of_Liberty_7.jpg/800px-Statue_of_Liberty_7.jpg',
+    imageUrl: '/images/statue-of-liberty.jpg',
     blurLevels: [45, 32, 22, 14, 7, 2, 0],
     category: 'Landmarks',
   },
