@@ -13,6 +13,7 @@ export interface QuizQuestion {
   spotifyEmbedUrl?: string;
   category?: string;
   difficulty?: Difficulty;
+  explanation?: string; // shown after the answer is revealed
 }
 
 export type MatchQuality = 'exact' | 'close' | 'none';
