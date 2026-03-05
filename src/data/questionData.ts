@@ -10,6 +10,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     correctAnswer: 'KKR',
     category: 'Private Equity',
     difficulty: 'hard',
+    explanation: 'KKR, alongside TPG and Goldman Sachs, acquired TXU Energy for ~$45 billion in 2007 — the largest LBO ever at the time. The deal ultimately went bankrupt in 2014.',
   },
   {
     id: 2,
