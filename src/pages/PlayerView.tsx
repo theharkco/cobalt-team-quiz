@@ -9,6 +9,7 @@ import PlayerAnswerInput from '@/components/quiz/PlayerAnswerInput';
 import CountdownTimer from '@/components/quiz/CountdownTimer';
 import FloatingShapes from '@/components/quiz/FloatingShapes';
 import confetti from 'canvas-confetti';
+import { playCorrect, playWrong, startTicking, stopTicking } from '@/lib/sounds';
 
 export default function PlayerView() {
   const { sessionId, playerId } = useParams<{ sessionId: string; playerId: string }>();
@@ -62,9 +63,11 @@ export default function PlayerView() {
               setTimeElapsed(Date.now() - questionStartRef.current);
             }, 100);
             setTimerRunning(true);
+            startTicking(() => (15000 - (Date.now() - questionStartRef.current)) / 1000);
           }
           if (newSession.status === 'leaderboard' || newSession.status === 'finished') {
             setTimerRunning(false);
+            stopTicking();
             if (timerInterval.current) clearInterval(timerInterval.current);
             refreshPlayer();
             refreshPlayers();
@@ -91,9 +94,11 @@ export default function PlayerView() {
                 setTimeElapsed(Date.now() - questionStartRef.current);
               }, 100);
               setTimerRunning(true);
+              startTicking(() => (15000 - (Date.now() - questionStartRef.current)) / 1000);
             }
             if (s.status === 'leaderboard' || s.status === 'finished') {
               setTimerRunning(false);
+              stopTicking();
               if (timerInterval.current) clearInterval(timerInterval.current);
               refreshPlayer();
               refreshPlayers();
@@ -108,6 +113,7 @@ export default function PlayerView() {
     return () => {
       supabase.removeChannel(channel);
       clearInterval(pollInterval);
+      stopTicking();
       if (timerInterval.current) clearInterval(timerInterval.current);
     };
   }, [sessionId, playerId]);
@@ -124,10 +130,14 @@ export default function PlayerView() {
     setAnswered(true);
     setLastResult({ correct: isCorrect, points });
     setTimerRunning(false);
+    stopTicking();
     if (timerInterval.current) clearInterval(timerInterval.current);
 
     if (isCorrect) {
+      playCorrect();
       confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 }, colors: ['#4ECDC4', '#45B7D1', '#FFEAA7'] });
+    } else {
+      playWrong();
     }
 
     // Save to DB
@@ -152,6 +162,8 @@ export default function PlayerView() {
       setAnswered(true);
       setLastResult({ correct: false, points: 0 });
       setTimerRunning(false);
+      stopTicking();
+      playWrong();
     }
   };
 
