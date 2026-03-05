@@ -180,7 +180,11 @@ export default function HostView() {
             transition={{ delay: 0.2, type: 'spring', bounce: 0.5 }}
             className="bg-card border-2 border-border rounded-2xl p-6 text-center w-full"
           >
-            <p className="text-muted-foreground font-body mb-2">Join code:</p>
+            <p className="text-muted-foreground font-body mb-1 text-sm">Go to</p>
+            <p className="text-lg md:text-2xl font-display font-bold text-accent-foreground mb-3 select-all">
+              {window.location.origin}
+            </p>
+            <p className="text-muted-foreground font-body mb-2">Enter code:</p>
             <p className="text-6xl md:text-8xl font-display font-bold text-primary tracking-[0.3em]">
               {session?.join_code || '----'}
             </p>
