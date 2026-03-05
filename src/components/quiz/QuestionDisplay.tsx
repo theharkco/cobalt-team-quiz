@@ -10,6 +10,7 @@ interface QuestionDisplayProps {
   isHost?: boolean;
   timeElapsedMs?: number;
   hideOptions?: boolean;
+  revealAnswer?: boolean;
 }
 
 const optionColors = [
