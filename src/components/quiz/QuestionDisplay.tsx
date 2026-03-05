@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 import type { QuizQuestion } from '@/data/questions';
 
@@ -22,6 +23,14 @@ const optionIcons = ['▲', '◆', '●', '★'];
 
 export default function QuestionDisplay({ question, questionNumber, totalQuestions, isHost, timeElapsedMs = 0, hideOptions }: QuestionDisplayProps) {
   const [blurAmount, setBlurAmount] = useState(40);
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  // Reset loaded state when question changes
+  useEffect(() => {
+    setImageLoaded(false);
+  }, [question.id]);
+
+  const handleImageLoad = useCallback(() => setImageLoaded(true), []);
 
   // Calculate blur based on time elapsed for image questions
   useEffect(() => {
@@ -74,11 +83,15 @@ export default function QuestionDisplay({ question, questionNumber, totalQuestio
           className="flex justify-center mb-8"
         >
           <div className="relative w-72 h-72 md:w-96 md:h-96 rounded-2xl overflow-hidden border-4 border-border">
+            {!imageLoaded && (
+              <Skeleton className="absolute inset-0 w-full h-full" />
+            )}
             <img
               src={question.imageUrl}
               alt="Mystery"
-              className="w-full h-full object-cover"
+              className={`w-full h-full object-cover ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
               style={{ filter: `blur(${blurAmount}px)`, transition: 'filter 0.3s ease' }}
+              onLoad={handleImageLoad}
             />
           </div>
         </motion.div>
