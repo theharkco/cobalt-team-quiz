@@ -38,15 +38,29 @@ export default function HostView() {
 
     const channel = supabase
       .channel(`host-${sessionId}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'quiz_sessions', filter: `id=eq.${sessionId}` }, (payload) => {
-        if (payload.new) setSession(payload.new as QuizSession);
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'quiz_sessions' }, (payload) => {
+        const row = payload.new as QuizSession;
+        if (row && row.id === sessionId) setSession(row);
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'players', filter: `session_id=eq.${sessionId}` }, () => {
-        refreshPlayers();
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'players' }, (payload) => {
+        const row = payload.new as Player;
+        if (row && row.session_id === sessionId) refreshPlayers();
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'players' }, (payload) => {
+        const row = payload.new as Player;
+        if (row && row.session_id === sessionId) refreshPlayers();
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    // Polling fallback for lobby - ensures players show up even if realtime hiccups
+    const pollInterval = setInterval(() => {
+      refreshPlayers();
+    }, 3000);
+
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(pollInterval);
+    };
   }, [sessionId]);
 
   const updateStatus = async (status: SessionStatus, q?: number) => {

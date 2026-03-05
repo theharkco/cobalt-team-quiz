@@ -46,8 +46,9 @@ export default function PlayerView() {
 
     const channel = supabase
       .channel(`player-${playerId}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'quiz_sessions', filter: `id=eq.${sessionId}` }, (payload) => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'quiz_sessions' }, (payload) => {
         const newSession = payload.new as QuizSession;
+        if (!newSession || newSession.id !== sessionId) return;
         setSession(prev => {
           // Reset answered state when question changes
           if (prev && newSession.current_question !== prev.current_question) {
@@ -73,8 +74,40 @@ export default function PlayerView() {
       })
       .subscribe();
 
+    // Polling fallback for session state changes
+    const pollInterval = setInterval(async () => {
+      const { data } = await supabase.from('quiz_sessions').select('*').eq('id', sessionId).single();
+      if (data) {
+        const s = data as QuizSession;
+        setSession(prev => {
+          if (prev && (prev.status !== s.status || prev.current_question !== s.current_question)) {
+            if (s.current_question !== prev.current_question) {
+              setAnswered(false);
+              setLastResult(null);
+              questionStartRef.current = Date.now();
+              setTimeElapsed(0);
+              if (timerInterval.current) clearInterval(timerInterval.current);
+              timerInterval.current = setInterval(() => {
+                setTimeElapsed(Date.now() - questionStartRef.current);
+              }, 100);
+              setTimerRunning(true);
+            }
+            if (s.status === 'leaderboard' || s.status === 'finished') {
+              setTimerRunning(false);
+              if (timerInterval.current) clearInterval(timerInterval.current);
+              refreshPlayer();
+              refreshPlayers();
+            }
+            return s;
+          }
+          return prev;
+        });
+      }
+    }, 2000);
+
     return () => {
       supabase.removeChannel(channel);
+      clearInterval(pollInterval);
       if (timerInterval.current) clearInterval(timerInterval.current);
     };
   }, [sessionId, playerId]);
