@@ -15,6 +15,7 @@ import { usePreCountdown } from '@/hooks/usePreCountdown';
 import { retryOnce } from '@/lib/retryAsync';
 import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
+import Emoji from '@/components/quiz/Emoji';
 import confetti from 'canvas-confetti';
 import { playCorrect, playWrong, startTicking, stopTicking } from '@/lib/sounds';
 
