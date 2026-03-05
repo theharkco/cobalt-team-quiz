@@ -77,8 +77,8 @@ export default function QuestionDisplay({ question, questionNumber, totalQuestio
             <img
               src={question.imageUrl}
               alt="Mystery"
-              className="w-full h-full object-cover transition-all duration-300"
-              style={{ filter: `blur(${blurAmount}px)` }}
+              className="w-full h-full object-cover"
+              style={{ filter: `blur(${blurAmount}px)`, transition: 'filter 0.3s ease' }}
             />
           </div>
         </motion.div>
