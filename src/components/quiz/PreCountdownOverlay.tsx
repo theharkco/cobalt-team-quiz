@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import type { QuizQuestion } from '@/data/questionTypes';
+import Emoji from '@/components/quiz/Emoji';
 
 interface PreCountdownOverlayProps {
   countdown: number;
