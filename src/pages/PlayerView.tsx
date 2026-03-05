@@ -38,14 +38,28 @@ export default function PlayerView() {
   }, [sessionId]);
 
   const handleSessionTransition = useCallback((prev: QuizSession | null, next: QuizSession) => {
-    // New question started
+    // New question started — begin 3s pre-countdown
     if (prev && next.current_question !== prev.current_question) {
       setAnswered(false);
       setLastResult(null);
-      // Use server timestamp for timing sync, fallback to local
-      const serverStart = next.question_started_at ? new Date(next.question_started_at).getTime() : Date.now();
-      timer.start(serverStart);
-      startTicking(() => (15000 - (Date.now() - (next.question_started_at ? new Date(next.question_started_at).getTime() : timer.startTimeRef.current))) / 1000);
+      timer.stop();
+      stopTicking();
+
+      // Start 3s pre-countdown, then start real timer
+      if (preCountdownRef.current) clearInterval(preCountdownRef.current);
+      setPreCountdown(3);
+      let count = 3;
+      preCountdownRef.current = setInterval(() => {
+        count--;
+        setPreCountdown(count);
+        if (count <= 0) {
+          if (preCountdownRef.current) clearInterval(preCountdownRef.current);
+          preCountdownRef.current = null;
+          const serverStart = next.question_started_at ? new Date(next.question_started_at).getTime() : Date.now();
+          timer.start(serverStart);
+          startTicking(() => (15000 - (Date.now() - (next.question_started_at ? new Date(next.question_started_at).getTime() : timer.startTimeRef.current))) / 1000);
+        }
+      }, 1000);
     }
     // Transition to leaderboard or finished
     if (next.status === 'leaderboard' || next.status === 'finished') {
