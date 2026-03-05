@@ -81,12 +81,12 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   {
     id: 10,
     type: 'blurred-image',
-    question: '🎨 What famous painting is this?',
-    correctAnswer: 'Mona Lisa',
-    acceptableAnswers: ['mona lisa', 'the mona lisa', 'la gioconda', 'la joconde'],
-    imageUrl: '/images/mona-lisa.jpg',
+    question: '👤 Who is this famous person?',
+    correctAnswer: 'Albert Einstein',
+    acceptableAnswers: ['albert einstein', 'einstein'],
+    imageUrl: '/images/einstein.jpg',
     blurLevels: [50, 38, 28, 18, 10, 4, 0],
-    category: 'Art',
+    category: 'Famous People',
   },
   {
     id: 11,
