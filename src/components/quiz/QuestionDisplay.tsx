@@ -100,36 +100,10 @@ export default function QuestionDisplay({ question, questionNumber, totalQuestio
 
       {/* Spotify embed */}
       {question.type === 'music' && question.spotifyEmbedUrl && (
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="flex justify-center mb-8"
-        >
-          <div className="relative w-72 md:w-96 rounded-2xl overflow-hidden border-4 border-border">
-            {/* Overlay to hide song title/artist - fades out when answer is revealed */}
-            <motion.div
-              initial={{ opacity: 1 }}
-              animate={{ opacity: revealAnswer ? 0 : 1 }}
-              transition={{ duration: 0.5 }}
-              className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-card rounded-xl"
-              style={{ pointerEvents: revealAnswer ? 'none' : 'auto' }}
-            >
-              <span className="text-5xl animate-pulse mb-2">🎵</span>
-              <span className="font-display font-bold text-foreground text-lg">Listen carefully...</span>
-              <span className="text-muted-foreground text-sm mt-1">Name the song or artist!</span>
-            </motion.div>
-            {/* Iframe rendered behind overlay; becomes visible when revealed */}
-            <iframe
-              src={`${question.spotifyEmbedUrl}&autoplay=1`}
-              width="100%"
-              height="152"
-              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-              loading="lazy"
-              style={{ border: 'none', borderRadius: '12px' }}
-            />
-          </div>
-        </motion.div>
+        <MusicEmbed
+          spotifyEmbedUrl={question.spotifyEmbedUrl}
+          revealAnswer={revealAnswer}
+        />
       )}
 
       {/* Multiple choice options (host view - display only) */}
