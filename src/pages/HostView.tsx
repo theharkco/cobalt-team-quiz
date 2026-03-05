@@ -227,16 +227,19 @@ export default function HostView() {
 
   // QUESTION
   if (session.status === 'question' && currentQ) {
+    const isPreCountdown = preCountdown > 0;
     return (
       <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4 py-8">
-        <div className="absolute top-6 right-6">
-          <CountdownTimer
-            duration={15}
-            onComplete={onTimerComplete}
-            isRunning={timer.isRunning}
-            size={100}
-          />
-        </div>
+        {!isPreCountdown && (
+          <div className="absolute top-6 right-6">
+            <CountdownTimer
+              duration={15}
+              onComplete={onTimerComplete}
+              isRunning={timer.isRunning}
+              size={100}
+            />
+          </div>
+        )}
 
         <div className="relative z-10 flex flex-col items-center gap-6 w-full max-w-4xl">
           <QuestionDisplay
@@ -245,7 +248,21 @@ export default function HostView() {
             totalQuestions={QUIZ_QUESTIONS.length}
             isHost
             timeElapsedMs={timer.timeElapsed}
+            hideOptions={isPreCountdown}
           />
+
+          {isPreCountdown && (
+            <motion.div
+              key={preCountdown}
+              initial={{ scale: 2, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+              transition={{ type: 'spring', bounce: 0.4 }}
+              className="text-8xl md:text-9xl font-display font-bold text-primary"
+            >
+              {preCountdown}
+            </motion.div>
+          )}
 
           {showAnswer && (
             <motion.div
