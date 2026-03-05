@@ -260,16 +260,42 @@ export default function HostView() {
           />
 
           {isPreCountdown && (
-            <motion.div
-              key={preCountdown}
-              initial={{ scale: 2, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0, opacity: 0 }}
-              transition={{ type: 'spring', bounce: 0.4 }}
-              className="text-8xl md:text-9xl font-display font-bold text-primary"
-            >
-              {preCountdown}
-            </motion.div>
+            <div className="flex flex-col items-center gap-6">
+              {currentQ.category && (
+                <motion.div
+                  initial={{ y: -40, opacity: 0, scale: 0.5 }}
+                  animate={{ y: 0, opacity: 1, scale: 1 }}
+                  transition={{ type: 'spring', bounce: 0.6, duration: 0.8 }}
+                  className="flex flex-col items-center gap-2"
+                >
+                  <motion.span
+                    animate={{ rotate: [0, -10, 10, -10, 0] }}
+                    transition={{ duration: 0.6, delay: 0.3 }}
+                    className="text-6xl md:text-7xl block"
+                  >
+                    {currentQ.question.match(/^\p{Emoji_Presentation}/u)?.[0] || '❓'}
+                  </motion.span>
+                  <motion.span
+                    initial={{ letterSpacing: '0.5em', opacity: 0 }}
+                    animate={{ letterSpacing: '0.15em', opacity: 1 }}
+                    transition={{ delay: 0.2, duration: 0.6 }}
+                    className="text-2xl md:text-3xl font-display font-bold text-accent-foreground uppercase"
+                  >
+                    {currentQ.category}
+                  </motion.span>
+                </motion.div>
+              )}
+              <motion.div
+                key={preCountdown}
+                initial={{ scale: 2, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                transition={{ type: 'spring', bounce: 0.4 }}
+                className="text-8xl md:text-9xl font-display font-bold text-primary"
+              >
+                {preCountdown}
+              </motion.div>
+            </div>
           )}
 
           {showAnswer && (
