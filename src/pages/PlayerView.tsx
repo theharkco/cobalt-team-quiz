@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,6 +21,8 @@ export default function PlayerView() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [answered, setAnswered] = useState(false);
   const [lastResult, setLastResult] = useState<{ correct: boolean; points: number } | null>(null);
+  const [preCountdown, setPreCountdown] = useState(0);
+  const preCountdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timer = useTimer();
 
   const refreshPlayer = useCallback(async () => {
@@ -36,14 +38,28 @@ export default function PlayerView() {
   }, [sessionId]);
 
   const handleSessionTransition = useCallback((prev: QuizSession | null, next: QuizSession) => {
-    // New question started
+    // New question started — begin 3s pre-countdown
     if (prev && next.current_question !== prev.current_question) {
       setAnswered(false);
       setLastResult(null);
-      // Use server timestamp for timing sync, fallback to local
-      const serverStart = next.question_started_at ? new Date(next.question_started_at).getTime() : Date.now();
-      timer.start(serverStart);
-      startTicking(() => (15000 - (Date.now() - (next.question_started_at ? new Date(next.question_started_at).getTime() : timer.startTimeRef.current))) / 1000);
+      timer.stop();
+      stopTicking();
+
+      // Start 3s pre-countdown, then start real timer
+      if (preCountdownRef.current) clearInterval(preCountdownRef.current);
+      setPreCountdown(3);
+      let count = 3;
+      preCountdownRef.current = setInterval(() => {
+        count--;
+        setPreCountdown(count);
+        if (count <= 0) {
+          if (preCountdownRef.current) clearInterval(preCountdownRef.current);
+          preCountdownRef.current = null;
+          const serverStart = next.question_started_at ? new Date(next.question_started_at).getTime() : Date.now();
+          timer.start(serverStart);
+          startTicking(() => (15000 - (Date.now() - (next.question_started_at ? new Date(next.question_started_at).getTime() : timer.startTimeRef.current))) / 1000);
+        }
+      }, 1000);
     }
     // Transition to leaderboard or finished
     if (next.status === 'leaderboard' || next.status === 'finished') {
@@ -96,6 +112,7 @@ export default function PlayerView() {
       clearInterval(pollInterval);
       stopTicking();
       timer.cleanup();
+      if (preCountdownRef.current) clearInterval(preCountdownRef.current);
     };
   }, [sessionId, playerId]);
 
@@ -184,11 +201,14 @@ export default function PlayerView() {
 
   // QUESTION
   if (session.status === 'question' && currentQ) {
+    const isPreCountdown = preCountdown > 0;
     return (
       <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4 py-6">
-        <div className="absolute top-4 right-4">
-          <CountdownTimer duration={15} onComplete={onTimerComplete} isRunning={timer.isRunning} size={70} />
-        </div>
+        {!isPreCountdown && (
+          <div className="absolute top-4 right-4">
+            <CountdownTimer duration={15} onComplete={onTimerComplete} isRunning={timer.isRunning} size={70} />
+          </div>
+        )}
         <div className="absolute top-4 left-4 bg-card rounded-xl px-3 py-1">
           <span className="font-display font-bold text-primary text-sm">{player?.score ?? 0} pts</span>
         </div>
@@ -199,9 +219,21 @@ export default function PlayerView() {
             questionNumber={session.current_question + 1}
             totalQuestions={QUIZ_QUESTIONS.length}
             timeElapsedMs={timer.timeElapsed}
+            hideOptions={isPreCountdown}
           />
 
-          {answered && lastResult ? (
+          {isPreCountdown ? (
+            <motion.div
+              key={preCountdown}
+              initial={{ scale: 2, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+              transition={{ type: 'spring', bounce: 0.4 }}
+              className="text-7xl font-display font-bold text-primary"
+            >
+              {preCountdown}
+            </motion.div>
+          ) : answered && lastResult ? (
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}

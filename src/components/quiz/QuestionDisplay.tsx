@@ -8,6 +8,7 @@ interface QuestionDisplayProps {
   totalQuestions: number;
   isHost?: boolean;
   timeElapsedMs?: number;
+  hideOptions?: boolean;
 }
 
 const optionColors = [
@@ -19,7 +20,7 @@ const optionColors = [
 
 const optionIcons = ['▲', '◆', '●', '★'];
 
-export default function QuestionDisplay({ question, questionNumber, totalQuestions, isHost, timeElapsedMs = 0 }: QuestionDisplayProps) {
+export default function QuestionDisplay({ question, questionNumber, totalQuestions, isHost, timeElapsedMs = 0, hideOptions }: QuestionDisplayProps) {
   const [blurAmount, setBlurAmount] = useState(40);
 
   // Calculate blur based on time elapsed for image questions
@@ -104,7 +105,7 @@ export default function QuestionDisplay({ question, questionNumber, totalQuestio
       )}
 
       {/* Multiple choice options (host view - display only) */}
-      {isHost && question.options && (
+      {isHost && !hideOptions && question.options && (
         <div className="grid grid-cols-2 gap-4 mt-4">
           {question.options.map((option, i) => (
             <motion.div

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,6 +20,8 @@ export default function HostView() {
   const [showAnswer, setShowAnswer] = useState(false);
   const [previousScores, setPreviousScores] = useState<Record<string, number>>({});
   const [answerCount, setAnswerCount] = useState(0);
+  const [preCountdown, setPreCountdown] = useState(0);
+  const preCountdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timer = useTimer();
 
   const refreshPlayers = useCallback(async () => {
@@ -81,6 +83,7 @@ export default function HostView() {
       supabase.removeChannel(channel);
       clearInterval(pollInterval);
       timer.cleanup();
+      if (preCountdownRef.current) clearInterval(preCountdownRef.current);
     };
   }, [sessionId]);
 
@@ -105,12 +108,27 @@ export default function HostView() {
     }
   };
 
+  const startPreCountdown = (onDone: () => void) => {
+    if (preCountdownRef.current) clearInterval(preCountdownRef.current);
+    setPreCountdown(3);
+    let count = 3;
+    preCountdownRef.current = setInterval(() => {
+      count--;
+      setPreCountdown(count);
+      if (count <= 0) {
+        if (preCountdownRef.current) clearInterval(preCountdownRef.current);
+        preCountdownRef.current = null;
+        onDone();
+      }
+    }, 1000);
+  };
+
   const startQuiz = async () => {
     setPreviousScores({});
     setAnswerCount(0);
-    await updateStatus('question', 0);
-    timer.start();
     setShowAnswer(false);
+    await updateStatus('question', 0);
+    startPreCountdown(() => timer.start());
   };
 
   const onTimerComplete = () => {
@@ -134,9 +152,9 @@ export default function HostView() {
       await refreshPlayers();
     } else {
       setAnswerCount(0);
-      await updateStatus('question', next);
-      timer.start();
       setShowAnswer(false);
+      await updateStatus('question', next);
+      startPreCountdown(() => timer.start());
     }
   };
 
@@ -210,16 +228,19 @@ export default function HostView() {
 
   // QUESTION
   if (session.status === 'question' && currentQ) {
+    const isPreCountdown = preCountdown > 0;
     return (
       <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4 py-8">
-        <div className="absolute top-6 right-6">
-          <CountdownTimer
-            duration={15}
-            onComplete={onTimerComplete}
-            isRunning={timer.isRunning}
-            size={100}
-          />
-        </div>
+        {!isPreCountdown && (
+          <div className="absolute top-6 right-6">
+            <CountdownTimer
+              duration={15}
+              onComplete={onTimerComplete}
+              isRunning={timer.isRunning}
+              size={100}
+            />
+          </div>
+        )}
 
         <div className="relative z-10 flex flex-col items-center gap-6 w-full max-w-4xl">
           <QuestionDisplay
@@ -228,7 +249,21 @@ export default function HostView() {
             totalQuestions={QUIZ_QUESTIONS.length}
             isHost
             timeElapsedMs={timer.timeElapsed}
+            hideOptions={isPreCountdown}
           />
+
+          {isPreCountdown && (
+            <motion.div
+              key={preCountdown}
+              initial={{ scale: 2, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+              transition={{ type: 'spring', bounce: 0.4 }}
+              className="text-8xl md:text-9xl font-display font-bold text-primary"
+            >
+              {preCountdown}
+            </motion.div>
+          )}
 
           {showAnswer && (
             <motion.div
