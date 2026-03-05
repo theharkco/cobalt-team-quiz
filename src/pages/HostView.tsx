@@ -312,7 +312,16 @@ export default function HostView() {
             revealAnswer={showAnswer}
           />
 
-          {isPreCountdown && <PreCountdownOverlay countdown={preCountdown} question={currentQ} />}
+          {!isPreCountdown && !showAnswer && (
+            <Button
+              onClick={onTimerComplete}
+              variant="outline"
+              className="h-10 px-6 text-sm font-display font-bold rounded-xl border-muted-foreground/30 text-muted-foreground hover:text-foreground hover:border-foreground/50 transition-all"
+            >
+              ⏭️ Skip Question
+            </Button>
+          )}
+
 
           {showAnswer && (
             <motion.div
