@@ -42,26 +42,31 @@ function MusicEmbed({ spotifyEmbedUrl, revealAnswer }: { spotifyEmbedUrl: string
     >
       <div className="relative w-72 md:w-96 rounded-2xl overflow-hidden border-4 border-border">
         {/* Overlay to hide song title/artist */}
-        <motion.div
-          initial={{ opacity: 1 }}
-          animate={{ opacity: showOverlay ? 1 : 0 }}
-          transition={{ duration: 0.3 }}
-          className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-card rounded-xl"
-          style={{ pointerEvents: showOverlay ? 'auto' : 'none' }}
-        >
-          <span className="text-5xl animate-pulse mb-2">🎵</span>
-          <span className="font-display font-bold text-foreground text-lg">Listen carefully...</span>
-          {playState === 'idle' ? (
-            <button
-              onClick={handlePlay}
-              className="mt-3 px-5 py-2 rounded-full bg-primary text-primary-foreground font-display font-bold text-sm hover:opacity-90 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
-            >
-              ▶ Tap to Play
-            </button>
-          ) : (
-            <span className="text-muted-foreground text-sm mt-1">Name the song or artist!</span>
-          )}
-        </motion.div>
+        {showOverlay && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-card rounded-xl">
+            <span className="text-5xl animate-pulse mb-2">🎵</span>
+            <span className="font-display font-bold text-foreground text-lg">Listen carefully...</span>
+            {playState === 'idle' ? (
+              <button
+                onClick={handlePlay}
+                className="mt-3 px-5 py-2 rounded-full bg-primary text-primary-foreground font-display font-bold text-sm hover:opacity-90 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+              >
+                ▶ Tap to Play
+              </button>
+            ) : (
+              <span className="text-muted-foreground text-sm mt-1">Name the song or artist!</span>
+            )}
+          </div>
+        )}
+        {/* When exposed, show a small button to re-cover */}
+        {playState === 'exposing' && !revealAnswer && (
+          <button
+            onClick={() => setPlayState('playing')}
+            className="absolute top-2 right-2 z-20 px-3 py-1 rounded-full bg-primary text-primary-foreground font-display font-bold text-xs hover:opacity-90 transition-all"
+          >
+            ✓ Playing — Hide
+          </button>
+        )}
         {/* Iframe - visible when exposing or revealed */}
         <iframe
           ref={iframeRef}
