@@ -1,7 +1,7 @@
 import type { QuizQuestion } from './questionTypes';
 
 export const QUIZ_QUESTIONS: QuizQuestion[] = [
-  // --- MULTIPLE CHOICE (6) ---
+  // --- MULTIPLE CHOICE ---
   {
     id: 1,
     type: 'multiple-choice',
@@ -9,6 +9,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     options: ['Blackstone', 'KKR', 'Apollo', 'Carlyle'],
     correctAnswer: 'KKR',
     category: 'Private Equity',
+    difficulty: 'hard',
   },
   {
     id: 2,
@@ -17,6 +18,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     options: ['Training', 'Transformer', 'Transfer', 'Token'],
     correctAnswer: 'Transformer',
     category: 'LLM Technology',
+    difficulty: 'easy',
   },
   {
     id: 3,
@@ -25,6 +27,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     options: ['1 and 10', '2 and 20', '3 and 30', '1.5 and 15'],
     correctAnswer: '2 and 20',
     category: 'Private Equity',
+    difficulty: 'medium',
   },
   {
     id: 4,
@@ -33,6 +36,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     options: ['Few-shot learning', 'Chain-of-thought', 'Fine-tuning', 'Beam search'],
     correctAnswer: 'Chain-of-thought',
     category: 'LLM Technology',
+    difficulty: 'medium',
   },
   {
     id: 5,
@@ -41,6 +45,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     options: ['Samantha', 'Ava', 'Sophia', 'Alexa'],
     correctAnswer: 'Ava',
     category: 'AI Pop Culture',
+    difficulty: 'medium',
   },
   {
     id: 6,
@@ -49,9 +54,10 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     options: ['Multiple on Invested Capital', 'Margin of Internal Cost', 'Mean of Investment Cash', 'Multiple on Initial Commitment'],
     correctAnswer: 'Multiple on Invested Capital',
     category: 'Private Equity',
+    difficulty: 'hard',
   },
 
-  // --- FREE TEXT (3) ---
+  // --- FREE TEXT ---
   {
     id: 7,
     type: 'free-text',
@@ -59,6 +65,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     correctAnswer: 'OpenAI',
     acceptableAnswers: ['openai', 'open ai', 'open-ai'],
     category: 'AI Pop Culture',
+    difficulty: 'easy',
   },
   {
     id: 8,
@@ -67,6 +74,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     correctAnswer: 'Fine-tuning',
     acceptableAnswers: ['fine-tuning', 'fine tuning', 'finetuning'],
     category: 'LLM Technology',
+    difficulty: 'medium',
   },
   {
     id: 9,
@@ -75,9 +83,10 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     correctAnswer: 'HAL 9000',
     acceptableAnswers: ['hal 9000', 'hal', 'hal9000'],
     category: 'AI Pop Culture',
+    difficulty: 'medium',
   },
 
-  // --- BLURRED IMAGE (3) ---
+  // --- BLURRED IMAGE ---
   {
     id: 10,
     type: 'blurred-image',
@@ -87,6 +96,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     imageUrl: '/images/jonathan-nilsfors.jpg',
     blurLevels: [50, 38, 28, 18, 10, 4, 0],
     category: 'Famous People',
+    difficulty: 'hard',
   },
   {
     id: 11,
@@ -97,6 +107,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     imageUrl: '/images/empire-state.jpg',
     blurLevels: [50, 35, 25, 15, 8, 3, 0],
     category: 'Landmarks',
+    difficulty: 'easy',
   },
   {
     id: 12,
@@ -107,9 +118,10 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     imageUrl: '/images/taj-mahal.jpg',
     blurLevels: [45, 32, 22, 14, 7, 2, 0],
     category: 'Landmarks',
+    difficulty: 'easy',
   },
 
-  // --- MUSIC (3) - Spotify embeds ---
+  // --- MUSIC ---
   {
     id: 13,
     type: 'music',
@@ -118,6 +130,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     correctAnswer: 'Steely Dan',
     spotifyEmbedUrl: 'https://open.spotify.com/embed/track/27OeeYzk6klgBh23ENUkXL?utm_source=generator&theme=0',
     category: 'Music',
+    difficulty: 'hard',
   },
   {
     id: 14,
@@ -127,6 +140,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     correctAnswer: 'Supertramp',
     spotifyEmbedUrl: 'https://open.spotify.com/embed/track/2kN5sBeGBOM2MfaRhscRFp?utm_source=generator&theme=0',
     category: 'Music',
+    difficulty: 'medium',
   },
   {
     id: 15,
@@ -136,9 +150,10 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     correctAnswer: 'King Crimson',
     spotifyEmbedUrl: 'https://open.spotify.com/embed/track/5kAGSAVFjBJlIFH3jSHJnz?utm_source=generator&theme=0',
     category: 'Music',
+    difficulty: 'hard',
   },
 
-  // --- EXTRA: One more per category ---
+  // --- EXTRA ---
   {
     id: 16,
     type: 'multiple-choice',
@@ -146,6 +161,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     options: ['Uninvested capital', 'Debt financing', 'Dividend recaps', 'Management fees'],
     correctAnswer: 'Uninvested capital',
     category: 'Private Equity',
+    difficulty: 'medium',
   },
   {
     id: 17,
@@ -154,6 +170,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     options: ['Backpropagation', 'Self-attention', 'Dropout', 'Batch normalization'],
     correctAnswer: 'Self-attention',
     category: 'LLM Technology',
+    difficulty: 'hard',
   },
   {
     id: 18,
@@ -162,6 +179,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     options: ['Skynet', 'WOPR', 'Ultron', 'The Matrix'],
     correctAnswer: 'Skynet',
     category: 'AI Pop Culture',
+    difficulty: 'easy',
   },
   {
     id: 19,
@@ -172,6 +190,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     imageUrl: '/images/elon-musk.jpg',
     blurLevels: [50, 38, 28, 18, 10, 4, 0],
     category: 'Famous People',
+    difficulty: 'easy',
   },
   {
     id: 20,
@@ -182,6 +201,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     imageUrl: '/images/statue-of-liberty-photo.jpg',
     blurLevels: [50, 35, 25, 15, 8, 3, 0],
     category: 'Landmarks',
+    difficulty: 'easy',
   },
   {
     id: 21,
@@ -191,6 +211,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     correctAnswer: 'Roxy Music',
     spotifyEmbedUrl: 'https://open.spotify.com/embed/track/3rKCEBl2VPupMkNZnGFbjF?utm_source=generator&theme=0',
     category: 'Music',
+    difficulty: 'hard',
   },
 ];
 
