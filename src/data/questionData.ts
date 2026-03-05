@@ -10,6 +10,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     correctAnswer: 'KKR',
     category: 'Private Equity',
     difficulty: 'hard',
+    explanation: 'KKR, alongside TPG and Goldman Sachs, acquired TXU Energy for ~$45 billion in 2007 — the largest LBO ever at the time. The deal ultimately went bankrupt in 2014.',
   },
   {
     id: 2,
@@ -19,6 +20,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     correctAnswer: 'Transformer',
     category: 'LLM Technology',
     difficulty: 'easy',
+    explanation: 'GPT = Generative Pre-trained Transformer. The Transformer architecture, introduced in the 2017 paper "Attention Is All You Need," is the foundation of all modern LLMs.',
   },
   {
     id: 3,
@@ -38,6 +40,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     correctAnswer: 'Chain-of-thought',
     category: 'LLM Technology',
     difficulty: 'medium',
+    explanation: 'Chain-of-thought prompting encourages the model to "think step by step," breaking complex reasoning into intermediate steps — dramatically improving accuracy on math and logic tasks.',
   },
   {
     id: 5,
@@ -56,6 +59,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     correctAnswer: 'Multiple on Invested Capital',
     category: 'Private Equity',
     difficulty: 'hard',
+    explanation: 'MOIC measures total value returned relative to capital invested. A 3.0x MOIC means the fund returned 3× the money put in. Unlike IRR, it ignores the time dimension.',
   },
 
   // --- FREE TEXT ---
@@ -76,6 +80,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     acceptableAnswers: ['fine-tuning', 'fine tuning', 'finetuning'],
     category: 'LLM Technology',
     difficulty: 'medium',
+    explanation: 'Fine-tuning adapts a general-purpose model to a specific task or domain by training it further on a curated dataset, adjusting its weights while preserving its broad knowledge.',
   },
   {
     id: 9,
@@ -163,6 +168,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     correctAnswer: 'Uninvested capital',
     category: 'Private Equity',
     difficulty: 'medium',
+    explanation: 'Dry powder is capital that has been committed by LPs but not yet deployed into deals. High levels of dry powder across the industry can drive up valuations as firms compete for targets.',
   },
   {
     id: 17,
@@ -172,6 +178,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     correctAnswer: 'Self-attention',
     category: 'LLM Technology',
     difficulty: 'hard',
+    explanation: 'Self-attention lets each token "look at" every other token in the sequence and compute relevance scores. This is what allows Transformers to capture long-range dependencies — unlike RNNs which process tokens sequentially.',
   },
   {
     id: 18,
