@@ -14,6 +14,7 @@ import { toast } from '@/hooks/use-toast';
 import confetti from 'canvas-confetti';
 import { playCorrect, playWrong, startTicking, stopTicking } from '@/lib/sounds';
 type ResultKind = 'exact' | 'close' | 'wrong' | 'timeout';
+
 export default function PlayerView() {
   const { sessionId, playerId } = useParams<{ sessionId: string; playerId: string }>();
   const [session, setSession] = useState<QuizSession | null>(null);
