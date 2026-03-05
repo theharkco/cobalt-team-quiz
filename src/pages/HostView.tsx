@@ -19,6 +19,7 @@ export default function HostView() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [showAnswer, setShowAnswer] = useState(false);
   const [previousScores, setPreviousScores] = useState<Record<string, number>>({});
+  const [answerCount, setAnswerCount] = useState(0);
   const timer = useTimer();
 
   const refreshPlayers = useCallback(async () => {
@@ -32,6 +33,24 @@ export default function HostView() {
     const { data } = await supabase.from('quiz_sessions').select('*').eq('id', sessionId).single();
     if (data) setSession(data as QuizSession);
   }, [sessionId]);
+
+  const refreshAnswerCount = useCallback(async (questionIndex: number) => {
+    if (!sessionId) return;
+    const { count } = await supabase
+      .from('answers')
+      .select('*', { count: 'exact', head: true })
+      .eq('session_id', sessionId)
+      .eq('question_index', questionIndex);
+    setAnswerCount(count ?? 0);
+  }, [sessionId]);
+
+  // Auto-skip timer when all players have answered
+  useEffect(() => {
+    if (session?.status === 'question' && timer.isRunning && players.length > 0 && answerCount >= players.length) {
+      timer.stop();
+      setShowAnswer(true);
+    }
+  }, [answerCount, players.length, session?.status, timer.isRunning]);
 
   useEffect(() => {
     refreshSession();
@@ -50,6 +69,9 @@ export default function HostView() {
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'players' }, (payload) => {
         const row = payload.new as Player;
         if (row && row.session_id === sessionId) refreshPlayers();
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'answers', filter: `session_id=eq.${sessionId}` }, () => {
+        setAnswerCount(prev => prev + 1);
       })
       .subscribe();
 
@@ -85,6 +107,7 @@ export default function HostView() {
 
   const startQuiz = async () => {
     setPreviousScores({});
+    setAnswerCount(0);
     await updateStatus('question', 0);
     timer.start();
     setShowAnswer(false);
@@ -110,6 +133,7 @@ export default function HostView() {
       await updateStatus('finished');
       await refreshPlayers();
     } else {
+      setAnswerCount(0);
       await updateStatus('question', next);
       timer.start();
       setShowAnswer(false);
