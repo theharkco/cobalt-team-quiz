@@ -84,7 +84,7 @@ export default function QuestionDisplay({ question, questionNumber, totalQuestio
         </motion.div>
       )}
 
-      {/* Spotify embed - hidden visually, autoplay audio only */}
+      {/* Spotify embed */}
       {question.type === 'music' && question.spotifyEmbedUrl && (
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
@@ -92,15 +92,14 @@ export default function QuestionDisplay({ question, questionNumber, totalQuestio
           transition={{ delay: 0.2 }}
           className="flex justify-center mb-8"
         >
-          <div className="relative w-72 h-20 md:w-96 md:h-24 rounded-2xl bg-card border-4 border-border flex items-center justify-center overflow-hidden">
-            <span className="text-5xl animate-pulse">🎵</span>
+          <div className="w-72 md:w-96 rounded-2xl overflow-hidden border-4 border-border">
             <iframe
               src={`${question.spotifyEmbedUrl}&autoplay=1`}
-              width="0"
-              height="0"
+              width="100%"
+              height="152"
               allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
               loading="lazy"
-              style={{ border: 'none', position: 'absolute', opacity: 0, pointerEvents: 'none' }}
+              style={{ border: 'none', borderRadius: '12px' }}
             />
           </div>
         </motion.div>
