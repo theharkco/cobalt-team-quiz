@@ -59,6 +59,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     correctAnswer: 'Multiple on Invested Capital',
     category: 'Private Equity',
     difficulty: 'hard',
+    explanation: 'MOIC measures total value returned relative to capital invested. A 3.0x MOIC means the fund returned 3× the money put in. Unlike IRR, it ignores the time dimension.',
   },
 
   // --- FREE TEXT ---
