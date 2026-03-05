@@ -94,9 +94,11 @@ export default function PlayerView() {
                 setTimeElapsed(Date.now() - questionStartRef.current);
               }, 100);
               setTimerRunning(true);
+              startTicking(() => (15000 - (Date.now() - questionStartRef.current)) / 1000);
             }
             if (s.status === 'leaderboard' || s.status === 'finished') {
               setTimerRunning(false);
+              stopTicking();
               if (timerInterval.current) clearInterval(timerInterval.current);
               refreshPlayer();
               refreshPlayers();
