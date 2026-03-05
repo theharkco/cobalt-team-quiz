@@ -12,7 +12,7 @@ import { useTimer } from '@/hooks/useTimer';
 import { retryOnce } from '@/lib/retryAsync';
 import { toast } from '@/hooks/use-toast';
 import confetti from 'canvas-confetti';
-import { playCorrect, playWrong, startTicking, stopTicking } from '@/lib/sounds';
+import { playCorrect, playWrong, startTicking, stopTicking, playCountdownBeep } from '@/lib/sounds';
 type ResultKind = 'exact' | 'close' | 'wrong' | 'timeout';
 
 export default function PlayerView() {

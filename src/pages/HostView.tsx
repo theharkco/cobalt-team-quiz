@@ -12,6 +12,7 @@ import QuestionDisplay from '@/components/quiz/QuestionDisplay';
 import Leaderboard from '@/components/quiz/Leaderboard';
 import FloatingShapes from '@/components/quiz/FloatingShapes';
 import { Button } from '@/components/ui/button';
+import { playCountdownBeep } from '@/lib/sounds';
 
 export default function HostView() {
   const { sessionId } = useParams<{ sessionId: string }>();
