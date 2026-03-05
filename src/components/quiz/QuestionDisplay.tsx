@@ -22,7 +22,7 @@ const optionColors = [
 
 const optionIcons = ['▲', '◆', '●', '★'];
 
-export default function QuestionDisplay({ question, questionNumber, totalQuestions, isHost, timeElapsedMs = 0, hideOptions }: QuestionDisplayProps) {
+export default function QuestionDisplay({ question, questionNumber, totalQuestions, isHost, timeElapsedMs = 0, hideOptions, revealAnswer }: QuestionDisplayProps) {
   const [blurAmount, setBlurAmount] = useState(40);
   const [imageLoaded, setImageLoaded] = useState(false);
 
