@@ -110,7 +110,7 @@ export default function Leaderboard({ players, previousScores, isFinal }: Leader
               className="flex items-center gap-3 bg-card rounded-xl p-3 border border-border"
             >
               <span className="font-display font-bold text-lg w-8 text-center">
-                {i < 3 ? medals[i] : <span className="text-muted-foreground">{i + 1}</span>}
+                {i < 3 ? <Emoji label="medal">{medals[i]}</Emoji> : <span className="text-muted-foreground">{i + 1}</span>}
               </span>
               <div
                 className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0"
