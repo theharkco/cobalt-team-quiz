@@ -129,10 +129,14 @@ export default function PlayerView() {
     setAnswered(true);
     setLastResult({ correct: isCorrect, points });
     setTimerRunning(false);
+    stopTicking();
     if (timerInterval.current) clearInterval(timerInterval.current);
 
     if (isCorrect) {
+      playCorrect();
       confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 }, colors: ['#4ECDC4', '#45B7D1', '#FFEAA7'] });
+    } else {
+      playWrong();
     }
 
     // Save to DB
