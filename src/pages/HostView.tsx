@@ -71,10 +71,7 @@ export default function HostView() {
         if (row && row.session_id === sessionId) refreshPlayers();
       })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'answers', filter: `session_id=eq.${sessionId}` }, () => {
-        // New answer came in — refresh count
-        if (session?.current_question !== undefined && session.current_question >= 0) {
-          refreshAnswerCount(session.current_question);
-        }
+        setAnswerCount(prev => prev + 1);
       })
       .subscribe();
 
