@@ -22,60 +22,23 @@ const optionColors = [
 
 const optionIcons = ['▲', '◆', '●', '★'];
 
-function MusicEmbed({ spotifyEmbedUrl, revealAnswer }: { spotifyEmbedUrl: string; revealAnswer?: boolean }) {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [playState, setPlayState] = useState<'idle' | 'exposing' | 'playing'>('idle');
-
-  const handlePlay = useCallback(() => {
-    // Expose the real Spotify player so the user can tap its native play button
-    setPlayState('exposing');
-  }, []);
-
-  const showOverlay = !revealAnswer && playState !== 'exposing';
-
+function MusicEmbed({ spotifyEmbedUrl }: { spotifyEmbedUrl: string }) {
   return (
     <motion.div
       initial={{ scale: 0.8, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ delay: 0.2 }}
-      className="flex justify-center mb-8"
+      className="flex flex-col items-center mb-8"
     >
-      <div className="relative w-72 md:w-96 rounded-2xl overflow-hidden border-4 border-border">
-        {/* Overlay to hide song title/artist */}
-        {showOverlay && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-card rounded-xl">
-            <span className="text-5xl animate-pulse mb-2">🎵</span>
-            <span className="font-display font-bold text-foreground text-lg">Listen carefully...</span>
-            {playState === 'idle' ? (
-              <button
-                onClick={handlePlay}
-                className="mt-3 px-5 py-2 rounded-full bg-primary text-primary-foreground font-display font-bold text-sm hover:opacity-90 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
-              >
-                ▶ Tap to Play
-              </button>
-            ) : (
-              <span className="text-muted-foreground text-sm mt-1">Name the song or artist!</span>
-            )}
-          </div>
-        )}
-        {/* When exposed, show a small button to re-cover */}
-        {playState === 'exposing' && !revealAnswer && (
-          <button
-            onClick={() => setPlayState('playing')}
-            className="absolute top-2 right-2 z-20 px-3 py-1 rounded-full bg-primary text-primary-foreground font-display font-bold text-xs hover:opacity-90 transition-all"
-          >
-            ✓ Playing — Hide
-          </button>
-        )}
-        {/* Iframe - visible when exposing or revealed */}
+      <span className="text-4xl mb-2">🎵</span>
+      <div className="relative w-72 md:w-96 rounded-2xl overflow-hidden border-4 border-border h-[80px]">
         <iframe
-          ref={iframeRef}
           src={spotifyEmbedUrl}
           width="100%"
           height="152"
           allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
           loading="lazy"
-          style={{ border: 'none', borderRadius: '12px' }}
+          style={{ border: 'none', borderRadius: '12px', marginTop: '-72px' }}
         />
       </div>
     </motion.div>
