@@ -1,7 +1,7 @@
-import { useState, useCallback, useRef } from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
-import { motion } from 'framer-motion';
-import type { QuizQuestion } from '@/data/questions';
+import { useState, useCallback, useRef } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { motion } from "framer-motion";
+import type { QuizQuestion } from "@/data/questions";
 
 interface QuestionDisplayProps {
   question: QuizQuestion;
@@ -14,13 +14,13 @@ interface QuestionDisplayProps {
 }
 
 const optionColors = [
-  'bg-quiz-pink hover:bg-quiz-pink/80',
-  'bg-quiz-blue hover:bg-quiz-blue/80',
-  'bg-quiz-orange hover:bg-quiz-orange/80',
-  'bg-quiz-purple hover:bg-quiz-purple/80',
+  "bg-quiz-pink hover:bg-quiz-pink/80",
+  "bg-quiz-blue hover:bg-quiz-blue/80",
+  "bg-quiz-orange hover:bg-quiz-orange/80",
+  "bg-quiz-purple hover:bg-quiz-purple/80",
 ];
 
-const optionIcons = ['▲', '◆', '●', '★'];
+const optionIcons = ["▲", "◆", "●", "★"];
 
 function MusicEmbed({ spotifyEmbedUrl }: { spotifyEmbedUrl: string }) {
   return (
@@ -31,21 +31,29 @@ function MusicEmbed({ spotifyEmbedUrl }: { spotifyEmbedUrl: string }) {
       className="flex flex-col items-center mb-8"
     >
       <span className="text-4xl mb-2">🎵</span>
-      <div className="relative w-[60px] rounded-2xl overflow-hidden border-4 border-border h-[30px]">
+      <div className="relative w-[60px] rounded-2xl overflow-hidden border-4 border-border h-[55px]">
         <iframe
           src={spotifyEmbedUrl}
           width="300"
           height="152"
           allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
           loading="lazy"
-          style={{ border: 'none', borderRadius: '12px', marginTop: '-108px', marginLeft: '-120px' }}
+          style={{ border: "none", borderRadius: "12px", marginTop: "-105px", marginLeft: "-244px" }}
         />
       </div>
     </motion.div>
   );
 }
 
-export default function QuestionDisplay({ question, questionNumber, totalQuestions, isHost, timeElapsedMs = 0, hideOptions, revealAnswer }: QuestionDisplayProps) {
+export default function QuestionDisplay({
+  question,
+  questionNumber,
+  totalQuestions,
+  isHost,
+  timeElapsedMs = 0,
+  hideOptions,
+  revealAnswer,
+}: QuestionDisplayProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const prevQuestionId = useRef(question.id);
 
@@ -60,7 +68,7 @@ export default function QuestionDisplay({ question, questionNumber, totalQuestio
   // Derive blur amount directly from props — no stale state possible
   let blurAmount = 0;
   let hasStartedUnblurring = false;
-  if (question.type === 'blurred-image' && question.blurLevels) {
+  if (question.type === "blurred-image" && question.blurLevels) {
     const levels = question.blurLevels;
     const totalDuration = 15000;
     if (timeElapsedMs > 0) {
@@ -68,7 +76,7 @@ export default function QuestionDisplay({ question, questionNumber, totalQuestio
       const progress = Math.min(timeElapsedMs / totalDuration, 1);
       const index = Math.min(Math.floor(progress * (levels.length - 1)), levels.length - 2);
       const nextIndex = index + 1;
-      const segmentProgress = (progress * (levels.length - 1)) - index;
+      const segmentProgress = progress * (levels.length - 1) - index;
       blurAmount = levels[index] + (levels[nextIndex] - levels[index]) * segmentProgress;
       blurAmount = Math.max(0, blurAmount);
     } else {
@@ -79,11 +87,7 @@ export default function QuestionDisplay({ question, questionNumber, totalQuestio
   return (
     <div className="w-full max-w-3xl mx-auto">
       {/* Question header */}
-      <motion.div
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="text-center mb-6"
-      >
+      <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="text-center mb-6">
         <span className="text-sm font-body font-bold text-primary uppercase tracking-wider">
           Question {questionNumber} of {totalQuestions}
         </span>
@@ -98,14 +102,14 @@ export default function QuestionDisplay({ question, questionNumber, totalQuestio
       <motion.h2
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.1, type: 'spring' }}
+        transition={{ delay: 0.1, type: "spring" }}
         className="text-2xl md:text-4xl font-display font-bold text-center text-foreground mb-8 leading-tight"
       >
         {question.question}
       </motion.h2>
 
       {/* Blurred image */}
-      {question.type === 'blurred-image' && question.imageUrl && (
+      {question.type === "blurred-image" && question.imageUrl && (
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -113,14 +117,15 @@ export default function QuestionDisplay({ question, questionNumber, totalQuestio
           className="flex justify-center mb-8"
         >
           <div className="relative w-72 h-72 md:w-96 md:h-96 rounded-2xl overflow-hidden border-4 border-border">
-            {!imageLoaded && (
-              <Skeleton className="absolute inset-0 w-full h-full" />
-            )}
+            {!imageLoaded && <Skeleton className="absolute inset-0 w-full h-full" />}
             <img
               src={question.imageUrl}
               alt="Mystery"
-              className={`w-full h-full object-cover ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-              style={{ filter: `blur(${blurAmount}px)`, transition: hasStartedUnblurring ? 'filter 0.3s ease' : 'none' }}
+              className={`w-full h-full object-cover ${imageLoaded ? "opacity-100" : "opacity-0"}`}
+              style={{
+                filter: `blur(${blurAmount}px)`,
+                transition: hasStartedUnblurring ? "filter 0.3s ease" : "none",
+              }}
               onLoad={handleImageLoad}
             />
           </div>
@@ -128,7 +133,7 @@ export default function QuestionDisplay({ question, questionNumber, totalQuestio
       )}
 
       {/* Spotify embed */}
-      {question.type === 'music' && question.spotifyEmbedUrl && (
+      {question.type === "music" && question.spotifyEmbedUrl && (
         <MusicEmbed spotifyEmbedUrl={question.spotifyEmbedUrl} />
       )}
 
@@ -140,7 +145,7 @@ export default function QuestionDisplay({ question, questionNumber, totalQuestio
               key={i}
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.3 + i * 0.1, type: 'spring', bounce: 0.4 }}
+              transition={{ delay: 0.3 + i * 0.1, type: "spring", bounce: 0.4 }}
               className={`${optionColors[i]} rounded-xl p-4 md:p-6 text-center cursor-default`}
             >
               <span className="text-2xl mr-2">{optionIcons[i]}</span>
