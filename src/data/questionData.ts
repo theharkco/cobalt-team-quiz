@@ -168,6 +168,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     correctAnswer: 'Uninvested capital',
     category: 'Private Equity',
     difficulty: 'medium',
+    explanation: 'Dry powder is capital that has been committed by LPs but not yet deployed into deals. High levels of dry powder across the industry can drive up valuations as firms compete for targets.',
   },
   {
     id: 17,
