@@ -46,38 +46,35 @@ function MusicEmbed({ spotifyEmbedUrl }: { spotifyEmbedUrl: string }) {
 }
 
 export default function QuestionDisplay({ question, questionNumber, totalQuestions, isHost, timeElapsedMs = 0, hideOptions, revealAnswer }: QuestionDisplayProps) {
-  const initialBlur = question.type === 'blurred-image' && question.blurLevels ? question.blurLevels[0] : 40;
-  const [blurAmount, setBlurAmount] = useState(initialBlur);
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [hasStartedUnblurring, setHasStartedUnblurring] = useState(false);
+  const prevQuestionId = useRef(question.id);
 
-  // Reset state when question changes
-  useEffect(() => {
+  // Reset image loaded state when question changes
+  if (prevQuestionId.current !== question.id) {
+    prevQuestionId.current = question.id;
     setImageLoaded(false);
-    setHasStartedUnblurring(false);
-    if (question.type === 'blurred-image' && question.blurLevels) {
-      setBlurAmount(question.blurLevels[0]);
-    }
-  }, [question.id]);
+  }
 
   const handleImageLoad = useCallback(() => setImageLoaded(true), []);
 
-  // Calculate blur based on time elapsed for image questions
-  useEffect(() => {
-    if (question.type === 'blurred-image' && question.blurLevels) {
-      const levels = question.blurLevels;
-      const totalDuration = 15000;
-      if (timeElapsedMs > 0) {
-        setHasStartedUnblurring(true);
-      }
+  // Derive blur amount directly from props — no stale state possible
+  let blurAmount = 0;
+  let hasStartedUnblurring = false;
+  if (question.type === 'blurred-image' && question.blurLevels) {
+    const levels = question.blurLevels;
+    const totalDuration = 15000;
+    if (timeElapsedMs > 0) {
+      hasStartedUnblurring = true;
       const progress = Math.min(timeElapsedMs / totalDuration, 1);
       const index = Math.min(Math.floor(progress * (levels.length - 1)), levels.length - 2);
       const nextIndex = index + 1;
       const segmentProgress = (progress * (levels.length - 1)) - index;
-      const blur = levels[index] + (levels[nextIndex] - levels[index]) * segmentProgress;
-      setBlurAmount(Math.max(0, blur));
+      blurAmount = levels[index] + (levels[nextIndex] - levels[index]) * segmentProgress;
+      blurAmount = Math.max(0, blurAmount);
+    } else {
+      blurAmount = levels[0];
     }
-  }, [timeElapsedMs, question]);
+  }
 
   return (
     <div className="w-full max-w-3xl mx-auto">
