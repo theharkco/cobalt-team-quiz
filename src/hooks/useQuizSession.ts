@@ -151,7 +151,6 @@ export function useQuizSession() {
     createSession,
     joinSession,
     updateSessionStatus,
-    submitAnswer,
     refreshPlayers,
   };
 }
