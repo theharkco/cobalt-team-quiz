@@ -1,9 +1,12 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
-import { QUIZ_QUESTIONS, checkAnswer, calculateScore } from '@/data/questions';
-import type { Player, QuizSession, SessionStatus } from '@/hooks/useQuizSession';
+import { QUIZ_QUESTIONS } from '@/data/questions';
+import type { Player, QuizSession, SessionStatus } from '@/types/quiz';
+import { useTimer } from '@/hooks/useTimer';
+import { retryOnce } from '@/lib/retryAsync';
+import { toast } from '@/hooks/use-toast';
 import CountdownTimer from '@/components/quiz/CountdownTimer';
 import QuestionDisplay from '@/components/quiz/QuestionDisplay';
 import Leaderboard from '@/components/quiz/Leaderboard';
@@ -14,11 +17,9 @@ export default function HostView() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const [session, setSession] = useState<QuizSession | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
-  const [timerRunning, setTimerRunning] = useState(false);
   const [showAnswer, setShowAnswer] = useState(false);
   const [previousScores, setPreviousScores] = useState<Record<string, number>>({});
-  const [timeElapsed, setTimeElapsed] = useState(0);
-  const timerInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timer = useTimer();
 
   const refreshPlayers = useCallback(async () => {
     if (!sessionId) return;
@@ -52,14 +53,12 @@ export default function HostView() {
       })
       .subscribe();
 
-    // Polling fallback for lobby - ensures players show up even if realtime hiccups
-    const pollInterval = setInterval(() => {
-      refreshPlayers();
-    }, 3000);
+    const pollInterval = setInterval(() => { refreshPlayers(); }, 3000);
 
     return () => {
       supabase.removeChannel(channel);
       clearInterval(pollInterval);
+      timer.cleanup();
     };
   }, [sessionId]);
 
@@ -67,37 +66,32 @@ export default function HostView() {
     if (!sessionId) return;
     const update: Record<string, unknown> = { status };
     if (q !== undefined) update.current_question = q;
-    // Optimistically update local state
-    setSession(prev => prev ? { ...prev, status, ...(q !== undefined ? { current_question: q } : {}) } : prev);
-    await supabase.from('quiz_sessions').update(update).eq('id', sessionId);
+    if (status === 'question') update.question_started_at = new Date().toISOString();
+
+    // Optimistic update
+    setSession(prev => prev ? { ...prev, status, ...(q !== undefined ? { current_question: q } : {}), ...(status === 'question' ? { question_started_at: update.question_started_at as string } : {}) } : prev);
+
+    try {
+      await retryOnce(() =>
+        supabase.from('quiz_sessions').update(update).eq('id', sessionId)
+          .then(({ error }) => { if (error) throw error; })
+      );
+    } catch (err) {
+      console.error('Failed to update session:', err);
+      toast({ title: 'Connection issue', description: 'Failed to update quiz state. Retrying...', variant: 'destructive' });
+      refreshSession(); // revert optimistic update
+    }
   };
 
   const startQuiz = async () => {
     setPreviousScores({});
     await updateStatus('question', 0);
-    startTimer();
-  };
-
-  const startTimer = () => {
-    setTimerRunning(true);
+    timer.start();
     setShowAnswer(false);
-    setTimeElapsed(0);
-    if (timerInterval.current) clearInterval(timerInterval.current);
-    timerInterval.current = setInterval(() => {
-      setTimeElapsed(prev => prev + 100);
-    }, 100);
-  };
-
-  const stopTimer = () => {
-    setTimerRunning(false);
-    if (timerInterval.current) {
-      clearInterval(timerInterval.current);
-      timerInterval.current = null;
-    }
   };
 
   const onTimerComplete = () => {
-    stopTimer();
+    timer.stop();
     setShowAnswer(true);
   };
 
@@ -117,7 +111,8 @@ export default function HostView() {
       await refreshPlayers();
     } else {
       await updateStatus('question', next);
-      startTimer();
+      timer.start();
+      setShowAnswer(false);
     }
   };
 
@@ -197,7 +192,7 @@ export default function HostView() {
           <CountdownTimer
             duration={15}
             onComplete={onTimerComplete}
-            isRunning={timerRunning}
+            isRunning={timer.isRunning}
             size={100}
           />
         </div>
@@ -208,7 +203,7 @@ export default function HostView() {
             questionNumber={session.current_question + 1}
             totalQuestions={QUIZ_QUESTIONS.length}
             isHost
-            timeElapsedMs={timeElapsed}
+            timeElapsedMs={timer.timeElapsed}
           />
 
           {showAnswer && (
