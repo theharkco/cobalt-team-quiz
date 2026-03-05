@@ -79,7 +79,6 @@ export default function QuestionDisplay({ question, questionNumber, totalQuestio
               alt="Mystery"
               className="w-full h-full object-cover"
               style={{ filter: `blur(${blurAmount}px)`, transition: 'filter 0.3s ease' }}
-              style={{ filter: `blur(${blurAmount}px)` }}
             />
           </div>
         </motion.div>
