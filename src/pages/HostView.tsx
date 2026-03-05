@@ -12,6 +12,7 @@ import QuestionDisplay from '@/components/quiz/QuestionDisplay';
 import Leaderboard from '@/components/quiz/Leaderboard';
 import FloatingShapes from '@/components/quiz/FloatingShapes';
 import { Button } from '@/components/ui/button';
+import { playCountdownBeep } from '@/lib/sounds';
 
 export default function HostView() {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -111,10 +112,12 @@ export default function HostView() {
   const startPreCountdown = (onDone: () => void) => {
     if (preCountdownRef.current) clearInterval(preCountdownRef.current);
     setPreCountdown(3);
+    playCountdownBeep(3);
     let count = 3;
     preCountdownRef.current = setInterval(() => {
       count--;
       setPreCountdown(count);
+      if (count > 0) playCountdownBeep(count);
       if (count <= 0) {
         if (preCountdownRef.current) clearInterval(preCountdownRef.current);
         preCountdownRef.current = null;

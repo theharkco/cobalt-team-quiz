@@ -12,7 +12,7 @@ import { useTimer } from '@/hooks/useTimer';
 import { retryOnce } from '@/lib/retryAsync';
 import { toast } from '@/hooks/use-toast';
 import confetti from 'canvas-confetti';
-import { playCorrect, playWrong, startTicking, stopTicking } from '@/lib/sounds';
+import { playCorrect, playWrong, startTicking, stopTicking, playCountdownBeep } from '@/lib/sounds';
 type ResultKind = 'exact' | 'close' | 'wrong' | 'timeout';
 
 export default function PlayerView() {
@@ -45,10 +45,12 @@ export default function PlayerView() {
       stopTicking();
       if (preCountdownRef.current) clearInterval(preCountdownRef.current);
       setPreCountdown(3);
+      playCountdownBeep(3);
       let count = 3;
       preCountdownRef.current = setInterval(() => {
         count--;
         setPreCountdown(count);
+        if (count > 0) playCountdownBeep(count);
         if (count <= 0) {
           if (preCountdownRef.current) clearInterval(preCountdownRef.current);
           preCountdownRef.current = null;
