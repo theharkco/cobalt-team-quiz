@@ -115,8 +115,36 @@ export default function PlayerView() {
         return;
       }
       if (data) {
-        const s = data as QuizSession;
+        const s = data as QuizSession & { quiz_id?: string };
         setSession(s);
+
+        // Load custom questions if quiz_id exists
+        if (s.quiz_id) {
+          const { data: qData } = await supabase
+            .from('custom_quiz_questions')
+            .select('*')
+            .eq('quiz_id', s.quiz_id)
+            .order('sort_order');
+          if (qData && qData.length > 0) {
+            setCustomQuestions(
+              qData.map((q: Record<string, unknown>, index: number) => ({
+                id: index + 1,
+                type: q.type as QuizQuestion['type'],
+                question: q.question as string,
+                options: (q.options as string[] | null) || undefined,
+                correctAnswer: q.correct_answer as string,
+                acceptableAnswers: (q.acceptable_answers as string[] | null) || undefined,
+                imageUrl: (q.image_url as string | null) || undefined,
+                blurLevels: (q.blur_levels as number[] | null) || undefined,
+                spotifyEmbedUrl: (q.spotify_embed_url as string | null) || undefined,
+                category: (q.category as string | null) || undefined,
+                difficulty: (q.difficulty as QuizQuestion['difficulty']) || undefined,
+                explanation: (q.explanation as string | null) || undefined,
+              }))
+            );
+          }
+        }
+
         // If we join mid-question, start the timer synced to server
         if (s.status === 'question' && s.question_started_at && s.current_question >= 0) {
           lastQuestionRef.current = s.current_question;
