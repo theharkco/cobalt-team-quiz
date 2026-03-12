@@ -316,7 +316,7 @@ export default function HostView() {
           <QuestionDisplay
             question={currentQ}
             questionNumber={session.current_question + 1}
-            totalQuestions={QUIZ_QUESTIONS.length}
+            totalQuestions={quizQuestions.length}
             isHost
             timeElapsedMs={timer.timeElapsed}
             hideOptions={isPreCountdown}
