@@ -350,12 +350,19 @@ export default function HostView() {
                   <p className="text-sm font-body text-muted-foreground mt-3 leading-relaxed">{currentQ.explanation}</p>
                 )}
               </div>
-              <div className="mt-6">
+              <div className="mt-6 flex flex-wrap gap-3 justify-center">
                 <Button
                   onClick={showLeaderboard}
                   className="h-14 px-10 text-lg font-display font-bold rounded-xl gradient-fun text-foreground border-none hover:opacity-90"
                 >
                   📊 Show Leaderboard
+                </Button>
+                <Button
+                  onClick={nextQuestion}
+                  variant="outline"
+                  className="h-14 px-10 text-lg font-display font-bold rounded-xl border-border hover:bg-accent"
+                >
+                  {session.current_question + 1 >= quizQuestions.length ? '🏆 Final Results' : '➡️ Next Question'}
                 </Button>
               </div>
             </motion.div>
