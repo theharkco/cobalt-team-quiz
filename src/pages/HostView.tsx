@@ -217,7 +217,7 @@ export default function HostView() {
   const nextQuestion = async () => {
     if (!session) return;
     const next = session.current_question + 1;
-    if (next >= QUIZ_QUESTIONS.length) {
+    if (next >= quizQuestions.length) {
       await updateStatus('finished');
       await refreshPlayers();
     } else {
