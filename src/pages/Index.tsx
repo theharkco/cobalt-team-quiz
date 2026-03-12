@@ -4,20 +4,30 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import FloatingShapes from '@/components/quiz/FloatingShapes';
+import QuizPicker from '@/components/quiz/QuizPicker';
 import { useQuizSession } from '@/hooks/useQuizSession';
+import { supabase } from '@/integrations/supabase/client';
+import type { QuizQuestion } from '@/data/questionTypes';
 
 const Index = () => {
   const navigate = useNavigate();
   const { createSession, joinSession, error, setError } = useQuizSession();
   const [showJoin, setShowJoin] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
   const [joinCode, setJoinCode] = useState('');
   const [playerName, setPlayerName] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleHost = async () => {
+  const handleHost = async (questions: QuizQuestion[], quizId?: string) => {
     setLoading(true);
     const session = await createSession();
     if (session) {
+      // Store selected questions in sessionStorage for the host
+      sessionStorage.setItem(`quiz-questions-${session.id}`, JSON.stringify(questions));
+      // Update session with quiz_id if custom
+      if (quizId) {
+        await supabase.from('quiz_sessions').update({ quiz_id: quizId }).eq('id', session.id);
+      }
       navigate(`/host/${session.id}`);
     }
     setLoading(false);
@@ -34,12 +44,15 @@ const Index = () => {
     setLoading(false);
   };
 
+  if (showPicker) {
+    return <QuizPicker onSelect={handleHost} onBack={() => setShowPicker(false)} />;
+  }
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4">
       <FloatingShapes />
 
       <div className="relative z-10 flex flex-col items-center gap-8 max-w-md w-full">
-        {/* Logo / Title */}
         <motion.div
           initial={{ y: -50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -62,7 +75,7 @@ const Index = () => {
             className="flex flex-col gap-4 w-full"
           >
             <Button
-              onClick={handleHost}
+              onClick={() => setShowPicker(true)}
               disabled={loading}
               className="h-16 text-xl font-display font-bold rounded-2xl gradient-fun text-foreground border-none hover:opacity-90 transition-all hover:scale-105 active:scale-95"
             >
@@ -74,6 +87,13 @@ const Index = () => {
               className="h-16 text-xl font-display font-bold rounded-2xl border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all hover:scale-105 active:scale-95"
             >
               🎮 Join a Quiz
+            </Button>
+            <Button
+              onClick={() => navigate('/create')}
+              variant="outline"
+              className="h-14 text-lg font-display font-bold rounded-2xl border-2 border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all"
+            >
+              ✏️ Create a Quiz
             </Button>
           </motion.div>
         ) : (

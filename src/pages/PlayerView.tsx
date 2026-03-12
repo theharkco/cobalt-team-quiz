@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { QUIZ_QUESTIONS, checkAnswer, calculateScore } from '@/data/questions';
+import type { QuizQuestion } from '@/data/questionTypes';
 import type { Player, QuizSession } from '@/types/quiz';
 import QuestionDisplay from '@/components/quiz/QuestionDisplay';
 import PlayerAnswerInput from '@/components/quiz/PlayerAnswerInput';
@@ -30,9 +31,12 @@ export default function PlayerView() {
   const [answered, setAnswered] = useState(false);
   const [lastPoints, setLastPoints] = useState(0);
   const [resultKind, setResultKind] = useState<ResultKind>('timeout');
+  const [customQuestions, setCustomQuestions] = useState<QuizQuestion[] | null>(null);
   const timer = useTimer();
   const { preCountdown, startPreCountdown, clearPreCountdown } = usePreCountdown();
   const lastQuestionRef = useRef(-1);
+
+  const quizQuestions = customQuestions || QUIZ_QUESTIONS;
 
   const refreshPlayer = useCallback(async () => {
     if (!playerId) return;
@@ -111,8 +115,36 @@ export default function PlayerView() {
         return;
       }
       if (data) {
-        const s = data as QuizSession;
+        const s = data as QuizSession & { quiz_id?: string };
         setSession(s);
+
+        // Load custom questions if quiz_id exists
+        if (s.quiz_id) {
+          const { data: qData } = await supabase
+            .from('custom_quiz_questions')
+            .select('*')
+            .eq('quiz_id', s.quiz_id)
+            .order('sort_order');
+          if (qData && qData.length > 0) {
+            setCustomQuestions(
+              qData.map((q: Record<string, unknown>, index: number) => ({
+                id: index + 1,
+                type: q.type as QuizQuestion['type'],
+                question: q.question as string,
+                options: (q.options as string[] | null) || undefined,
+                correctAnswer: q.correct_answer as string,
+                acceptableAnswers: (q.acceptable_answers as string[] | null) || undefined,
+                imageUrl: (q.image_url as string | null) || undefined,
+                blurLevels: (q.blur_levels as number[] | null) || undefined,
+                spotifyEmbedUrl: (q.spotify_embed_url as string | null) || undefined,
+                category: (q.category as string | null) || undefined,
+                difficulty: (q.difficulty as QuizQuestion['difficulty']) || undefined,
+                explanation: (q.explanation as string | null) || undefined,
+              }))
+            );
+          }
+        }
+
         // If we join mid-question, start the timer synced to server
         if (s.status === 'question' && s.question_started_at && s.current_question >= 0) {
           lastQuestionRef.current = s.current_question;
@@ -166,7 +198,7 @@ export default function PlayerView() {
 
   const handleSubmitAnswer = async (answer: string) => {
     if (!session || !player || answered) return;
-    const question = QUIZ_QUESTIONS[session.current_question];
+    const question = quizQuestions[session.current_question];
     if (!question) return;
 
     const serverStart = session.question_started_at
@@ -265,7 +297,7 @@ export default function PlayerView() {
     );
   }
 
-  const currentQ = session.current_question >= 0 ? QUIZ_QUESTIONS[session.current_question] : null;
+  const currentQ = session.current_question >= 0 ? quizQuestions[session.current_question] : null;
 
   // QUESTION
   if (session.status === 'question' && currentQ) {
@@ -287,7 +319,7 @@ export default function PlayerView() {
           <QuestionDisplay
             question={currentQ}
             questionNumber={session.current_question + 1}
-            totalQuestions={QUIZ_QUESTIONS.length}
+            totalQuestions={quizQuestions.length}
             timeElapsedMs={timer.timeElapsed}
             hideOptions={isPreCountdown}
             revealAnswer={answered || timer.timeElapsed >= 15000}

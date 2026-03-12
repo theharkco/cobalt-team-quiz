@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { QUIZ_QUESTIONS } from '@/data/questions';
+import type { QuizQuestion } from '@/data/questionTypes';
 import type { Player, QuizSession, SessionStatus } from '@/types/quiz';
 import { useTimer } from '@/hooks/useTimer';
 import { usePreCountdown } from '@/hooks/usePreCountdown';
@@ -24,6 +25,16 @@ export default function HostView() {
   const [previousScores, setPreviousScores] = useState<Record<string, number>>({});
   const [answerCount, setAnswerCount] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(-1);
+  // Load custom questions from sessionStorage or fall back to defaults
+  const quizQuestions = useMemo<QuizQuestion[]>(() => {
+    if (!sessionId) return QUIZ_QUESTIONS;
+    try {
+      const stored = sessionStorage.getItem(`quiz-questions-${sessionId}`);
+      if (stored) return JSON.parse(stored) as QuizQuestion[];
+    } catch {}
+    return QUIZ_QUESTIONS;
+  }, [sessionId]);
+
   const timer = useTimer();
   const { preCountdown, startPreCountdown, clearPreCountdown } = usePreCountdown();
 
@@ -206,7 +217,7 @@ export default function HostView() {
   const nextQuestion = async () => {
     if (!session) return;
     const next = session.current_question + 1;
-    if (next >= QUIZ_QUESTIONS.length) {
+    if (next >= quizQuestions.length) {
       await updateStatus('finished');
       await refreshPlayers();
     } else {
@@ -215,7 +226,7 @@ export default function HostView() {
     }
   };
 
-  const currentQ = session && session.current_question >= 0 ? QUIZ_QUESTIONS[session.current_question] : null;
+  const currentQ = session && session.current_question >= 0 ? quizQuestions[session.current_question] : null;
 
   // LOBBY
   if (!session || session.status === 'lobby') {
@@ -305,7 +316,7 @@ export default function HostView() {
           <QuestionDisplay
             question={currentQ}
             questionNumber={session.current_question + 1}
-            totalQuestions={QUIZ_QUESTIONS.length}
+            totalQuestions={quizQuestions.length}
             isHost
             timeElapsedMs={timer.timeElapsed}
             hideOptions={isPreCountdown}
@@ -365,7 +376,7 @@ export default function HostView() {
             onClick={nextQuestion}
             className="h-14 px-10 text-lg font-display font-bold rounded-xl gradient-fun text-foreground border-none hover:opacity-90 hover:scale-105 active:scale-95 transition-all"
           >
-            {session.current_question + 1 >= QUIZ_QUESTIONS.length ? '🏆 Final Results' : '➡️ Next Question'}
+            {session.current_question + 1 >= quizQuestions.length ? '🏆 Final Results' : '➡️ Next Question'}
           </Button>
         </div>
       </div>

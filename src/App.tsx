@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import HostView from "./pages/HostView";
 import PlayerView from "./pages/PlayerView";
+import QuizCreator from "./pages/QuizCreator";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -20,6 +21,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/host/:sessionId" element={<HostView />} />
           <Route path="/play/:sessionId/:playerId" element={<PlayerView />} />
+          <Route path="/create" element={<QuizCreator />} />
+          <Route path="/create/:quizId" element={<QuizCreator />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
