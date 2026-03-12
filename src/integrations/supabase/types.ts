@@ -65,6 +65,89 @@ export type Database = {
           },
         ]
       }
+      custom_quiz_questions: {
+        Row: {
+          acceptable_answers: Json | null
+          blur_levels: Json | null
+          category: string | null
+          correct_answer: string
+          created_at: string
+          difficulty: string | null
+          explanation: string | null
+          id: string
+          image_url: string | null
+          options: Json | null
+          question: string
+          quiz_id: string
+          sort_order: number
+          spotify_embed_url: string | null
+          type: string
+        }
+        Insert: {
+          acceptable_answers?: Json | null
+          blur_levels?: Json | null
+          category?: string | null
+          correct_answer: string
+          created_at?: string
+          difficulty?: string | null
+          explanation?: string | null
+          id?: string
+          image_url?: string | null
+          options?: Json | null
+          question: string
+          quiz_id: string
+          sort_order?: number
+          spotify_embed_url?: string | null
+          type?: string
+        }
+        Update: {
+          acceptable_answers?: Json | null
+          blur_levels?: Json | null
+          category?: string | null
+          correct_answer?: string
+          created_at?: string
+          difficulty?: string | null
+          explanation?: string | null
+          id?: string
+          image_url?: string | null
+          options?: Json | null
+          question?: string
+          quiz_id?: string
+          sort_order?: number
+          spotify_embed_url?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_quiz_questions_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "custom_quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_quizzes: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          title?: string
+        }
+        Relationships: []
+      }
       players: {
         Row: {
           color: string
@@ -107,6 +190,7 @@ export type Database = {
           id: string
           join_code: string
           question_started_at: string | null
+          quiz_id: string | null
           status: string
         }
         Insert: {
@@ -115,6 +199,7 @@ export type Database = {
           id?: string
           join_code: string
           question_started_at?: string | null
+          quiz_id?: string | null
           status?: string
         }
         Update: {
@@ -123,9 +208,18 @@ export type Database = {
           id?: string
           join_code?: string
           question_started_at?: string | null
+          quiz_id?: string | null
           status?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "quiz_sessions_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "custom_quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
