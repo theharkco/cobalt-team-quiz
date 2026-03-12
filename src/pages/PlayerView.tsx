@@ -198,7 +198,7 @@ export default function PlayerView() {
 
   const handleSubmitAnswer = async (answer: string) => {
     if (!session || !player || answered) return;
-    const question = QUIZ_QUESTIONS[session.current_question];
+    const question = quizQuestions[session.current_question];
     if (!question) return;
 
     const serverStart = session.question_started_at
