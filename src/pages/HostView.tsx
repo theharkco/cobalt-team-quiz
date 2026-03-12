@@ -25,6 +25,16 @@ export default function HostView() {
   const [previousScores, setPreviousScores] = useState<Record<string, number>>({});
   const [answerCount, setAnswerCount] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(-1);
+  // Load custom questions from sessionStorage or fall back to defaults
+  const quizQuestions = useMemo<QuizQuestion[]>(() => {
+    if (!sessionId) return QUIZ_QUESTIONS;
+    try {
+      const stored = sessionStorage.getItem(`quiz-questions-${sessionId}`);
+      if (stored) return JSON.parse(stored) as QuizQuestion[];
+    } catch {}
+    return QUIZ_QUESTIONS;
+  }, [sessionId]);
+
   const timer = useTimer();
   const { preCountdown, startPreCountdown, clearPreCountdown } = usePreCountdown();
 
