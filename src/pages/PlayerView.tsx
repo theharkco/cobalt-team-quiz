@@ -319,7 +319,7 @@ export default function PlayerView() {
           <QuestionDisplay
             question={currentQ}
             questionNumber={session.current_question + 1}
-            totalQuestions={QUIZ_QUESTIONS.length}
+            totalQuestions={quizQuestions.length}
             timeElapsedMs={timer.timeElapsed}
             hideOptions={isPreCountdown}
             revealAnswer={answered || timer.timeElapsed >= 15000}
