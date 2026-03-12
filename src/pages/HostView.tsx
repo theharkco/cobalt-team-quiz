@@ -226,7 +226,7 @@ export default function HostView() {
     }
   };
 
-  const currentQ = session && session.current_question >= 0 ? QUIZ_QUESTIONS[session.current_question] : null;
+  const currentQ = session && session.current_question >= 0 ? quizQuestions[session.current_question] : null;
 
   // LOBBY
   if (!session || session.status === 'lobby') {
