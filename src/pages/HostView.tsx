@@ -376,7 +376,7 @@ export default function HostView() {
             onClick={nextQuestion}
             className="h-14 px-10 text-lg font-display font-bold rounded-xl gradient-fun text-foreground border-none hover:opacity-90 hover:scale-105 active:scale-95 transition-all"
           >
-            {session.current_question + 1 >= QUIZ_QUESTIONS.length ? '🏆 Final Results' : '➡️ Next Question'}
+            {session.current_question + 1 >= quizQuestions.length ? '🏆 Final Results' : '➡️ Next Question'}
           </Button>
         </div>
       </div>
