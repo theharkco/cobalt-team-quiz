@@ -31,9 +31,12 @@ export default function PlayerView() {
   const [answered, setAnswered] = useState(false);
   const [lastPoints, setLastPoints] = useState(0);
   const [resultKind, setResultKind] = useState<ResultKind>('timeout');
+  const [customQuestions, setCustomQuestions] = useState<QuizQuestion[] | null>(null);
   const timer = useTimer();
   const { preCountdown, startPreCountdown, clearPreCountdown } = usePreCountdown();
   const lastQuestionRef = useRef(-1);
+
+  const quizQuestions = customQuestions || QUIZ_QUESTIONS;
 
   const refreshPlayer = useCallback(async () => {
     if (!playerId) return;
