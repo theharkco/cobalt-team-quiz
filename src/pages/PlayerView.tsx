@@ -297,7 +297,7 @@ export default function PlayerView() {
     );
   }
 
-  const currentQ = session.current_question >= 0 ? QUIZ_QUESTIONS[session.current_question] : null;
+  const currentQ = session.current_question >= 0 ? quizQuestions[session.current_question] : null;
 
   // QUESTION
   if (session.status === 'question' && currentQ) {
