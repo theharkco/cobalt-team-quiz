@@ -96,7 +96,8 @@ export default function HostView() {
           setCurrentQuestionIndex(s.current_question);
           const serverStart = new Date(s.question_started_at).getTime();
           const elapsed = Date.now() - serverStart;
-          if (elapsed < 15000) {
+          const qTimeLimit = (quizQuestions[s.current_question]?.timeLimitSeconds ?? 15) * 1000;
+          if (elapsed < qTimeLimit) {
             timer.start(serverStart);
           } else {
             // Timer already expired — show answer
@@ -304,11 +305,12 @@ export default function HostView() {
   // QUESTION
   if (session.status === 'question' && currentQ) {
     const isPreCountdown = preCountdown > 0;
+    const questionTimeLimit = currentQ.timeLimitSeconds ?? 15;
     return (
       <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4 py-8">
         {!isPreCountdown && (
           <div className="absolute top-6 right-6">
-            <CountdownTimer duration={15} timeElapsed={timer.timeElapsed} onComplete={onTimerComplete} isRunning={timer.isRunning} size={100} />
+            <CountdownTimer duration={questionTimeLimit} timeElapsed={timer.timeElapsed} onComplete={onTimerComplete} isRunning={timer.isRunning} size={100} />
           </div>
         )}
 
