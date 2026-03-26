@@ -58,6 +58,7 @@ export default function QuizCreator() {
               category: (q.category as string) || '',
               difficulty: (q.difficulty as Difficulty) || 'medium',
               explanation: (q.explanation as string) || '',
+              timeLimitSeconds: (q.time_limit_seconds as number) || 15,
             },
           }))
         );
@@ -122,6 +123,7 @@ export default function QuizCreator() {
         category: q.data.category || null,
         difficulty: q.data.difficulty,
         explanation: q.data.explanation || null,
+        time_limit_seconds: q.data.timeLimitSeconds,
       }));
 
       const { error: insertErr } = await supabase.from('custom_quiz_questions').insert(questionRows);
