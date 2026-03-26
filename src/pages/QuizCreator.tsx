@@ -82,6 +82,18 @@ export default function QuizCreator() {
     setEditingIndex(null);
   };
 
+  const handleMoveQuestion = (index: number, direction: 'up' | 'down') => {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    setQuestions((prev) => {
+      const next = [...prev];
+      [next[index], next[targetIndex]] = [next[targetIndex], next[index]];
+      return next;
+    });
+    // Update editing index if we're moving the edited question
+    if (editingIndex === index) setEditingIndex(targetIndex);
+    else if (editingIndex === targetIndex) setEditingIndex(index);
+  };
+
   const handleSaveQuiz = async () => {
     if (!title.trim() || questions.length === 0) {
       toast({ title: 'Missing info', description: 'Add a title and at least one question.', variant: 'destructive' });
