@@ -85,9 +85,11 @@ export default function PlayerView() {
               ? new Date(currentSession.question_started_at).getTime()
               : Date.now();
             timer.start(serverStart);
+            const qIdx = currentSession?.current_question ?? 0;
+            const qTimeMs = (quizQuestions[qIdx]?.timeLimitSeconds ?? 15) * 1000;
             startTicking(() => {
               const elapsed = Date.now() - serverStart;
-              return Math.max(0, (15000 - elapsed) / 1000);
+              return Math.max(0, (qTimeMs - elapsed) / 1000);
             });
             return currentSession;
           });
