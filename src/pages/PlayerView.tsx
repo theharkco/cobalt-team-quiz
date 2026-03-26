@@ -143,6 +143,7 @@ export default function PlayerView() {
                 category: (q.category as string | null) || undefined,
                 difficulty: (q.difficulty as QuizQuestion['difficulty']) || undefined,
                 explanation: (q.explanation as string | null) || undefined,
+                timeLimitSeconds: (q.time_limit_seconds as number | null) || 15,
               }))
             );
           }
