@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
-import { QUIZ_QUESTIONS, checkAnswer, calculateScore } from '@/data/questions';
+import { QUIZ_QUESTIONS, checkAnswer, calculateScore, checkSelectWrongAnswer, calculateSelectWrongScore } from '@/data/questions';
 import type { QuizQuestion } from '@/data/questionTypes';
 import type { Player, QuizSession } from '@/types/quiz';
 import QuestionDisplay from '@/components/quiz/QuestionDisplay';
@@ -210,6 +210,30 @@ export default function PlayerView() {
     const points = calculateScore(mq, timeTaken);
     const kind: ResultKind = mq === 'exact' ? 'exact' : mq === 'close' ? 'close' : 'wrong';
 
+    await submitResult(answer, isCorrect, points, timeTaken, kind);
+  };
+
+  const handleSubmitMultiple = async (answers: string[]) => {
+    if (!session || !player || answered) return;
+    const question = quizQuestions[session.current_question];
+    if (!question || question.type !== 'select-wrong') return;
+
+    const serverStart = session.question_started_at
+      ? new Date(session.question_started_at).getTime()
+      : timer.startTimeRef.current || Date.now();
+    const timeTaken = Math.min(Date.now() - serverStart, 15000);
+
+    const result = checkSelectWrongAnswer(question, answers);
+    const points = calculateSelectWrongScore(result.wrongFoundCount, result.totalWrongCount, timeTaken);
+    const isCorrect = result.match !== 'none';
+    const kind: ResultKind = result.match === 'exact' ? 'exact' : result.match === 'close' ? 'close' : 'wrong';
+
+    await submitResult(JSON.stringify(answers), isCorrect, points, timeTaken, kind);
+  };
+
+  const submitResult = async (answer: string, isCorrect: boolean, points: number, timeTaken: number, kind: ResultKind) => {
+    if (!session || !player) return;
+
     setAnswered(true);
     setLastPoints(points);
     setResultKind(kind);
@@ -219,7 +243,7 @@ export default function PlayerView() {
     if (isCorrect) {
       playCorrect();
       confetti({
-        particleCount: mq === 'exact' ? 80 : 40,
+        particleCount: kind === 'exact' ? 80 : 40,
         spread: 60,
         origin: { y: 0.7 },
         colors: ['#4ECDC4', '#45B7D1', '#FFEAA7'],
@@ -349,7 +373,7 @@ export default function PlayerView() {
               <p className="text-muted-foreground mt-1 text-sm">Waiting for results...</p>
             </motion.div>
           ) : (
-            <PlayerAnswerInput question={currentQ} onSubmit={handleSubmitAnswer} disabled={answered} />
+            <PlayerAnswerInput question={currentQ} onSubmit={handleSubmitAnswer} onSubmitMultiple={handleSubmitMultiple} disabled={answered} />
           )}
         </div>
       </div>
