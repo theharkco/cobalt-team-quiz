@@ -50,6 +50,7 @@ export default function QuizCreator() {
               question: q.question as string,
               options: (q.options as string[]) || ['', '', '', ''],
               correctAnswer: q.correct_answer as string,
+              correctAnswers: (q.acceptable_answers as string[]) || [], // reuse acceptable_answers column for correctAnswers in select-wrong
               acceptableAnswers: (q.acceptable_answers as string[]) || [],
               imageUrl: (q.image_url as string) || '',
               blurLevels: (q.blur_levels as number[]) || [50, 38, 28, 18, 10, 4, 0],
