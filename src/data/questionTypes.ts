@@ -1,4 +1,4 @@
-export type QuestionType = 'multiple-choice' | 'free-text' | 'blurred-image' | 'music';
+export type QuestionType = 'multiple-choice' | 'free-text' | 'blurred-image' | 'music' | 'select-wrong';
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
 export interface QuizQuestion {
@@ -14,6 +14,7 @@ export interface QuizQuestion {
   category?: string;
   difficulty?: Difficulty;
   explanation?: string; // shown after the answer is revealed
+  correctAnswers?: string[]; // for select-wrong: the correct options (players must avoid these)
 }
 
 export type MatchQuality = 'exact' | 'close' | 'none';
