@@ -112,8 +112,10 @@ export default function QuizCreator() {
         type: q.data.type,
         question: q.data.question,
         options: q.data.options.filter(Boolean).length > 0 ? q.data.options.filter(Boolean) : null,
-        correct_answer: q.data.correctAnswer,
-        acceptable_answers: q.data.acceptableAnswers.length > 0 ? q.data.acceptableAnswers : null,
+        correct_answer: q.data.type === 'select-wrong' ? (q.data.correctAnswers[0] || '') : q.data.correctAnswer,
+        acceptable_answers: q.data.type === 'select-wrong'
+          ? (q.data.correctAnswers.length > 0 ? q.data.correctAnswers : null)
+          : (q.data.acceptableAnswers.length > 0 ? q.data.acceptableAnswers : null),
         image_url: q.data.imageUrl || null,
         blur_levels: q.data.blurLevels,
         spotify_embed_url: q.data.spotifyEmbedUrl || null,

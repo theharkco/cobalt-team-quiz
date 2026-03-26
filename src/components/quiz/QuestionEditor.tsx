@@ -149,32 +149,89 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
         />
       </div>
 
-      {/* Correct answer */}
-      <div>
-        <label className="text-sm font-body text-muted-foreground mb-1 block">Correct Answer *</label>
-        <Input
-          value={form.correctAnswer}
-          onChange={(e) => update('correctAnswer', e.target.value)}
-          placeholder="The correct answer"
-          className="bg-muted border-border text-foreground"
-        />
-      </div>
+      {/* Correct answer (not for select-wrong) */}
+      {!needsCorrectAnswers && (
+        <div>
+          <label className="text-sm font-body text-muted-foreground mb-1 block">Correct Answer *</label>
+          <Input
+            value={form.correctAnswer}
+            onChange={(e) => update('correctAnswer', e.target.value)}
+            placeholder="The correct answer"
+            className="bg-muted border-border text-foreground"
+          />
+        </div>
+      )}
 
-      {/* Options for MC / Music */}
+      {/* Options for MC / Music / Select-wrong */}
       <AnimatePresence>
         {needsOptions && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="space-y-2 overflow-hidden">
-            <label className="text-sm font-body text-muted-foreground block">Answer Options (include the correct answer)</label>
+            <label className="text-sm font-body text-muted-foreground block">
+              {needsCorrectAnswers ? 'All Options (mix of correct and wrong)' : 'Answer Options (include the correct answer)'}
+            </label>
             {form.options.map((opt, i) => (
-              <Input
-                key={i}
-                value={opt}
-                onChange={(e) => updateOption(i, e.target.value)}
-                placeholder={`Option ${i + 1}`}
-                className="bg-muted border-border text-foreground"
-              />
+              <div key={i} className="flex gap-2 items-center">
+                <Input
+                  value={opt}
+                  onChange={(e) => updateOption(i, e.target.value)}
+                  placeholder={`Option ${i + 1}`}
+                  className="bg-muted border-border text-foreground flex-1"
+                />
+                {needsCorrectAnswers && opt.trim() && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const isCorrect = form.correctAnswers.includes(opt);
+                      if (isCorrect) {
+                        update('correctAnswers', form.correctAnswers.filter(a => a !== opt));
+                      } else {
+                        update('correctAnswers', [...form.correctAnswers, opt]);
+                      }
+                    }}
+                    className={`px-3 py-2 rounded-lg text-xs font-bold transition-colors ${
+                      form.correctAnswers.includes(opt)
+                        ? 'bg-quiz-green/20 text-quiz-green border border-quiz-green'
+                        : 'bg-muted text-muted-foreground border border-border hover:border-quiz-green'
+                    }`}
+                  >
+                    {form.correctAnswers.includes(opt) ? '✓ Correct' : 'Mark correct'}
+                  </button>
+                )}
+                {form.options.length > 2 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newOpts = form.options.filter((_, idx) => idx !== i);
+                      update('options', newOpts);
+                      // Also remove from correctAnswers if applicable
+                      if (needsCorrectAnswers) {
+                        update('correctAnswers', form.correctAnswers.filter(a => a !== opt));
+                      }
+                    }}
+                    className="text-destructive hover:text-destructive/80 text-sm px-1"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
             ))}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => update('options', [...form.options, ''])}
+              className="text-muted-foreground"
+            >
+              + Add Option
+            </Button>
+            {needsCorrectAnswers && (
+              <p className="text-xs text-muted-foreground">
+                Mark the <span className="text-quiz-green font-bold">correct</span> answers above. Players will need to select all the unmarked (wrong) ones.
+              </p>
+            )}
           </motion.div>
+        )}
+      </AnimatePresence>
         )}
       </AnimatePresence>
 
