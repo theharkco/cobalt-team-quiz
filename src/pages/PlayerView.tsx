@@ -371,7 +371,25 @@ export default function PlayerView() {
                       ? "Time's up!"
                       : 'Wrong answer!'}
               </p>
-              <p className="text-muted-foreground mt-1 text-sm">Waiting for results...</p>
+              <div className="mt-3 bg-card border border-border rounded-xl p-3 text-center">
+                {currentQ.type === 'select-wrong' ? (
+                  <>
+                    <p className="text-xs text-muted-foreground mb-1">Correct answer{(currentQ.correctAnswers?.length || 0) > 1 ? 's' : ''}:</p>
+                    <p className="text-sm font-display font-bold text-quiz-green">
+                      {currentQ.correctAnswers?.join(', ') || currentQ.correctAnswer}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-xs text-muted-foreground mb-1">Correct answer:</p>
+                    <p className="text-sm font-display font-bold text-quiz-green">{currentQ.correctAnswer}</p>
+                  </>
+                )}
+                {currentQ.explanation && (
+                  <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{currentQ.explanation}</p>
+                )}
+              </div>
+              <p className="text-muted-foreground mt-2 text-xs animate-pulse">Waiting for host...</p>
             </motion.div>
           ) : (
             <PlayerAnswerInput question={currentQ} onSubmit={handleSubmitAnswer} onSubmitMultiple={handleSubmitMultiple} disabled={answered} />
