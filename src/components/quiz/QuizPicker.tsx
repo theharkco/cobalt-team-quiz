@@ -65,6 +65,7 @@ export default function QuizPicker({ onSelect, onBack }: Props) {
       options: (q.options as string[] | null) || undefined,
       correctAnswer: q.correct_answer as string,
       acceptableAnswers: (q.acceptable_answers as string[] | null) || undefined,
+      correctAnswers: q.type === 'select-wrong' ? ((q.acceptable_answers as string[] | null) || undefined) : undefined,
       imageUrl: (q.image_url as string | null) || undefined,
       blurLevels: (q.blur_levels as number[] | null) || undefined,
       spotifyEmbedUrl: (q.spotify_embed_url as string | null) || undefined,
