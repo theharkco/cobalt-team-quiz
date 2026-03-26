@@ -344,19 +344,26 @@ export default function HostView() {
               className="text-center mt-4"
             >
               <div className="bg-card border-2 border-quiz-green rounded-2xl p-6 inline-block max-w-lg">
-                {currentQ.type === 'select-wrong' ? (
+                {currentQ.type === 'select-wrong' ? (() => {
+                  const correctSet = new Set((currentQ.correctAnswers || []).map(a => a.toLowerCase()));
+                  const wrongOnes = (currentQ.options || []).filter(o => !correctSet.has(o.toLowerCase()));
+                  return (
+                    <>
+                      <p className="text-muted-foreground font-body mb-1">✅ True statements:</p>
+                      <p className="text-xl font-display font-bold text-quiz-green">
+                        {currentQ.correctAnswers?.join(', ')}
+                      </p>
+                      <div className="mt-3 pt-3 border-t border-border">
+                        <p className="text-muted-foreground font-body mb-1">❌ Players needed to spot these false ones:</p>
+                        <p className="text-lg font-display font-bold text-destructive">
+                          {wrongOnes.join(', ')}
+                        </p>
+                      </div>
+                    </>
+                  );
+                })() : (
                   <>
-                    <p className="text-muted-foreground font-body mb-1">Correct answer{(currentQ.correctAnswers?.length || 0) > 1 ? 's' : ''}:</p>
-                    <p className="text-2xl font-display font-bold text-quiz-green">
-                      {currentQ.correctAnswers?.join(', ') || currentQ.correctAnswer}
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Players needed to select the other {(currentQ.options?.length || 0) - (currentQ.correctAnswers?.length || 0)} wrong answer{((currentQ.options?.length || 0) - (currentQ.correctAnswers?.length || 0)) !== 1 ? 's' : ''}
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-muted-foreground font-body mb-1">Correct answer:</p>
+                    <p className="text-muted-foreground font-body mb-1">The answer:</p>
                     <p className="text-3xl font-display font-bold text-quiz-green">{currentQ.correctAnswer}</p>
                   </>
                 )}
