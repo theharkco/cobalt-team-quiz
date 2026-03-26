@@ -232,8 +232,6 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
           </motion.div>
         )}
       </AnimatePresence>
-        )}
-      </AnimatePresence>
 
       {/* Acceptable answers for free-text / blurred-image */}
       <AnimatePresence>
