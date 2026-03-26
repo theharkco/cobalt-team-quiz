@@ -150,22 +150,41 @@ export default function QuestionDisplay({
         <MusicEmbed spotifyEmbedUrl={question.spotifyEmbedUrl} />
       )}
 
-      {/* Multiple choice options (host view - display only) */}
+      {/* Multiple choice / select-wrong options (host view - display only) */}
       {isHost && !hideOptions && question.options && (
-        <div className="grid grid-cols-2 gap-4 mt-4">
-          {question.options.map((option, i) => (
-            <motion.div
-              key={i}
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.3 + i * 0.1, type: "spring", bounce: 0.4 }}
-              className={`${optionColors[i]} rounded-xl p-4 md:p-6 text-center cursor-default`}
-            >
-              <span className="text-2xl mr-2">{optionIcons[i]}</span>
-              <span className="text-lg md:text-xl font-display font-bold text-foreground">{option}</span>
-            </motion.div>
-          ))}
+        <div className={`grid ${question.options.length > 4 ? 'grid-cols-3' : 'grid-cols-2'} gap-4 mt-4`}>
+          {question.options.map((option, i) => {
+            const isCorrectAnswer = question.type === 'select-wrong'
+              ? question.correctAnswers?.map(a => a.toLowerCase()).includes(option.toLowerCase())
+              : option === question.correctAnswer;
+            return (
+              <motion.div
+                key={i}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.3 + i * 0.1, type: "spring", bounce: 0.4 }}
+                className={`${optionColors[i % optionColors.length]} rounded-xl p-4 md:p-6 text-center cursor-default relative ${
+                  revealAnswer && isCorrectAnswer && question.type === 'select-wrong'
+                    ? 'ring-4 ring-quiz-green'
+                    : ''
+                }`}
+              >
+                <span className="text-2xl mr-2">{optionIcons[i % optionIcons.length]}</span>
+                <span className="text-lg md:text-xl font-display font-bold text-foreground">{option}</span>
+                {revealAnswer && question.type === 'select-wrong' && isCorrectAnswer && (
+                  <span className="absolute -top-2 -right-2 bg-quiz-green text-foreground w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold">✓</span>
+                )}
+              </motion.div>
+            );
+          })}
         </div>
+      )}
+
+      {/* Select-wrong instruction for host */}
+      {isHost && !hideOptions && question.type === 'select-wrong' && (
+        <p className="text-center text-sm font-body text-muted-foreground mt-3">
+          🚫 Players must select all the <span className="font-bold text-destructive">WRONG</span> answers
+        </p>
       )}
     </div>
   );
