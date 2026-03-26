@@ -234,6 +234,9 @@ export default function QuizCreator() {
                       <span className="text-xs font-body px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
                         {q.data.difficulty}
                       </span>
+                      <span className="text-xs font-body px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                        ⏱️ {q.data.timeLimitSeconds}s
+                      </span>
                     </div>
                   </div>
                   <span className="text-muted-foreground text-sm">✏️</span>
