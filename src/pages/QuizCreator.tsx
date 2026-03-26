@@ -220,67 +220,30 @@ export default function QuizCreator() {
             Questions ({questions.length})
           </h2>
 
-          <AnimatePresence>
-            {questions.map((q, index) =>
-              editingIndex === index ? (
-                <QuestionEditor
-                  key={`edit-${index}`}
-                  initialData={q.data}
-                  questionNumber={index + 1}
-                  onSave={(data) => handleSaveQuestion(data, index)}
-                  onCancel={() => setEditingIndex(null)}
-                  onDelete={() => handleDeleteQuestion(index)}
-                />
-              ) : (
-                <motion.div
-                  key={`saved-${index}`}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="bg-card border border-border rounded-xl p-4 flex items-center gap-4 cursor-pointer hover:border-primary/50 transition-colors"
-                  onClick={() => setEditingIndex(index)}
-                >
-                  <div className="flex flex-col gap-0.5 shrink-0">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleMoveQuestion(index, 'up'); }}
-                      disabled={index === 0}
-                      className="text-muted-foreground hover:text-foreground disabled:opacity-20 transition-colors text-xs leading-none p-0.5"
-                      aria-label="Move up"
-                    >▲</button>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleMoveQuestion(index, 'down'); }}
-                      disabled={index === questions.length - 1}
-                      className="text-muted-foreground hover:text-foreground disabled:opacity-20 transition-colors text-xs leading-none p-0.5"
-                      aria-label="Move down"
-                    >▼</button>
-                  </div>
-                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-display font-bold text-foreground text-sm shrink-0">
-                    {index + 1}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-body font-bold text-foreground truncate">{q.data.question}</p>
-                    <div className="flex gap-2 mt-1 flex-wrap">
-                      <span className="text-xs font-body px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                        {q.data.type}
-                      </span>
-                      {q.data.category && (
-                        <span className="text-xs font-body px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                          {q.data.category}
-                        </span>
-                      )}
-                      <span className="text-xs font-body px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                        {q.data.difficulty}
-                      </span>
-                      <span className="text-xs font-body px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                        ⏱️ {q.data.timeLimitSeconds}s
-                      </span>
-                    </div>
-                  </div>
-                  <span className="text-muted-foreground text-sm">✏️</span>
-                </motion.div>
-              )
-            )}
-          </AnimatePresence>
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={questions.map((_, i) => `q-${i}`)} strategy={verticalListSortingStrategy}>
+              {questions.map((q, index) =>
+                editingIndex === index ? (
+                  <QuestionEditor
+                    key={`edit-${index}`}
+                    initialData={q.data}
+                    questionNumber={index + 1}
+                    onSave={(data) => handleSaveQuestion(data, index)}
+                    onCancel={() => setEditingIndex(null)}
+                    onDelete={() => handleDeleteQuestion(index)}
+                  />
+                ) : (
+                  <SortableQuestionCard
+                    key={`saved-${index}`}
+                    id={`q-${index}`}
+                    index={index}
+                    data={q.data}
+                    onClick={() => setEditingIndex(index)}
+                  />
+                )
+              )}
+            </SortableContext>
+          </DndContext>
 
           {/* Add new question */}
           {isAddingNew ? (
