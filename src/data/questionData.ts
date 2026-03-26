@@ -159,6 +159,30 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     difficulty: 'hard',
   },
 
+  // --- SELECT WRONG ---
+  {
+    id: 22,
+    type: 'select-wrong',
+    question: '🚫 Which of these are NOT real AI model names? Select all the fakes!',
+    options: ['GPT-4', 'Claude', 'Llama', 'NeuralFox', 'Gemini', 'CortexBrain'],
+    correctAnswers: ['GPT-4', 'Claude', 'Llama', 'Gemini'],
+    correctAnswer: 'GPT-4',
+    category: 'LLM Technology',
+    difficulty: 'medium',
+    explanation: 'NeuralFox and CortexBrain are made up. GPT-4 (OpenAI), Claude (Anthropic), Llama (Meta), and Gemini (Google) are all real AI models.',
+  },
+  {
+    id: 23,
+    type: 'select-wrong',
+    question: '🚫 Which of these are NOT valid PE deal types? Select all the wrong ones!',
+    options: ['Leveraged Buyout', 'Growth Equity', 'Reverse Merger Arbitrage', 'Venture Capital', 'Synthetic Recap Swap'],
+    correctAnswers: ['Leveraged Buyout', 'Growth Equity', 'Venture Capital'],
+    correctAnswer: 'Leveraged Buyout',
+    category: 'Private Equity',
+    difficulty: 'hard',
+    explanation: '"Reverse Merger Arbitrage" and "Synthetic Recap Swap" are made-up terms. LBO, Growth Equity, and VC are all legitimate deal types.',
+  },
+
   // --- EXTRA ---
   {
     id: 16,

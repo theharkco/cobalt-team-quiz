@@ -18,9 +18,11 @@ const optionColors = [
   "bg-quiz-blue hover:bg-quiz-blue/80",
   "bg-quiz-orange hover:bg-quiz-orange/80",
   "bg-quiz-purple hover:bg-quiz-purple/80",
+  "bg-primary/60 hover:bg-primary/50",
+  "bg-accent hover:bg-accent/80",
 ];
 
-const optionIcons = ["▲", "◆", "●", "★"];
+const optionIcons = ["▲", "◆", "●", "★", "■", "⬟"];
 
 function MusicEmbed({ spotifyEmbedUrl }: { spotifyEmbedUrl: string }) {
   return (
