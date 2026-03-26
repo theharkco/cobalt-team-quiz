@@ -11,6 +11,7 @@ export interface QuestionFormData {
   question: string;
   options: string[];
   correctAnswer: string;
+  correctAnswers: string[];
   acceptableAnswers: string[];
   imageUrl: string;
   blurLevels: number[];
@@ -28,6 +29,7 @@ function createEmptyQuestion(): QuestionFormData {
     question: '',
     options: ['', '', '', ''],
     correctAnswer: '',
+    correctAnswers: [],
     acceptableAnswers: [],
     imageUrl: '',
     blurLevels: DEFAULT_BLUR_LEVELS,
@@ -60,14 +62,20 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
   };
 
   const handleSave = () => {
-    if (!form.question.trim() || !form.correctAnswer.trim()) return;
+    if (!form.question.trim()) return;
+    if (form.type === 'select-wrong') {
+      if (form.correctAnswers.length === 0) return;
+    } else {
+      if (!form.correctAnswer.trim()) return;
+    }
     onSave(form);
   };
 
-  const needsOptions = form.type === 'multiple-choice' || form.type === 'music';
+  const needsOptions = form.type === 'multiple-choice' || form.type === 'music' || form.type === 'select-wrong';
   const needsImage = form.type === 'blurred-image';
   const needsSpotify = form.type === 'music';
   const needsAcceptable = form.type === 'free-text' || form.type === 'blurred-image';
+  const needsCorrectAnswers = form.type === 'select-wrong';
 
   return (
     <motion.div
@@ -100,6 +108,7 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
               <SelectItem value="free-text">Free Text</SelectItem>
               <SelectItem value="blurred-image">Blurred Image</SelectItem>
               <SelectItem value="music">Music</SelectItem>
+              <SelectItem value="select-wrong">Select Wrong Answers</SelectItem>
             </SelectContent>
           </Select>
         </div>
