@@ -1,12 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
+import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import FloatingShapes from '@/components/quiz/FloatingShapes';
 import QuestionEditor, { type QuestionFormData, createEmptyQuestion } from '@/components/quiz/QuestionEditor';
+import SortableQuestionCard from '@/components/quiz/SortableQuestionCard';
 import { toast } from '@/hooks/use-toast';
 import type { QuestionType, Difficulty } from '@/data/questionTypes';
 
