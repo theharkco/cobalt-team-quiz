@@ -344,8 +344,22 @@ export default function HostView() {
               className="text-center mt-4"
             >
               <div className="bg-card border-2 border-quiz-green rounded-2xl p-6 inline-block max-w-lg">
-                <p className="text-muted-foreground font-body mb-1">Correct answer:</p>
-                <p className="text-3xl font-display font-bold text-quiz-green">{currentQ.correctAnswer}</p>
+                {currentQ.type === 'select-wrong' ? (
+                  <>
+                    <p className="text-muted-foreground font-body mb-1">Correct answer{(currentQ.correctAnswers?.length || 0) > 1 ? 's' : ''}:</p>
+                    <p className="text-2xl font-display font-bold text-quiz-green">
+                      {currentQ.correctAnswers?.join(', ') || currentQ.correctAnswer}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Players needed to select the other {(currentQ.options?.length || 0) - (currentQ.correctAnswers?.length || 0)} wrong answer{((currentQ.options?.length || 0) - (currentQ.correctAnswers?.length || 0)) !== 1 ? 's' : ''}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-muted-foreground font-body mb-1">Correct answer:</p>
+                    <p className="text-3xl font-display font-bold text-quiz-green">{currentQ.correctAnswer}</p>
+                  </>
+                )}
                 {currentQ.explanation && (
                   <p className="text-sm font-body text-muted-foreground mt-3 leading-relaxed">{currentQ.explanation}</p>
                 )}

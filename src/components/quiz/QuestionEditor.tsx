@@ -11,6 +11,7 @@ export interface QuestionFormData {
   question: string;
   options: string[];
   correctAnswer: string;
+  correctAnswers: string[];
   acceptableAnswers: string[];
   imageUrl: string;
   blurLevels: number[];
@@ -28,6 +29,7 @@ function createEmptyQuestion(): QuestionFormData {
     question: '',
     options: ['', '', '', ''],
     correctAnswer: '',
+    correctAnswers: [],
     acceptableAnswers: [],
     imageUrl: '',
     blurLevels: DEFAULT_BLUR_LEVELS,
@@ -60,14 +62,20 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
   };
 
   const handleSave = () => {
-    if (!form.question.trim() || !form.correctAnswer.trim()) return;
+    if (!form.question.trim()) return;
+    if (form.type === 'select-wrong') {
+      if (form.correctAnswers.length === 0) return;
+    } else {
+      if (!form.correctAnswer.trim()) return;
+    }
     onSave(form);
   };
 
-  const needsOptions = form.type === 'multiple-choice' || form.type === 'music';
+  const needsOptions = form.type === 'multiple-choice' || form.type === 'music' || form.type === 'select-wrong';
   const needsImage = form.type === 'blurred-image';
   const needsSpotify = form.type === 'music';
   const needsAcceptable = form.type === 'free-text' || form.type === 'blurred-image';
+  const needsCorrectAnswers = form.type === 'select-wrong';
 
   return (
     <motion.div
@@ -100,6 +108,7 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
               <SelectItem value="free-text">Free Text</SelectItem>
               <SelectItem value="blurred-image">Blurred Image</SelectItem>
               <SelectItem value="music">Music</SelectItem>
+              <SelectItem value="select-wrong">Select Wrong Answers</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -140,31 +149,86 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
         />
       </div>
 
-      {/* Correct answer */}
-      <div>
-        <label className="text-sm font-body text-muted-foreground mb-1 block">Correct Answer *</label>
-        <Input
-          value={form.correctAnswer}
-          onChange={(e) => update('correctAnswer', e.target.value)}
-          placeholder="The correct answer"
-          className="bg-muted border-border text-foreground"
-        />
-      </div>
+      {/* Correct answer (not for select-wrong) */}
+      {!needsCorrectAnswers && (
+        <div>
+          <label className="text-sm font-body text-muted-foreground mb-1 block">Correct Answer *</label>
+          <Input
+            value={form.correctAnswer}
+            onChange={(e) => update('correctAnswer', e.target.value)}
+            placeholder="The correct answer"
+            className="bg-muted border-border text-foreground"
+          />
+        </div>
+      )}
 
-      {/* Options for MC / Music */}
+      {/* Options for MC / Music / Select-wrong */}
       <AnimatePresence>
         {needsOptions && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="space-y-2 overflow-hidden">
-            <label className="text-sm font-body text-muted-foreground block">Answer Options (include the correct answer)</label>
+            <label className="text-sm font-body text-muted-foreground block">
+              {needsCorrectAnswers ? 'All Options (mix of correct and wrong)' : 'Answer Options (include the correct answer)'}
+            </label>
             {form.options.map((opt, i) => (
-              <Input
-                key={i}
-                value={opt}
-                onChange={(e) => updateOption(i, e.target.value)}
-                placeholder={`Option ${i + 1}`}
-                className="bg-muted border-border text-foreground"
-              />
+              <div key={i} className="flex gap-2 items-center">
+                <Input
+                  value={opt}
+                  onChange={(e) => updateOption(i, e.target.value)}
+                  placeholder={`Option ${i + 1}`}
+                  className="bg-muted border-border text-foreground flex-1"
+                />
+                {needsCorrectAnswers && opt.trim() && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const isCorrect = form.correctAnswers.includes(opt);
+                      if (isCorrect) {
+                        update('correctAnswers', form.correctAnswers.filter(a => a !== opt));
+                      } else {
+                        update('correctAnswers', [...form.correctAnswers, opt]);
+                      }
+                    }}
+                    className={`px-3 py-2 rounded-lg text-xs font-bold transition-colors ${
+                      form.correctAnswers.includes(opt)
+                        ? 'bg-quiz-green/20 text-quiz-green border border-quiz-green'
+                        : 'bg-muted text-muted-foreground border border-border hover:border-quiz-green'
+                    }`}
+                  >
+                    {form.correctAnswers.includes(opt) ? '✓ Correct' : 'Mark correct'}
+                  </button>
+                )}
+                {form.options.length > 2 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newOpts = form.options.filter((_, idx) => idx !== i);
+                      update('options', newOpts);
+                      // Also remove from correctAnswers if applicable
+                      if (needsCorrectAnswers) {
+                        update('correctAnswers', form.correctAnswers.filter(a => a !== opt));
+                      }
+                    }}
+                    className="text-destructive hover:text-destructive/80 text-sm px-1"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
             ))}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => update('options', [...form.options, ''])}
+              className="text-muted-foreground"
+            >
+              + Add Option
+            </Button>
+            {needsCorrectAnswers && (
+              <p className="text-xs text-muted-foreground">
+                Mark the <span className="text-quiz-green font-bold">correct</span> answers above. Players will need to select all the unmarked (wrong) ones.
+              </p>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -231,7 +295,7 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
       <div className="flex gap-3 pt-2">
         <Button
           onClick={handleSave}
-          disabled={!form.question.trim() || !form.correctAnswer.trim()}
+          disabled={!form.question.trim() || (needsCorrectAnswers ? form.correctAnswers.length === 0 : !form.correctAnswer.trim())}
           className="flex-1 h-12 font-display font-bold rounded-xl gradient-fun text-foreground border-none hover:opacity-90"
         >
           ✅ Save Question

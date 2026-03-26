@@ -50,6 +50,7 @@ export default function QuizCreator() {
               question: q.question as string,
               options: (q.options as string[]) || ['', '', '', ''],
               correctAnswer: q.correct_answer as string,
+              correctAnswers: (q.acceptable_answers as string[]) || [], // reuse acceptable_answers column for correctAnswers in select-wrong
               acceptableAnswers: (q.acceptable_answers as string[]) || [],
               imageUrl: (q.image_url as string) || '',
               blurLevels: (q.blur_levels as number[]) || [50, 38, 28, 18, 10, 4, 0],
@@ -111,8 +112,10 @@ export default function QuizCreator() {
         type: q.data.type,
         question: q.data.question,
         options: q.data.options.filter(Boolean).length > 0 ? q.data.options.filter(Boolean) : null,
-        correct_answer: q.data.correctAnswer,
-        acceptable_answers: q.data.acceptableAnswers.length > 0 ? q.data.acceptableAnswers : null,
+        correct_answer: q.data.type === 'select-wrong' ? (q.data.correctAnswers[0] || '') : q.data.correctAnswer,
+        acceptable_answers: q.data.type === 'select-wrong'
+          ? (q.data.correctAnswers.length > 0 ? q.data.correctAnswers : null)
+          : (q.data.acceptableAnswers.length > 0 ? q.data.acceptableAnswers : null),
         image_url: q.data.imageUrl || null,
         blur_levels: q.data.blurLevels,
         spotify_embed_url: q.data.spotifyEmbedUrl || null,
