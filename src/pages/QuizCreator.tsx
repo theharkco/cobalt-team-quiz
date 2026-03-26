@@ -85,17 +85,25 @@ export default function QuizCreator() {
     setEditingIndex(null);
   };
 
-  const handleMoveQuestion = (index: number, direction: 'up' | 'down') => {
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
     setQuestions((prev) => {
-      const next = [...prev];
-      [next[index], next[targetIndex]] = [next[targetIndex], next[index]];
-      return next;
+      const oldIndex = prev.findIndex((_, i) => `q-${i}` === active.id);
+      const newIndex = prev.findIndex((_, i) => `q-${i}` === over.id);
+      if (oldIndex === -1 || newIndex === -1) return prev;
+      // Update editing index
+      if (editingIndex === oldIndex) setEditingIndex(newIndex);
+      else if (editingIndex !== null && oldIndex < editingIndex && newIndex >= editingIndex) setEditingIndex(editingIndex - 1);
+      else if (editingIndex !== null && oldIndex > editingIndex && newIndex <= editingIndex) setEditingIndex(editingIndex + 1);
+      return arrayMove(prev, oldIndex, newIndex);
     });
-    // Update editing index if we're moving the edited question
-    if (editingIndex === index) setEditingIndex(targetIndex);
-    else if (editingIndex === targetIndex) setEditingIndex(index);
-  };
+  }, [editingIndex]);
 
   const handleSaveQuiz = async () => {
     if (!title.trim() || questions.length === 0) {
