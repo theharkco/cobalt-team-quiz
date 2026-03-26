@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
 import type { QuestionType, Difficulty } from '@/data/questionTypes';
 
 export interface QuestionFormData {
@@ -19,6 +20,7 @@ export interface QuestionFormData {
   category: string;
   difficulty: Difficulty;
   explanation: string;
+  timeLimitSeconds: number;
 }
 
 const DEFAULT_BLUR_LEVELS = [50, 38, 28, 18, 10, 4, 0];
@@ -37,6 +39,7 @@ function createEmptyQuestion(): QuestionFormData {
     category: '',
     difficulty: 'medium',
     explanation: '',
+    timeLimitSeconds: 15,
   };
 }
 
@@ -279,6 +282,25 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Time Limit */}
+      <div>
+        <label className="text-sm font-body text-muted-foreground mb-1 block">
+          Time Limit: <span className="font-bold text-foreground">{form.timeLimitSeconds}s</span>
+        </label>
+        <Slider
+          value={[form.timeLimitSeconds]}
+          onValueChange={([v]) => update('timeLimitSeconds', v)}
+          min={5}
+          max={60}
+          step={5}
+          className="mt-2"
+        />
+        <div className="flex justify-between text-xs text-muted-foreground mt-1">
+          <span>5s</span>
+          <span>60s</span>
+        </div>
+      </div>
 
       {/* Explanation */}
       <div>

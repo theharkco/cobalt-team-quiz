@@ -72,7 +72,7 @@ export default function QuestionDisplay({
   let hasStartedUnblurring = false;
   if (question.type === "blurred-image" && question.blurLevels) {
     const levels = question.blurLevels;
-    const totalDuration = 15000;
+    const totalDuration = (question.timeLimitSeconds ?? 15) * 1000;
     if (timeElapsedMs > 0) {
       hasStartedUnblurring = true;
       const progress = Math.min(timeElapsedMs / totalDuration, 1);

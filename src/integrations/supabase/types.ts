@@ -81,6 +81,7 @@ export type Database = {
           quiz_id: string
           sort_order: number
           spotify_embed_url: string | null
+          time_limit_seconds: number
           type: string
         }
         Insert: {
@@ -98,6 +99,7 @@ export type Database = {
           quiz_id: string
           sort_order?: number
           spotify_embed_url?: string | null
+          time_limit_seconds?: number
           type?: string
         }
         Update: {
@@ -115,6 +117,7 @@ export type Database = {
           quiz_id?: string
           sort_order?: number
           spotify_embed_url?: string | null
+          time_limit_seconds?: number
           type?: string
         }
         Relationships: [

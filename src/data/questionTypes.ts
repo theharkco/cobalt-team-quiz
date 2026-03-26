@@ -15,6 +15,7 @@ export interface QuizQuestion {
   difficulty?: Difficulty;
   explanation?: string; // shown after the answer is revealed
   correctAnswers?: string[]; // for select-wrong: the correct options (players must avoid these)
+  timeLimitSeconds?: number; // per-question time limit, defaults to 15
 }
 
 export type MatchQuality = 'exact' | 'close' | 'none';

@@ -1,0 +1,1 @@
+ALTER TABLE public.custom_quiz_questions ADD COLUMN time_limit_seconds integer NOT NULL DEFAULT 15;

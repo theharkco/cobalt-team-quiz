@@ -85,9 +85,11 @@ export default function PlayerView() {
               ? new Date(currentSession.question_started_at).getTime()
               : Date.now();
             timer.start(serverStart);
+            const qIdx = currentSession?.current_question ?? 0;
+            const qTimeMs = (quizQuestions[qIdx]?.timeLimitSeconds ?? 15) * 1000;
             startTicking(() => {
               const elapsed = Date.now() - serverStart;
-              return Math.max(0, (15000 - elapsed) / 1000);
+              return Math.max(0, (qTimeMs - elapsed) / 1000);
             });
             return currentSession;
           });
@@ -141,6 +143,7 @@ export default function PlayerView() {
                 category: (q.category as string | null) || undefined,
                 difficulty: (q.difficulty as QuizQuestion['difficulty']) || undefined,
                 explanation: (q.explanation as string | null) || undefined,
+                timeLimitSeconds: (q.time_limit_seconds as number | null) || 15,
               }))
             );
           }
@@ -151,9 +154,10 @@ export default function PlayerView() {
           lastQuestionRef.current = s.current_question;
           const serverStart = new Date(s.question_started_at).getTime();
           const elapsed = Date.now() - serverStart;
-          if (elapsed < 15000) {
+          const qTimeMs = (quizQuestions[s.current_question]?.timeLimitSeconds ?? 15) * 1000;
+          if (elapsed < qTimeMs) {
             timer.start(serverStart);
-            startTicking(() => Math.max(0, (15000 - (Date.now() - serverStart)) / 1000));
+            startTicking(() => Math.max(0, (qTimeMs - (Date.now() - serverStart)) / 1000));
           }
         }
       }
@@ -202,13 +206,14 @@ export default function PlayerView() {
     const question = quizQuestions[session.current_question];
     if (!question) return;
 
+    const totalTimeMs = (question.timeLimitSeconds ?? 15) * 1000;
     const serverStart = session.question_started_at
       ? new Date(session.question_started_at).getTime()
       : timer.startTimeRef.current || Date.now();
-    const timeTaken = Math.min(Date.now() - serverStart, 15000);
+    const timeTaken = Math.min(Date.now() - serverStart, totalTimeMs);
     const mq = checkAnswer(question, answer);
     const isCorrect = mq !== 'none';
-    const points = calculateScore(mq, timeTaken);
+    const points = calculateScore(mq, timeTaken, totalTimeMs);
     const kind: ResultKind = mq === 'exact' ? 'exact' : mq === 'close' ? 'close' : 'wrong';
 
     await submitResult(answer, isCorrect, points, timeTaken, kind);
@@ -219,10 +224,11 @@ export default function PlayerView() {
     const question = quizQuestions[session.current_question];
     if (!question || question.type !== 'select-wrong') return;
 
+    const totalTimeMs = (question.timeLimitSeconds ?? 15) * 1000;
     const serverStart = session.question_started_at
       ? new Date(session.question_started_at).getTime()
       : timer.startTimeRef.current || Date.now();
-    const timeTaken = Math.min(Date.now() - serverStart, 15000);
+    const timeTaken = Math.min(Date.now() - serverStart, totalTimeMs);
 
     const result = checkSelectWrongAnswer(question, answers);
     const points = calculateSelectWrongScore(result.wrongFoundCount, result.totalWrongCount, timeTaken);
@@ -333,7 +339,7 @@ export default function PlayerView() {
       <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4 py-6">
         {!isPreCountdown && (
           <div className="absolute top-4 right-4">
-            <CountdownTimer duration={15} timeElapsed={timer.timeElapsed} onComplete={onTimerComplete} isRunning={timer.isRunning} size={70} />
+            <CountdownTimer duration={currentQ.timeLimitSeconds ?? 15} timeElapsed={timer.timeElapsed} onComplete={onTimerComplete} isRunning={timer.isRunning} size={70} />
           </div>
         )}
         <div className="absolute top-4 left-4 bg-card rounded-xl px-3 py-1">
@@ -347,7 +353,7 @@ export default function PlayerView() {
             totalQuestions={quizQuestions.length}
             timeElapsedMs={timer.timeElapsed}
             hideOptions={isPreCountdown}
-            revealAnswer={answered || timer.timeElapsed >= 15000}
+            revealAnswer={answered || timer.timeElapsed >= (currentQ.timeLimitSeconds ?? 15) * 1000}
           />
 
           {isPreCountdown ? (
