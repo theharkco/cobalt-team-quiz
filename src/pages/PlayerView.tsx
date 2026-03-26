@@ -372,16 +372,26 @@ export default function PlayerView() {
                       : 'Wrong answer!'}
               </p>
               <div className="mt-3 bg-card border border-border rounded-xl p-3 text-center">
-                {currentQ.type === 'select-wrong' ? (
+                {currentQ.type === 'select-wrong' ? (() => {
+                  const correctSet = new Set((currentQ.correctAnswers || []).map(a => a.toLowerCase()));
+                  const wrongOnes = (currentQ.options || []).filter(o => !correctSet.has(o.toLowerCase()));
+                  return (
+                    <>
+                      <p className="text-xs text-muted-foreground mb-1">✅ True statements:</p>
+                      <p className="text-sm font-display font-bold text-quiz-green">
+                        {currentQ.correctAnswers?.join(', ')}
+                      </p>
+                      <div className="mt-2 pt-2 border-t border-border">
+                        <p className="text-xs text-muted-foreground mb-1">❌ False ones to spot:</p>
+                        <p className="text-sm font-display font-bold text-destructive">
+                          {wrongOnes.join(', ')}
+                        </p>
+                      </div>
+                    </>
+                  );
+                })() : (
                   <>
-                    <p className="text-xs text-muted-foreground mb-1">Correct answer{(currentQ.correctAnswers?.length || 0) > 1 ? 's' : ''}:</p>
-                    <p className="text-sm font-display font-bold text-quiz-green">
-                      {currentQ.correctAnswers?.join(', ') || currentQ.correctAnswer}
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-xs text-muted-foreground mb-1">Correct answer:</p>
+                    <p className="text-xs text-muted-foreground mb-1">The answer:</p>
                     <p className="text-sm font-display font-bold text-quiz-green">{currentQ.correctAnswer}</p>
                   </>
                 )}
