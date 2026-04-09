@@ -25,6 +25,8 @@ export default function HostView() {
   const [previousScores, setPreviousScores] = useState<Record<string, number>>({});
   const [answerCount, setAnswerCount] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(-1);
+  const [rankedGuesses, setRankedGuesses] = useState<{ playerName: string; guess: number; points: number; over: boolean }[]>([]);
+  const [hasScored, setHasScored] = useState(false);
   // Load custom questions from sessionStorage or fall back to defaults
   const quizQuestions = useMemo<QuizQuestion[]>(() => {
     if (!sessionId) return QUIZ_QUESTIONS;
