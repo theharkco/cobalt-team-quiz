@@ -254,7 +254,9 @@ export default function PlayerView() {
     timer.stop();
     stopTicking();
 
-    if (isCorrect) {
+    if (deferred) {
+      // No sound for deferred — will be resolved when host scores
+    } else if (isCorrect) {
       playCorrect();
       confetti({
         particleCount: kind === 'exact' ? 80 : 40,
