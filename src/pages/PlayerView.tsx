@@ -20,7 +20,7 @@ import Emoji from '@/components/quiz/Emoji';
 import confetti from 'canvas-confetti';
 import { playCorrect, playWrong, startTicking, stopTicking } from '@/lib/sounds';
 
-type ResultKind = 'exact' | 'close' | 'wrong' | 'timeout';
+type ResultKind = 'exact' | 'close' | 'wrong' | 'timeout' | 'deferred';
 
 export default function PlayerView() {
   const { sessionId, playerId } = useParams<{ sessionId: string; playerId: string }>();
@@ -211,6 +211,13 @@ export default function PlayerView() {
       ? new Date(session.question_started_at).getTime()
       : timer.startTimeRef.current || Date.now();
     const timeTaken = Math.min(Date.now() - serverStart, totalTimeMs);
+
+    // Closest-without-going-over: deferred scoring — submit with 0 points
+    if (question.type === 'closest-without-going-over') {
+      await submitResult(answer, false, 0, timeTaken, 'wrong', true);
+      return;
+    }
+
     const mq = checkAnswer(question, answer);
     const isCorrect = mq !== 'none';
     const points = calculateScore(mq, timeTaken, totalTimeMs);
@@ -238,12 +245,12 @@ export default function PlayerView() {
     await submitResult(JSON.stringify(answers), isCorrect, points, timeTaken, kind);
   };
 
-  const submitResult = async (answer: string, isCorrect: boolean, points: number, timeTaken: number, kind: ResultKind) => {
+  const submitResult = async (answer: string, isCorrect: boolean, points: number, timeTaken: number, kind: ResultKind, deferred = false) => {
     if (!session || !player) return;
 
     setAnswered(true);
     setLastPoints(points);
-    setResultKind(kind);
+    setResultKind(deferred ? 'deferred' : kind);
     timer.stop();
     stopTicking();
 
