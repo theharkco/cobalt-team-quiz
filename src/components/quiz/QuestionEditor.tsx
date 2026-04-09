@@ -342,7 +342,7 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
       <div className="flex gap-3 pt-2">
         <Button
           onClick={handleSave}
-          disabled={!form.question.trim() || (needsCorrectAnswers ? form.correctAnswers.length === 0 : !form.correctAnswer.trim())}
+          disabled={!form.question.trim() || (isClosest ? (form.numericAnswer === '' || isNaN(Number(form.numericAnswer))) : needsCorrectAnswers ? form.correctAnswers.length === 0 : !form.correctAnswer.trim())}
           className="flex-1 h-12 font-display font-bold rounded-xl gradient-fun text-foreground border-none hover:opacity-90"
         >
           ✅ Save Question
