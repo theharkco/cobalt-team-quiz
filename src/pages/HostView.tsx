@@ -145,9 +145,9 @@ export default function HostView() {
     };
   }, [sessionId]);
 
-  const updateStatus = async (status: SessionStatus, q?: number, extraFields?: Record<string, unknown>) => {
+  const updateStatus = async (status: SessionStatus, q?: number, extraFields?: Partial<{ question_started_at: string | null }>) => {
     if (!sessionId) return;
-    const update: Record<string, unknown> = { status, ...extraFields };
+    const update: { status: string; current_question?: number; question_started_at?: string | null } = { status, ...extraFields };
     if (q !== undefined) update.current_question = q;
 
     setSession((prev) =>

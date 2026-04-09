@@ -129,7 +129,7 @@ export function useQuizSession() {
 
   const updateSessionStatus = useCallback(async (status: SessionStatus, questionIndex?: number) => {
     if (!session) return;
-    const update: Record<string, unknown> = { status };
+    const update: { status: string; current_question?: number } = { status };
     if (questionIndex !== undefined) update.current_question = questionIndex;
     await supabase.from('quiz_sessions').update(update).eq('id', session.id);
   }, [session]);
