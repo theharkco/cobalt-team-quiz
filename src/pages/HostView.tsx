@@ -27,7 +27,7 @@ export default function HostView() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(-1);
   const [rankedGuesses, setRankedGuesses] = useState<{ playerName: string; guess: number; points: number; over: boolean }[]>([]);
   const [hasScored, setHasScored] = useState(false);
-  // Load custom questions from sessionStorage or fall back to defaults
+
   const quizQuestions = useMemo<QuizQuestion[]>(() => {
     if (!sessionId) return QUIZ_QUESTIONS;
     try {
@@ -83,6 +83,81 @@ export default function HostView() {
     }
   }, [answerCount, players.length, session?.status, timer.isRunning]);
 
+  // Score closest-without-going-over when answer is revealed
+  useEffect(() => {
+    if (!showAnswer || !session || hasScored) return;
+    const q = session.current_question >= 0 ? quizQuestions[session.current_question] : null;
+    if (!q || q.type !== 'closest-without-going-over') return;
+
+    const correctNum = q.numericAnswer ?? parseFloat(q.correctAnswer);
+    if (isNaN(correctNum)) return;
+
+    setHasScored(true);
+
+    (async () => {
+      const { data: answers } = await supabase
+        .from('answers')
+        .select('*')
+        .eq('session_id', session.id)
+        .eq('question_index', session.current_question);
+
+      if (!answers || answers.length === 0) {
+        setRankedGuesses([]);
+        return;
+      }
+
+      const guesses = answers.map((a) => ({
+        playerId: a.player_id,
+        answer: parseFloat(a.answer),
+        answerId: a.id,
+      }));
+
+      const scores = calculateClosestWithoutGoingOverScores(
+        guesses.map((g) => ({ playerId: g.playerId, answer: g.answer })),
+        correctNum
+      );
+
+      const playerMap = new Map(players.map((p) => [p.id, p.name]));
+      const ranked = guesses
+        .map((g) => ({
+          playerName: playerMap.get(g.playerId) || 'Unknown',
+          guess: g.answer,
+          points: scores.get(g.playerId) || 0,
+          over: g.answer > correctNum,
+        }))
+        .sort((a, b) => {
+          if (a.over !== b.over) return a.over ? 1 : -1;
+          return b.points - a.points;
+        });
+      setRankedGuesses(ranked);
+
+      try {
+        for (const g of guesses) {
+          const pts = scores.get(g.playerId) || 0;
+          await supabase
+            .from('answers')
+            .update({ points_earned: pts, is_correct: pts > 0 })
+            .eq('id', g.answerId);
+        }
+        for (const g of guesses) {
+          const pts = scores.get(g.playerId) || 0;
+          if (pts > 0) {
+            const player = players.find((p) => p.id === g.playerId);
+            if (player) {
+              await supabase
+                .from('players')
+                .update({ score: player.score + pts })
+                .eq('id', player.id);
+            }
+          }
+        }
+        refreshPlayers();
+      } catch (err) {
+        console.error('Failed to update scores for closest-without-going-over:', err);
+      }
+    })();
+  }, [showAnswer, session, hasScored, players, quizQuestions, refreshPlayers]);
+
   // Mid-question sync: if host reloads while a question is active, resume timer
   useEffect(() => {
     if (!sessionId) return;
@@ -102,7 +177,6 @@ export default function HostView() {
           if (elapsed < qTimeLimit) {
             timer.start(serverStart);
           } else {
-            // Timer already expired — show answer
             setShowAnswer(true);
           }
         }
@@ -184,8 +258,9 @@ export default function HostView() {
     setAnswerCount(0);
     setCurrentQuestionIndex(questionIndex);
     setShowAnswer(false);
+    setHasScored(false);
+    setRankedGuesses([]);
     startPreCountdown(async () => {
-      // Set question_started_at AFTER the 3s pre-countdown finishes
       const now = new Date().toISOString();
       await supabase
         .from('quiz_sessions')
@@ -339,82 +414,6 @@ export default function HostView() {
             </Button>
           )}
 
-  // Score closest-without-going-over when answer is revealed
-  useEffect(() => {
-    if (!showAnswer || !session || hasScored) return;
-    const q = session.current_question >= 0 ? quizQuestions[session.current_question] : null;
-    if (!q || q.type !== 'closest-without-going-over') return;
-
-    const correctNum = q.numericAnswer ?? parseFloat(q.correctAnswer);
-    if (isNaN(correctNum)) return;
-
-    setHasScored(true);
-
-    (async () => {
-      const { data: answers } = await supabase
-        .from('answers')
-        .select('*')
-        .eq('session_id', session.id)
-        .eq('question_index', session.current_question);
-
-      if (!answers || answers.length === 0) {
-        setRankedGuesses([]);
-        return;
-      }
-
-      const guesses = answers.map((a) => ({
-        playerId: a.player_id,
-        answer: parseFloat(a.answer),
-        answerId: a.id,
-      }));
-
-      const scores = calculateClosestWithoutGoingOverScores(
-        guesses.map((g) => ({ playerId: g.playerId, answer: g.answer })),
-        correctNum
-      );
-
-      const playerMap = new Map(players.map((p) => [p.id, p.name]));
-      const ranked = guesses
-        .map((g) => ({
-          playerName: playerMap.get(g.playerId) || 'Unknown',
-          guess: g.answer,
-          points: scores.get(g.playerId) || 0,
-          over: g.answer > correctNum,
-        }))
-        .sort((a, b) => {
-          if (a.over !== b.over) return a.over ? 1 : -1;
-          return b.points - a.points;
-        });
-      setRankedGuesses(ranked);
-
-      try {
-        for (const g of guesses) {
-          const pts = scores.get(g.playerId) || 0;
-          await supabase
-            .from('answers')
-            .update({ points_earned: pts, is_correct: pts > 0 })
-            .eq('id', g.answerId);
-        }
-        for (const g of guesses) {
-          const pts = scores.get(g.playerId) || 0;
-          if (pts > 0) {
-            const player = players.find((p) => p.id === g.playerId);
-            if (player) {
-              await supabase
-                .from('players')
-                .update({ score: player.score + pts })
-                .eq('id', player.id);
-            }
-          }
-        }
-        refreshPlayers();
-      } catch (err) {
-        console.error('Failed to update scores for closest-without-going-over:', err);
-      }
-    })();
-  }, [showAnswer, session, hasScored, players, quizQuestions, refreshPlayers]);
-
-
           {showAnswer && (
             <motion.div
               initial={{ scale: 0 }}
@@ -422,7 +421,7 @@ export default function HostView() {
               transition={{ type: 'spring', bounce: 0.5 }}
               className="text-center mt-4"
             >
-              <div className="bg-card border-2 border-quiz-green rounded-2xl p-6 inline-block max-w-lg">
+              <div className="bg-card border-2 border-quiz-green rounded-2xl p-6 inline-block max-w-lg w-full">
                 {currentQ.type === 'closest-without-going-over' ? (
                   <>
                     <p className="text-muted-foreground font-body mb-1">🎯 The correct number:</p>
