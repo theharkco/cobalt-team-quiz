@@ -428,7 +428,41 @@ export default function HostView() {
               className="text-center mt-4"
             >
               <div className="bg-card border-2 border-quiz-green rounded-2xl p-6 inline-block max-w-lg">
-                {currentQ.type === 'select-wrong' ? (() => {
+                {currentQ.type === 'closest-without-going-over' ? (
+                  <>
+                    <p className="text-muted-foreground font-body mb-1">🎯 The correct number:</p>
+                    <p className="text-3xl font-display font-bold text-quiz-green">
+                      {currentQ.numericAnswer ?? currentQ.correctAnswer}
+                    </p>
+                    {rankedGuesses.length > 0 && (
+                      <div className="mt-4 space-y-2 text-left">
+                        <p className="text-sm text-muted-foreground font-body mb-2">Player guesses:</p>
+                        {rankedGuesses.map((g, i) => (
+                          <div
+                            key={i}
+                            className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm font-body ${
+                              g.over
+                                ? 'bg-destructive/10 text-destructive'
+                                : g.points >= 700
+                                  ? 'bg-quiz-green/20 text-quiz-green'
+                                  : 'bg-muted text-foreground'
+                            }`}
+                          >
+                            <span className="font-display font-bold">{g.playerName}</span>
+                            <span className="flex items-center gap-3">
+                              <span className="font-mono">{g.guess}</span>
+                              {g.over ? (
+                                <span className="text-xs font-bold">OVER ✗</span>
+                              ) : (
+                                <span className="font-bold text-quiz-green">+{g.points}</span>
+                              )}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : currentQ.type === 'select-wrong' ? (() => {
                   const correctSet = new Set((currentQ.correctAnswers || []).map(a => a.toLowerCase()));
                   const wrongOnes = (currentQ.options || []).filter(o => !correctSet.has(o.toLowerCase()));
                   return (
