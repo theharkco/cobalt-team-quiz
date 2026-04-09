@@ -372,48 +372,56 @@ export default function PlayerView() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: 'spring', bounce: 0.5 }}
-              className={`text-center p-6 rounded-2xl ${isCorrectResult ? 'bg-quiz-green/20' : 'bg-destructive/20'}`}
+              className={`text-center p-6 rounded-2xl ${resultKind === 'deferred' ? 'bg-primary/20' : isCorrectResult ? 'bg-quiz-green/20' : 'bg-destructive/20'}`}
             >
               <Emoji className="text-5xl mb-2" label="result">
-                {resultKind === 'exact' ? '🎉' : resultKind === 'close' ? '👍' : resultKind === 'timeout' ? '⏰' : '💥'}
+                {resultKind === 'exact' ? '🎉' : resultKind === 'close' ? '👍' : resultKind === 'timeout' ? '⏰' : resultKind === 'deferred' ? '🎯' : '💥'}
               </Emoji>
               <p className="text-xl font-display font-bold text-foreground">
                 {resultKind === 'exact'
                   ? `+${lastPoints} points!`
                   : resultKind === 'close'
                     ? `Close enough! +${lastPoints} points`
-                    : resultKind === 'timeout'
-                      ? "Time's up!"
-                      : 'Wrong answer!'}
+                    : resultKind === 'deferred'
+                      ? 'Guess locked in!'
+                      : resultKind === 'timeout'
+                        ? "Time's up!"
+                        : 'Wrong answer!'}
               </p>
-              <div className="mt-3 bg-card border border-border rounded-xl p-3 text-center">
-                {currentQ.type === 'select-wrong' ? (() => {
-                  const correctSet = new Set((currentQ.correctAnswers || []).map(a => a.toLowerCase()));
-                  const wrongOnes = (currentQ.options || []).filter(o => !correctSet.has(o.toLowerCase()));
-                  return (
-                    <>
-                      <p className="text-xs text-muted-foreground mb-1">✅ True statements:</p>
-                      <p className="text-sm font-display font-bold text-quiz-green">
-                        {currentQ.correctAnswers?.join(', ')}
-                      </p>
-                      <div className="mt-2 pt-2 border-t border-border">
-                        <p className="text-xs text-muted-foreground mb-1">❌ False ones to spot:</p>
-                        <p className="text-sm font-display font-bold text-destructive">
-                          {wrongOnes.join(', ')}
+              {resultKind === 'deferred' ? (
+                <p className="text-muted-foreground mt-2 text-sm animate-pulse">
+                  Waiting for all guesses to be scored...
+                </p>
+              ) : (
+                <div className="mt-3 bg-card border border-border rounded-xl p-3 text-center">
+                  {currentQ.type === 'select-wrong' ? (() => {
+                    const correctSet = new Set((currentQ.correctAnswers || []).map(a => a.toLowerCase()));
+                    const wrongOnes = (currentQ.options || []).filter(o => !correctSet.has(o.toLowerCase()));
+                    return (
+                      <>
+                        <p className="text-xs text-muted-foreground mb-1">✅ True statements:</p>
+                        <p className="text-sm font-display font-bold text-quiz-green">
+                          {currentQ.correctAnswers?.join(', ')}
                         </p>
-                      </div>
+                        <div className="mt-2 pt-2 border-t border-border">
+                          <p className="text-xs text-muted-foreground mb-1">❌ False ones to spot:</p>
+                          <p className="text-sm font-display font-bold text-destructive">
+                            {wrongOnes.join(', ')}
+                          </p>
+                        </div>
+                      </>
+                    );
+                  })() : (
+                    <>
+                      <p className="text-xs text-muted-foreground mb-1">The answer:</p>
+                      <p className="text-sm font-display font-bold text-quiz-green">{currentQ.correctAnswer}</p>
                     </>
-                  );
-                })() : (
-                  <>
-                    <p className="text-xs text-muted-foreground mb-1">The answer:</p>
-                    <p className="text-sm font-display font-bold text-quiz-green">{currentQ.correctAnswer}</p>
-                  </>
-                )}
-                {currentQ.explanation && (
-                  <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{currentQ.explanation}</p>
-                )}
-              </div>
+                  )}
+                  {currentQ.explanation && (
+                    <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{currentQ.explanation}</p>
+                  )}
+                </div>
+              )}
               <p className="text-muted-foreground mt-2 text-xs animate-pulse">Waiting for host...</p>
             </motion.div>
           ) : (
