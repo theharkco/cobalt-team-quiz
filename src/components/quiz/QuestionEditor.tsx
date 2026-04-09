@@ -68,13 +68,17 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
 
   const handleSave = () => {
     if (!form.question.trim()) return;
-    if (form.type === 'select-wrong') {
+    if (form.type === 'closest-without-going-over') {
+      if (form.numericAnswer === '' || isNaN(Number(form.numericAnswer))) return;
+    } else if (form.type === 'select-wrong') {
       if (form.correctAnswers.length === 0) return;
     } else {
       if (!form.correctAnswer.trim()) return;
     }
     onSave(form);
   };
+
+  const isClosest = form.type === 'closest-without-going-over';
 
   const needsOptions = form.type === 'multiple-choice' || form.type === 'music' || form.type === 'select-wrong';
   const needsImage = form.type === 'blurred-image';
