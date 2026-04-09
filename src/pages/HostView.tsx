@@ -339,6 +339,86 @@ export default function HostView() {
             </Button>
           )}
 
+  // Score closest-without-going-over when answer is revealed
+  useEffect(() => {
+    if (!showAnswer || !session || hasScored) return;
+    const currentQ = session.current_question >= 0 ? quizQuestions[session.current_question] : null;
+    if (!currentQ || currentQ.type !== 'closest-without-going-over') return;
+
+    const correctNum = currentQ.numericAnswer ?? parseFloat(currentQ.correctAnswer);
+    if (isNaN(correctNum)) return;
+
+    setHasScored(true);
+
+    (async () => {
+      // Fetch all answers for this question
+      const { data: answers } = await supabase
+        .from('answers')
+        .select('*')
+        .eq('session_id', session.id)
+        .eq('question_index', session.current_question);
+
+      if (!answers || answers.length === 0) {
+        setRankedGuesses([]);
+        return;
+      }
+
+      const guesses = answers.map((a) => ({
+        playerId: a.player_id,
+        answer: parseFloat(a.answer),
+        answerId: a.id,
+      }));
+
+      const scores = calculateClosestWithoutGoingOverScores(
+        guesses.map((g) => ({ playerId: g.playerId, answer: g.answer })),
+        correctNum
+      );
+
+      // Build ranked display
+      const playerMap = new Map(players.map((p) => [p.id, p.name]));
+      const ranked = guesses
+        .map((g) => ({
+          playerName: playerMap.get(g.playerId) || 'Unknown',
+          guess: g.answer,
+          points: scores.get(g.playerId) || 0,
+          over: g.answer > correctNum,
+        }))
+        .sort((a, b) => {
+          // Over answers last, then by points descending
+          if (a.over !== b.over) return a.over ? 1 : -1;
+          return b.points - a.points;
+        });
+      setRankedGuesses(ranked);
+
+      // Batch update answer points and player scores
+      try {
+        for (const g of guesses) {
+          const pts = scores.get(g.playerId) || 0;
+          await supabase
+            .from('answers')
+            .update({ points_earned: pts, is_correct: pts > 0 })
+            .eq('id', g.answerId);
+        }
+        // Update player scores
+        for (const g of guesses) {
+          const pts = scores.get(g.playerId) || 0;
+          if (pts > 0) {
+            const player = players.find((p) => p.id === g.playerId);
+            if (player) {
+              await supabase
+                .from('players')
+                .update({ score: player.score + pts })
+                .eq('id', player.id);
+            }
+          }
+        }
+        refreshPlayers();
+      } catch (err) {
+        console.error('Failed to update scores for closest-without-going-over:', err);
+      }
+    })();
+  }, [showAnswer, session, hasScored, players, quizQuestions, refreshPlayers]);
+
 
           {showAnswer && (
             <motion.div
