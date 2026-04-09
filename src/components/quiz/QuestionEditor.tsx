@@ -21,6 +21,7 @@ export interface QuestionFormData {
   difficulty: Difficulty;
   explanation: string;
   timeLimitSeconds: number;
+  numericAnswer: number | '';
 }
 
 const DEFAULT_BLUR_LEVELS = [50, 38, 28, 18, 10, 4, 0];
@@ -40,6 +41,7 @@ function createEmptyQuestion(): QuestionFormData {
     difficulty: 'medium',
     explanation: '',
     timeLimitSeconds: 15,
+    numericAnswer: '',
   };
 }
 
