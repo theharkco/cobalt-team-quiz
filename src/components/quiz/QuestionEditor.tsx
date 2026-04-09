@@ -118,6 +118,7 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
               <SelectItem value="blurred-image">Blurred Image</SelectItem>
               <SelectItem value="music">Music</SelectItem>
               <SelectItem value="select-wrong">Select Wrong Answers</SelectItem>
+              <SelectItem value="closest-without-going-over">Closest Without Going Over</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -158,8 +159,8 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
         />
       </div>
 
-      {/* Correct answer (not for select-wrong) */}
-      {!needsCorrectAnswers && (
+      {/* Correct answer (not for select-wrong or closest) */}
+      {!needsCorrectAnswers && !isClosest && (
         <div>
           <label className="text-sm font-body text-muted-foreground mb-1 block">Correct Answer *</label>
           <Input
@@ -168,6 +169,24 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
             placeholder="The correct answer"
             className="bg-muted border-border text-foreground"
           />
+        </div>
+      )}
+
+      {/* Numeric answer for closest-without-going-over */}
+      {isClosest && (
+        <div>
+          <label className="text-sm font-body text-muted-foreground mb-1 block">Correct Number *</label>
+          <Input
+            type="number"
+            inputMode="decimal"
+            value={form.numericAnswer}
+            onChange={(e) => update('numericAnswer', e.target.value === '' ? '' : parseFloat(e.target.value))}
+            placeholder="e.g. 42, 3.14"
+            className="bg-muted border-border text-foreground text-lg font-display"
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Players guess closest to this number without going over.
+          </p>
         </div>
       )}
 
