@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
-import { QUIZ_QUESTIONS } from '@/data/questions';
+import { QUIZ_QUESTIONS, calculateClosestWithoutGoingOverScores } from '@/data/questions';
 import type { QuizQuestion } from '@/data/questionTypes';
 import type { Player, QuizSession, SessionStatus } from '@/types/quiz';
 import { useTimer } from '@/hooks/useTimer';
@@ -25,7 +25,9 @@ export default function HostView() {
   const [previousScores, setPreviousScores] = useState<Record<string, number>>({});
   const [answerCount, setAnswerCount] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(-1);
-  // Load custom questions from sessionStorage or fall back to defaults
+  const [rankedGuesses, setRankedGuesses] = useState<{ playerName: string; guess: number; points: number; over: boolean }[]>([]);
+  const [hasScored, setHasScored] = useState(false);
+
   const quizQuestions = useMemo<QuizQuestion[]>(() => {
     if (!sessionId) return QUIZ_QUESTIONS;
     try {
@@ -81,6 +83,81 @@ export default function HostView() {
     }
   }, [answerCount, players.length, session?.status, timer.isRunning]);
 
+  // Score closest-without-going-over when answer is revealed
+  useEffect(() => {
+    if (!showAnswer || !session || hasScored) return;
+    const q = session.current_question >= 0 ? quizQuestions[session.current_question] : null;
+    if (!q || q.type !== 'closest-without-going-over') return;
+
+    const correctNum = q.numericAnswer ?? parseFloat(q.correctAnswer);
+    if (isNaN(correctNum)) return;
+
+    setHasScored(true);
+
+    (async () => {
+      const { data: answers } = await supabase
+        .from('answers')
+        .select('*')
+        .eq('session_id', session.id)
+        .eq('question_index', session.current_question);
+
+      if (!answers || answers.length === 0) {
+        setRankedGuesses([]);
+        return;
+      }
+
+      const guesses = answers.map((a) => ({
+        playerId: a.player_id,
+        answer: parseFloat(a.answer),
+        answerId: a.id,
+      }));
+
+      const scores = calculateClosestWithoutGoingOverScores(
+        guesses.map((g) => ({ playerId: g.playerId, answer: g.answer })),
+        correctNum
+      );
+
+      const playerMap = new Map(players.map((p) => [p.id, p.name]));
+      const ranked = guesses
+        .map((g) => ({
+          playerName: playerMap.get(g.playerId) || 'Unknown',
+          guess: g.answer,
+          points: scores.get(g.playerId) || 0,
+          over: g.answer > correctNum,
+        }))
+        .sort((a, b) => {
+          if (a.over !== b.over) return a.over ? 1 : -1;
+          return b.points - a.points;
+        });
+      setRankedGuesses(ranked);
+
+      try {
+        for (const g of guesses) {
+          const pts = scores.get(g.playerId) || 0;
+          await supabase
+            .from('answers')
+            .update({ points_earned: pts, is_correct: pts > 0 })
+            .eq('id', g.answerId);
+        }
+        for (const g of guesses) {
+          const pts = scores.get(g.playerId) || 0;
+          if (pts > 0) {
+            const player = players.find((p) => p.id === g.playerId);
+            if (player) {
+              await supabase
+                .from('players')
+                .update({ score: player.score + pts })
+                .eq('id', player.id);
+            }
+          }
+        }
+        refreshPlayers();
+      } catch (err) {
+        console.error('Failed to update scores for closest-without-going-over:', err);
+      }
+    })();
+  }, [showAnswer, session, hasScored, players, quizQuestions, refreshPlayers]);
+
   // Mid-question sync: if host reloads while a question is active, resume timer
   useEffect(() => {
     if (!sessionId) return;
@@ -100,7 +177,6 @@ export default function HostView() {
           if (elapsed < qTimeLimit) {
             timer.start(serverStart);
           } else {
-            // Timer already expired — show answer
             setShowAnswer(true);
           }
         }
@@ -145,9 +221,9 @@ export default function HostView() {
     };
   }, [sessionId]);
 
-  const updateStatus = async (status: SessionStatus, q?: number, extraFields?: Record<string, unknown>) => {
+  const updateStatus = async (status: SessionStatus, q?: number, extraFields?: Partial<{ question_started_at: string | null }>) => {
     if (!sessionId) return;
-    const update: Record<string, unknown> = { status, ...extraFields };
+    const update: { status: string; current_question?: number; question_started_at?: string | null } = { status, ...extraFields };
     if (q !== undefined) update.current_question = q;
 
     setSession((prev) =>
@@ -182,8 +258,9 @@ export default function HostView() {
     setAnswerCount(0);
     setCurrentQuestionIndex(questionIndex);
     setShowAnswer(false);
+    setHasScored(false);
+    setRankedGuesses([]);
     startPreCountdown(async () => {
-      // Set question_started_at AFTER the 3s pre-countdown finishes
       const now = new Date().toISOString();
       await supabase
         .from('quiz_sessions')
@@ -337,7 +414,6 @@ export default function HostView() {
             </Button>
           )}
 
-
           {showAnswer && (
             <motion.div
               initial={{ scale: 0 }}
@@ -345,8 +421,42 @@ export default function HostView() {
               transition={{ type: 'spring', bounce: 0.5 }}
               className="text-center mt-4"
             >
-              <div className="bg-card border-2 border-quiz-green rounded-2xl p-6 inline-block max-w-lg">
-                {currentQ.type === 'select-wrong' ? (() => {
+              <div className="bg-card border-2 border-quiz-green rounded-2xl p-6 inline-block max-w-lg w-full">
+                {currentQ.type === 'closest-without-going-over' ? (
+                  <>
+                    <p className="text-muted-foreground font-body mb-1">🎯 The correct number:</p>
+                    <p className="text-3xl font-display font-bold text-quiz-green">
+                      {currentQ.numericAnswer ?? currentQ.correctAnswer}
+                    </p>
+                    {rankedGuesses.length > 0 && (
+                      <div className="mt-4 space-y-2 text-left">
+                        <p className="text-sm text-muted-foreground font-body mb-2">Player guesses:</p>
+                        {rankedGuesses.map((g, i) => (
+                          <div
+                            key={i}
+                            className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm font-body ${
+                              g.over
+                                ? 'bg-destructive/10 text-destructive'
+                                : g.points >= 700
+                                  ? 'bg-quiz-green/20 text-quiz-green'
+                                  : 'bg-muted text-foreground'
+                            }`}
+                          >
+                            <span className="font-display font-bold">{g.playerName}</span>
+                            <span className="flex items-center gap-3">
+                              <span className="font-mono">{g.guess}</span>
+                              {g.over ? (
+                                <span className="text-xs font-bold">OVER ✗</span>
+                              ) : (
+                                <span className="font-bold text-quiz-green">+{g.points}</span>
+                              )}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : currentQ.type === 'select-wrong' ? (() => {
                   const correctSet = new Set((currentQ.correctAnswers || []).map(a => a.toLowerCase()));
                   const wrongOnes = (currentQ.options || []).filter(o => !correctSet.has(o.toLowerCase()));
                   return (

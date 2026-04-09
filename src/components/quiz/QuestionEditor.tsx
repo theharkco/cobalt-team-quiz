@@ -21,6 +21,7 @@ export interface QuestionFormData {
   difficulty: Difficulty;
   explanation: string;
   timeLimitSeconds: number;
+  numericAnswer: number | '';
 }
 
 const DEFAULT_BLUR_LEVELS = [50, 38, 28, 18, 10, 4, 0];
@@ -40,6 +41,7 @@ function createEmptyQuestion(): QuestionFormData {
     difficulty: 'medium',
     explanation: '',
     timeLimitSeconds: 15,
+    numericAnswer: '',
   };
 }
 
@@ -66,13 +68,17 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
 
   const handleSave = () => {
     if (!form.question.trim()) return;
-    if (form.type === 'select-wrong') {
+    if (form.type === 'closest-without-going-over') {
+      if (form.numericAnswer === '' || isNaN(Number(form.numericAnswer))) return;
+    } else if (form.type === 'select-wrong') {
       if (form.correctAnswers.length === 0) return;
     } else {
       if (!form.correctAnswer.trim()) return;
     }
     onSave(form);
   };
+
+  const isClosest = form.type === 'closest-without-going-over';
 
   const needsOptions = form.type === 'multiple-choice' || form.type === 'music' || form.type === 'select-wrong';
   const needsImage = form.type === 'blurred-image';
@@ -112,6 +118,7 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
               <SelectItem value="blurred-image">Blurred Image</SelectItem>
               <SelectItem value="music">Music</SelectItem>
               <SelectItem value="select-wrong">Select Wrong Answers</SelectItem>
+              <SelectItem value="closest-without-going-over">Closest Without Going Over</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -152,8 +159,8 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
         />
       </div>
 
-      {/* Correct answer (not for select-wrong) */}
-      {!needsCorrectAnswers && (
+      {/* Correct answer (not for select-wrong or closest) */}
+      {!needsCorrectAnswers && !isClosest && (
         <div>
           <label className="text-sm font-body text-muted-foreground mb-1 block">Correct Answer *</label>
           <Input
@@ -162,6 +169,24 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
             placeholder="The correct answer"
             className="bg-muted border-border text-foreground"
           />
+        </div>
+      )}
+
+      {/* Numeric answer for closest-without-going-over */}
+      {isClosest && (
+        <div>
+          <label className="text-sm font-body text-muted-foreground mb-1 block">Correct Number *</label>
+          <Input
+            type="number"
+            inputMode="decimal"
+            value={form.numericAnswer}
+            onChange={(e) => update('numericAnswer', e.target.value === '' ? '' : parseFloat(e.target.value))}
+            placeholder="e.g. 42, 3.14"
+            className="bg-muted border-border text-foreground text-lg font-display"
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Players guess closest to this number without going over.
+          </p>
         </div>
       )}
 
@@ -317,7 +342,7 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
       <div className="flex gap-3 pt-2">
         <Button
           onClick={handleSave}
-          disabled={!form.question.trim() || (needsCorrectAnswers ? form.correctAnswers.length === 0 : !form.correctAnswer.trim())}
+          disabled={!form.question.trim() || (isClosest ? (form.numericAnswer === '' || isNaN(Number(form.numericAnswer))) : needsCorrectAnswers ? form.correctAnswers.length === 0 : !form.correctAnswer.trim())}
           className="flex-1 h-12 font-display font-bold rounded-xl gradient-fun text-foreground border-none hover:opacity-90"
         >
           ✅ Save Question

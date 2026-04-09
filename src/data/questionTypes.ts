@@ -1,4 +1,4 @@
-export type QuestionType = 'multiple-choice' | 'free-text' | 'blurred-image' | 'music' | 'select-wrong';
+export type QuestionType = 'multiple-choice' | 'free-text' | 'blurred-image' | 'music' | 'select-wrong' | 'closest-without-going-over';
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
 export interface QuizQuestion {
@@ -16,6 +16,7 @@ export interface QuizQuestion {
   explanation?: string; // shown after the answer is revealed
   correctAnswers?: string[]; // for select-wrong: the correct options (players must avoid these)
   timeLimitSeconds?: number; // per-question time limit, defaults to 15
+  numericAnswer?: number; // for closest-without-going-over: the correct numeric value
 }
 
 export type MatchQuality = 'exact' | 'close' | 'none';

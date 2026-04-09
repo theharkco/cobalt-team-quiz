@@ -42,3 +42,34 @@ export function calculateScore(match: MatchQuality, timeTakenMs: number, totalTi
   const penalty = Math.round((basePoints - minPoints) * (elapsed / remaining));
   return Math.max(minPoints, basePoints - penalty);
 }
+
+/**
+ * Closest Without Going Over: rank-based scoring.
+ * Guesses over the correct answer get 0 points.
+ * Valid guesses ranked by proximity (closest first).
+ */
+const RANK_POINTS = [1000, 700, 400, 200];
+
+export function calculateClosestWithoutGoingOverScores(
+  guesses: { playerId: string; answer: number }[],
+  correctAnswer: number
+): Map<string, number> {
+  const result = new Map<string, number>();
+
+  // All players start with 0
+  for (const g of guesses) {
+    result.set(g.playerId, 0);
+  }
+
+  // Filter valid guesses (not over)
+  const valid = guesses
+    .filter((g) => g.answer <= correctAnswer)
+    .sort((a, b) => (correctAnswer - a.answer) - (correctAnswer - b.answer)); // closest first
+
+  for (let i = 0; i < valid.length; i++) {
+    const points = i < RANK_POINTS.length ? RANK_POINTS[i] : 100;
+    result.set(valid[i].playerId, points);
+  }
+
+  return result;
+}

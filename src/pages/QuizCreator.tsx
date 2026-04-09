@@ -53,7 +53,7 @@ export default function QuizCreator() {
               question: q.question as string,
               options: (q.options as string[]) || ['', '', '', ''],
               correctAnswer: q.correct_answer as string,
-              correctAnswers: (q.acceptable_answers as string[]) || [], // reuse acceptable_answers column for correctAnswers in select-wrong
+              correctAnswers: (q.acceptable_answers as string[]) || [],
               acceptableAnswers: (q.acceptable_answers as string[]) || [],
               imageUrl: (q.image_url as string) || '',
               blurLevels: (q.blur_levels as number[]) || [50, 38, 28, 18, 10, 4, 0],
@@ -62,6 +62,9 @@ export default function QuizCreator() {
               difficulty: (q.difficulty as Difficulty) || 'medium',
               explanation: (q.explanation as string) || '',
               timeLimitSeconds: (q.time_limit_seconds as number) || 15,
+              numericAnswer: (q.type as string) === 'closest-without-going-over'
+                ? parseFloat(q.correct_answer as string)
+                : '',
             },
           }))
         );
@@ -136,7 +139,9 @@ export default function QuizCreator() {
         type: q.data.type,
         question: q.data.question,
         options: q.data.options.filter(Boolean).length > 0 ? q.data.options.filter(Boolean) : null,
-        correct_answer: q.data.type === 'select-wrong' ? (q.data.correctAnswers[0] || '') : q.data.correctAnswer,
+        correct_answer: q.data.type === 'closest-without-going-over'
+          ? String(q.data.numericAnswer)
+          : q.data.type === 'select-wrong' ? (q.data.correctAnswers[0] || '') : q.data.correctAnswer,
         acceptable_answers: q.data.type === 'select-wrong'
           ? (q.data.correctAnswers.length > 0 ? q.data.correctAnswers : null)
           : (q.data.acceptableAnswers.length > 0 ? q.data.acceptableAnswers : null),

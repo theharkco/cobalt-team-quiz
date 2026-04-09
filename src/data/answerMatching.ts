@@ -57,6 +57,9 @@ export function checkSelectWrongAnswer(
 }
 
 export function checkAnswer(question: QuizQuestion, answer: string): MatchQuality {
+  // Closest-without-going-over uses deferred scoring — no instant match
+  if (question.type === 'closest-without-going-over') return 'none';
+
   const normalizedAnswer = answer.trim().toLowerCase();
   const correctNorm = question.correctAnswer.toLowerCase();
 

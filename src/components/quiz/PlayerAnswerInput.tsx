@@ -117,6 +117,40 @@ export default function PlayerAnswerInput({ question, onSubmit, onSubmitMultiple
     );
   }
 
+  // Closest Without Going Over: numeric input
+  if (question.type === 'closest-without-going-over') {
+    return (
+      <motion.div
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="w-full max-w-md mx-auto space-y-4"
+      >
+        <p className="text-center text-sm font-body text-muted-foreground">
+          🎯 Get as close as you can <span className="font-bold text-primary">without going over!</span>
+        </p>
+        <Input
+          type="number"
+          inputMode="decimal"
+          value={textAnswer}
+          onChange={(e) => setTextAnswer(e.target.value)}
+          placeholder="Enter your guess..."
+          className="text-center text-2xl font-display font-bold h-16 bg-card border-2 border-border text-foreground placeholder:text-muted-foreground rounded-xl"
+          autoFocus
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && textAnswer.trim()) onSubmit(textAnswer.trim());
+          }}
+        />
+        <Button
+          onClick={() => textAnswer.trim() && onSubmit(textAnswer.trim())}
+          disabled={!textAnswer.trim()}
+          className="w-full h-14 text-lg font-display font-bold rounded-xl gradient-fun text-foreground border-none hover:opacity-90"
+        >
+          Lock In Guess 🎯
+        </Button>
+      </motion.div>
+    );
+  }
+
   // Free text / blurred image
   return (
     <motion.div
