@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
-import { QUIZ_QUESTIONS } from '@/data/questions';
+import { QUIZ_QUESTIONS, calculateClosestWithoutGoingOverScores } from '@/data/questions';
 import type { QuizQuestion } from '@/data/questionTypes';
 import type { Player, QuizSession, SessionStatus } from '@/types/quiz';
 import { useTimer } from '@/hooks/useTimer';
