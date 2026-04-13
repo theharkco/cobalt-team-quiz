@@ -74,6 +74,8 @@ export default function PlayerView() {
         timer.stop();
         stopTicking();
         clearPreCountdown();
+        // Refresh player from DB to pick up any host-awarded scores (e.g. from closest-without-going-over)
+        refreshPlayer();
 
         // Use the unified usePreCountdown hook
         startPreCountdown(() => {
@@ -288,17 +290,22 @@ export default function PlayerView() {
             if (error) throw error;
           })
       );
-      const newScore = player.score + points;
-      await retryOnce(() =>
-        supabase
-          .from('players')
-          .update({ score: newScore })
-          .eq('id', player.id)
-          .then(({ error }) => {
-            if (error) throw error;
-          })
-      );
-      setPlayer((prev) => (prev ? { ...prev, score: newScore } : null));
+      // For deferred scoring (e.g. closest-without-going-over), the host will
+      // update the player's score later. Skip the client-side score update to
+      // avoid overwriting host-awarded points with a stale local value.
+      if (!deferred) {
+        const newScore = player.score + points;
+        await retryOnce(() =>
+          supabase
+            .from('players')
+            .update({ score: newScore })
+            .eq('id', player.id)
+            .then(({ error }) => {
+              if (error) throw error;
+            })
+        );
+        setPlayer((prev) => (prev ? { ...prev, score: newScore } : null));
+      }
     } catch (err) {
       console.error('Failed to save answer:', err);
       toast({ title: 'Connection issue', description: 'Your answer may not have been saved.', variant: 'destructive' });
