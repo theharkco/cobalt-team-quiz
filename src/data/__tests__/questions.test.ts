@@ -38,8 +38,8 @@ describe('Types are importable', () => {
 });
 
 describe('QUIZ_QUESTIONS', () => {
-  it('has 15 questions', () => {
-    expect(QUIZ_QUESTIONS).toHaveLength(15);
+  it('has 23 questions', () => {
+    expect(QUIZ_QUESTIONS).toHaveLength(23);
   });
 
   it('each question has required fields', () => {
@@ -112,14 +112,14 @@ describe('checkAnswer', () => {
   });
 
   it('returns close for similar answers (fuzzy match)', () => {
-    const tokyoQ = QUIZ_QUESTIONS.find((q) => q.correctAnswer === 'Tokyo')!;
-    expect(checkAnswer(tokyoQ, 'Tokyoo')).toBe('close');
+    const openAiQ = QUIZ_QUESTIONS.find((q) => q.correctAnswer === 'OpenAI')!;
+    expect(checkAnswer(openAiQ, 'OpenAII')).toBe('close');
   });
 
   it('returns close for substring containment', () => {
-    const daVinciQ = QUIZ_QUESTIONS.find((q) => q.correctAnswer === 'Leonardo da Vinci')!;
-    expect(checkAnswer(daVinciQ, 'leonardo')).toBe('exact');
-    expect(checkAnswer(daVinciQ, 'vinci')).toBe('close');
+    const halQ = QUIZ_QUESTIONS.find((q) => q.correctAnswer === 'HAL 9000')!;
+    expect(checkAnswer(halQ, 'HAL 9000')).toBe('exact');
+    expect(checkAnswer(halQ, '9000')).toBe('close');
   });
 
   it('returns none for completely wrong free-text answer', () => {
