@@ -73,3 +73,30 @@ export function calculateClosestWithoutGoingOverScores(
 
   return result;
 }
+
+/**
+ * Put-in-order: partial credit per correctly positioned item.
+ * 200 pts per correct slot + 200 all-correct bonus + speed bonus (up to 300) when all correct.
+ */
+export function calculatePutInOrderScore(
+  playerOrder: string[],
+  correctOrder: string[],
+  timeTakenMs: number,
+): { points: number; correctCount: number; total: number } {
+  const total = correctOrder.length;
+  let correct = 0;
+  for (let i = 0; i < total; i++) {
+    if ((playerOrder[i] ?? '').trim().toLowerCase() === (correctOrder[i] ?? '').trim().toLowerCase()) {
+      correct++;
+    }
+  }
+  const perSlot = 200;
+  let points = correct * perSlot;
+  if (correct === total && total > 0) {
+    points += 200; // all-correct bonus
+    if (timeTakenMs <= 5000) {
+      points += Math.round(300 * (1 - timeTakenMs / 5000));
+    }
+  }
+  return { points, correctCount: correct, total };
+}

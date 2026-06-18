@@ -59,6 +59,8 @@ export function checkSelectWrongAnswer(
 export function checkAnswer(question: QuizQuestion, answer: string): MatchQuality {
   // Closest-without-going-over uses deferred scoring — no instant match
   if (question.type === 'closest-without-going-over') return 'none';
+  // Put-in-order is scored separately via calculatePutInOrderScore
+  if (question.type === 'put-in-order') return 'none';
 
   const normalizedAnswer = answer.trim().toLowerCase();
   const correctNorm = question.correctAnswer.toLowerCase();
