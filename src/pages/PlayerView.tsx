@@ -395,7 +395,7 @@ export default function PlayerView() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: 'spring', bounce: 0.5 }}
-              className={`text-center p-6 rounded-2xl ${resultKind === 'deferred' ? 'bg-primary/20' : isCorrectResult ? 'bg-quiz-green/20' : 'bg-destructive/20'}`}
+              className={`text-center p-6 rounded-2xl ${resultKind === 'deferred' ? 'bg-primary/20' : resultKind === 'exact' ? 'bg-quiz-green/20' : resultKind === 'close' ? 'bg-yellow-500/20 border-2 border-yellow-500/50' : 'bg-destructive/20'}`}
             >
               <Emoji className="text-5xl mb-2" label="result">
                 {resultKind === 'exact' ? '🎉' : resultKind === 'close' ? '👍' : resultKind === 'timeout' ? '⏰' : resultKind === 'deferred' ? '🎯' : '💥'}
