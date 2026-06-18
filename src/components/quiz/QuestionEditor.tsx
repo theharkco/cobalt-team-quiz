@@ -195,6 +195,41 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
         </div>
       )}
 
+      {/* Put-in-order: 4 ordered slots */}
+      {isOrder && (
+        <div className="space-y-2">
+          <label className="text-sm font-body text-muted-foreground block">
+            Items in <span className="text-primary font-bold">correct order</span> (1st → 4th)
+          </label>
+          {[0, 1, 2, 3].map((i) => {
+            const ordinals = ['1st', '2nd', '3rd', '4th'];
+            const value = form.options[i] ?? '';
+            return (
+              <div key={i} className="flex gap-2 items-center">
+                <div className="w-10 h-10 rounded-full gradient-fun flex items-center justify-center font-display font-bold text-foreground text-xs shrink-0">
+                  {ordinals[i]}
+                </div>
+                <Input
+                  value={value}
+                  onChange={(e) => {
+                    const next = [...form.options];
+                    while (next.length < 4) next.push('');
+                    next[i] = e.target.value;
+                    update('options', next.slice(0, 4));
+                  }}
+                  placeholder={`Item in position ${i + 1}`}
+                  className="bg-muted border-border text-foreground flex-1"
+                />
+              </div>
+            );
+          })}
+          <p className="text-xs text-muted-foreground">
+            Players see these in random order and drag them into the correct order. Partial credit per correct position.
+          </p>
+        </div>
+      )}
+
+
       {/* Options for MC / Music / Select-wrong */}
       <AnimatePresence>
         {needsOptions && (
