@@ -31,6 +31,7 @@ export default function PlayerView() {
   const [answered, setAnswered] = useState(false);
   const [lastPoints, setLastPoints] = useState(0);
   const [resultKind, setResultKind] = useState<ResultKind>('timeout');
+  const [lastPutInOrderPicks, setLastPutInOrderPicks] = useState<string[] | null>(null);
   const [customQuestions, setCustomQuestions] = useState<QuizQuestion[] | null>(null);
   const timer = useTimer();
   const { preCountdown, startPreCountdown, clearPreCountdown } = usePreCountdown();
@@ -71,6 +72,7 @@ export default function PlayerView() {
         setAnswered(false);
         setLastPoints(0);
         setResultKind('timeout');
+        setLastPutInOrderPicks(null);
         timer.stop();
         stopTicking();
         clearPreCountdown();
@@ -231,6 +233,7 @@ export default function PlayerView() {
       const { points, correctCount, total } = calculatePutInOrderScore(playerOrder, correctOrder, timeTaken);
       const isCorrect = correctCount > 0;
       const kind: ResultKind = correctCount === total ? 'exact' : correctCount > 0 ? 'close' : 'wrong';
+      setLastPutInOrderPicks(playerOrder);
       await submitResult(answer, isCorrect, points, timeTaken, kind);
       return;
     }
@@ -434,14 +437,35 @@ export default function PlayerView() {
                         </div>
                       </>
                     );
-                  })() : currentQ.type === 'put-in-order' ? (
-                    <>
-                      <p className="text-xs text-muted-foreground mb-1">Correct order:</p>
-                      <ol className="text-sm font-display font-bold text-quiz-green list-decimal list-inside text-left inline-block">
-                        {(currentQ.options || []).map((opt, i) => (<li key={i}>{opt}</li>))}
-                      </ol>
-                    </>
-                  ) : (
+                  })() : currentQ.type === 'put-in-order' ? (() => {
+                    const correctOrder = currentQ.options || [];
+                    const norm = (s: string) => (s ?? '').trim().toLowerCase();
+                    return (
+                      <>
+                        <p className="text-xs text-muted-foreground mb-2">Your picks vs correct order:</p>
+                        <ul className="space-y-1 text-left">
+                          {correctOrder.map((correct, i) => {
+                            const pick = lastPutInOrderPicks?.[i] ?? '—';
+                            const isRight = norm(pick) === norm(correct);
+                            return (
+                              <li key={i} className={`flex items-center justify-between text-sm font-body px-2 py-1 rounded ${isRight ? 'bg-quiz-green/10' : 'bg-muted/40'}`}>
+                                <span className="flex items-center gap-2 min-w-0">
+                                  <span className="text-xs text-muted-foreground w-4">{i + 1}.</span>
+                                  <span className={isRight ? 'text-quiz-green font-bold' : 'text-muted-foreground line-through truncate'}>{pick}</span>
+                                  {!isRight && (
+                                    <span className="text-xs text-quiz-green/80 truncate">→ {correct}</span>
+                                  )}
+                                </span>
+                                <span className={`text-xs font-display font-bold ${isRight ? 'text-quiz-green' : 'text-muted-foreground/60'}`}>
+                                  {isRight ? '✓ +200' : '✗ +0'}
+                                </span>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </>
+                    );
+                  })() : (
                     <>
                       <p className="text-xs text-muted-foreground mb-1">The answer:</p>
                       <p className="text-sm font-display font-bold text-quiz-green">{currentQ.correctAnswer}</p>
