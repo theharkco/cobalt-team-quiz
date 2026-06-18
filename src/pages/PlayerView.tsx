@@ -434,7 +434,14 @@ export default function PlayerView() {
                         </div>
                       </>
                     );
-                  })() : (
+                  })() : currentQ.type === 'put-in-order' ? (
+                    <>
+                      <p className="text-xs text-muted-foreground mb-1">Correct order:</p>
+                      <ol className="text-sm font-display font-bold text-quiz-green list-decimal list-inside text-left inline-block">
+                        {(currentQ.options || []).map((opt, i) => (<li key={i}>{opt}</li>))}
+                      </ol>
+                    </>
+                  ) : (
                     <>
                       <p className="text-xs text-muted-foreground mb-1">The answer:</p>
                       <p className="text-sm font-display font-bold text-quiz-green">{currentQ.correctAnswer}</p>
