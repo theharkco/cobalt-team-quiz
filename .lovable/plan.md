@@ -1,59 +1,31 @@
+## Plan: Per-Slot Breakdown for "Put in Order" (Player View)
 
+After a player submits their order, show a compact slot-by-slot breakdown — each of the 4 items marked correct/wrong with the points contributed — before they see the leaderboard.
 
-## Plan: "Closest Without Going Over" Question Type
+### Where
+`src/pages/PlayerView.tsx`, inside the existing `answered` result card (the green/yellow/red feedback box), within the `currentQ.type === 'put-in-order'` branch.
 
-### Key Design Challenge
+### What to show
+For each slot 1–4, a row with:
+- Slot number
+- The player's pick
+- ✓ (green) if it matches the correct item at that index, ✗ (red) if not
+- `+200` next to correct slots, dimmed `+0` next to wrong ones
 
-Unlike all existing question types where each player scores independently at submit time, this type requires **collective scoring** — points depend on how a player's guess ranks against all other players' guesses. This means scoring must be **deferred** until all answers are in.
+Below the rows: a small summary line like `3 / 4 correct • +600 pts` (plus `+200 all-correct bonus` and `+XXX speed bonus` when applicable).
 
-### Architecture
+### Data flow
+The player's submitted order is already JSON-encoded into the `answer` string in `handleSubmitAnswer`. To render the breakdown we need the parsed array available at render time. Store it in a new `lastPutInOrderPicks: string[] | null` state, set it inside `handleSubmitAnswer` right before calling `submitResult`, and clear it on question transition (alongside `setLastPoints(0)`).
 
-```text
-Player submits guess → stored with 0 points
-Timer expires / all answered → Host triggers rank-based scoring
-Host fetches all answers → filters overshots → ranks by proximity → assigns points → batch updates
-```
+Use the existing `calculatePutInOrderScore` return values (`correctCount`, `total`) for the summary; per-slot correctness is recomputed inline by comparing `lastPutInOrderPicks[i]` to `currentQ.options[i]` (same case-insensitive compare as scoring).
 
-### Files to Change
+### Visual
+- Reuse existing card styling (`bg-card border border-border rounded-xl`)
+- Correct rows: `text-quiz-green` with ✓
+- Wrong rows: `text-muted-foreground` with ✗ and strikethrough on the pick
+- The correct order list that already renders stays — it acts as the answer key shown alongside the breakdown
 
-**1. Type definition (`src/data/questionTypes.ts`)**
-- Add `'closest-without-going-over'` to `QuestionType`
-- Add `numericAnswer?: number` field to `QuizQuestion` for the correct numeric value
-
-**2. Scoring logic (`src/data/scoring.ts`)**
-- Add `calculateClosestWithoutGoingOverScores(guesses: {playerId: string, answer: number}[], correctAnswer: number): Map<string, number>`
-- Filter out guesses > correctAnswer (0 points)
-- Sort remaining by distance ascending
-- Sliding scale: 1st place = 1000pts, 2nd = 700, 3rd = 400, 4th = 200, rest = 100
-
-**3. Player input (`src/components/quiz/PlayerAnswerInput.tsx`)**
-- Add numeric input mode for this question type (number input field + submit button)
-
-**4. Player answer handling (`src/pages/PlayerView.tsx`)**
-- For `closest-without-going-over`, submit the numeric guess with `points: 0` (deferred scoring)
-- Show "Waiting for all guesses..." instead of instant score feedback
-- After host scores, show the result via player score refresh
-
-**5. Host scoring logic (`src/pages/HostView.tsx`)**
-- When `showAnswer` becomes true for this type, fetch all answers for the current question from the database
-- Run `calculateClosestWithoutGoingOverScores` to determine rank-based points
-- Batch update each answer's `points_earned` and each player's `score` in the database
-- Display a ranked results table showing each player's guess, distance, and points earned
-
-**6. Answer reveal UI (both views)**
-- Host: show correct number + ranked list of guesses with points
-- Player: show correct number + their guess + whether they went over
-
-**7. Quiz Editor (`src/components/quiz/QuestionEditor.tsx`)**
-- Add the new type to the dropdown
-- Show a "Correct Number" input (numeric) instead of text correct answer
-- No options needed for this type
-
-**8. Quiz persistence (`src/pages/QuizCreator.tsx`)**
-- Map `numericAnswer` to `correct_answer` (stored as string, parsed back to number)
-- Handle loading for this type
-
-**9. Re-exports (`src/data/questions.ts`, `src/data/answerMatching.ts`)**
-- Export new scoring function
-- `checkAnswer` returns `'none'` for this type (scoring is deferred)
-
+### Out of scope
+- Host view (per user choice)
+- Other question types (per user choice)
+- No DB schema or scoring logic changes
