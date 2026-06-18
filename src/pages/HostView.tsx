@@ -473,7 +473,14 @@ export default function HostView() {
                       </div>
                     </>
                   );
-                })() : (
+                })() : currentQ.type === 'put-in-order' ? (
+                  <>
+                    <p className="text-muted-foreground font-body mb-2">🔀 Correct order:</p>
+                    <ol className="text-xl font-display font-bold text-quiz-green list-decimal list-inside text-left inline-block space-y-1">
+                      {(currentQ.options || []).map((opt, i) => (<li key={i}>{opt}</li>))}
+                    </ol>
+                  </>
+                ) : (
                   <>
                     <p className="text-muted-foreground font-body mb-1">The answer:</p>
                     <p className="text-3xl font-display font-bold text-quiz-green">{currentQ.correctAnswer}</p>
