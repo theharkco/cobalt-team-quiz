@@ -152,8 +152,37 @@ export default function QuestionDisplay({
         <MusicEmbed spotifyEmbedUrl={question.spotifyEmbedUrl} />
       )}
 
+      {/* Put-in-order: numbered correct list (host only) */}
+      {isHost && !hideOptions && question.type === 'put-in-order' && question.options && (
+        <div className="max-w-md mx-auto space-y-2 mt-4">
+          {!revealAnswer && (
+            <p className="text-center text-sm font-body text-muted-foreground mb-2">
+              🔀 Players are putting these in the correct order...
+            </p>
+          )}
+          {(revealAnswer ? question.options : [...question.options].sort()).map((option, i) => (
+            <motion.div
+              key={option + i}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2 + i * 0.08, type: 'spring', bounce: 0.4 }}
+              className={`flex items-center gap-3 bg-card border-2 rounded-xl p-3 md:p-4 ${
+                revealAnswer ? 'border-quiz-green' : 'border-border'
+              }`}
+            >
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-display font-bold text-foreground text-sm shrink-0 ${
+                revealAnswer ? 'bg-quiz-green' : 'bg-muted'
+              }`}>
+                {revealAnswer ? i + 1 : '?'}
+              </div>
+              <span className="text-lg md:text-xl font-display font-bold text-foreground">{option}</span>
+            </motion.div>
+          ))}
+        </div>
+      )}
+
       {/* Multiple choice / select-wrong options (host view - display only) */}
-      {isHost && !hideOptions && question.options && (
+      {isHost && !hideOptions && question.options && question.type !== 'put-in-order' && (
         <div className={`grid ${question.options.length > 4 ? 'grid-cols-3' : 'grid-cols-2'} gap-4 mt-4`}>
           {question.options.map((option, i) => {
             const isCorrectAnswer = question.type === 'select-wrong'

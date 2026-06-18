@@ -72,6 +72,9 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
       if (form.numericAnswer === '' || isNaN(Number(form.numericAnswer))) return;
     } else if (form.type === 'select-wrong') {
       if (form.correctAnswers.length === 0) return;
+    } else if (form.type === 'put-in-order') {
+      const filled = form.options.filter((o) => o.trim()).length;
+      if (filled < 2) return;
     } else {
       if (!form.correctAnswer.trim()) return;
     }
@@ -79,6 +82,7 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
   };
 
   const isClosest = form.type === 'closest-without-going-over';
+  const isOrder = form.type === 'put-in-order';
 
   const needsOptions = form.type === 'multiple-choice' || form.type === 'music' || form.type === 'select-wrong';
   const needsImage = form.type === 'blurred-image';
@@ -119,6 +123,7 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
               <SelectItem value="music">Music</SelectItem>
               <SelectItem value="select-wrong">Select Wrong Answers</SelectItem>
               <SelectItem value="closest-without-going-over">Closest Without Going Over</SelectItem>
+              <SelectItem value="put-in-order">Put in Order</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -160,7 +165,7 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
       </div>
 
       {/* Correct answer (not for select-wrong or closest) */}
-      {!needsCorrectAnswers && !isClosest && (
+      {!needsCorrectAnswers && !isClosest && !isOrder && (
         <div>
           <label className="text-sm font-body text-muted-foreground mb-1 block">Correct Answer *</label>
           <Input
@@ -189,6 +194,41 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
           </p>
         </div>
       )}
+
+      {/* Put-in-order: 4 ordered slots */}
+      {isOrder && (
+        <div className="space-y-2">
+          <label className="text-sm font-body text-muted-foreground block">
+            Items in <span className="text-primary font-bold">correct order</span> (1st → 4th)
+          </label>
+          {[0, 1, 2, 3].map((i) => {
+            const ordinals = ['1st', '2nd', '3rd', '4th'];
+            const value = form.options[i] ?? '';
+            return (
+              <div key={i} className="flex gap-2 items-center">
+                <div className="w-10 h-10 rounded-full gradient-fun flex items-center justify-center font-display font-bold text-foreground text-xs shrink-0">
+                  {ordinals[i]}
+                </div>
+                <Input
+                  value={value}
+                  onChange={(e) => {
+                    const next = [...form.options];
+                    while (next.length < 4) next.push('');
+                    next[i] = e.target.value;
+                    update('options', next.slice(0, 4));
+                  }}
+                  placeholder={`Item in position ${i + 1}`}
+                  className="bg-muted border-border text-foreground flex-1"
+                />
+              </div>
+            );
+          })}
+          <p className="text-xs text-muted-foreground">
+            Players see these in random order and drag them into the correct order. Partial credit per correct position.
+          </p>
+        </div>
+      )}
+
 
       {/* Options for MC / Music / Select-wrong */}
       <AnimatePresence>
@@ -342,7 +382,7 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
       <div className="flex gap-3 pt-2">
         <Button
           onClick={handleSave}
-          disabled={!form.question.trim() || (isClosest ? (form.numericAnswer === '' || isNaN(Number(form.numericAnswer))) : needsCorrectAnswers ? form.correctAnswers.length === 0 : !form.correctAnswer.trim())}
+          disabled={!form.question.trim() || (isClosest ? (form.numericAnswer === '' || isNaN(Number(form.numericAnswer))) : isOrder ? form.options.filter((o) => o.trim()).length < 2 : needsCorrectAnswers ? form.correctAnswers.length === 0 : !form.correctAnswer.trim())}
           className="flex-1 h-12 font-display font-bold rounded-xl gradient-fun text-foreground border-none hover:opacity-90"
         >
           ✅ Save Question

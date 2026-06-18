@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
-import { QUIZ_QUESTIONS, checkAnswer, calculateScore, checkSelectWrongAnswer, calculateSelectWrongScore } from '@/data/questions';
+import { QUIZ_QUESTIONS, checkAnswer, calculateScore, checkSelectWrongAnswer, calculateSelectWrongScore, calculatePutInOrderScore } from '@/data/questions';
 import type { QuizQuestion } from '@/data/questionTypes';
 import type { Player, QuizSession } from '@/types/quiz';
 import QuestionDisplay from '@/components/quiz/QuestionDisplay';
@@ -223,6 +223,19 @@ export default function PlayerView() {
       return;
     }
 
+    // Put-in-order: parse JSON-encoded player order and score by position
+    if (question.type === 'put-in-order') {
+      let playerOrder: string[] = [];
+      try { playerOrder = JSON.parse(answer); } catch { playerOrder = []; }
+      const correctOrder = question.options || [];
+      const { points, correctCount, total } = calculatePutInOrderScore(playerOrder, correctOrder, timeTaken);
+      const isCorrect = correctCount > 0;
+      const kind: ResultKind = correctCount === total ? 'exact' : correctCount > 0 ? 'close' : 'wrong';
+      await submitResult(answer, isCorrect, points, timeTaken, kind);
+      return;
+    }
+
+
     const mq = checkAnswer(question, answer);
     const isCorrect = mq !== 'none';
     const points = calculateScore(mq, timeTaken, totalTimeMs);
@@ -421,7 +434,14 @@ export default function PlayerView() {
                         </div>
                       </>
                     );
-                  })() : (
+                  })() : currentQ.type === 'put-in-order' ? (
+                    <>
+                      <p className="text-xs text-muted-foreground mb-1">Correct order:</p>
+                      <ol className="text-sm font-display font-bold text-quiz-green list-decimal list-inside text-left inline-block">
+                        {(currentQ.options || []).map((opt, i) => (<li key={i}>{opt}</li>))}
+                      </ol>
+                    </>
+                  ) : (
                     <>
                       <p className="text-xs text-muted-foreground mb-1">The answer:</p>
                       <p className="text-sm font-display font-bold text-quiz-green">{currentQ.correctAnswer}</p>

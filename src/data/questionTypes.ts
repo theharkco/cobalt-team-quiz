@@ -1,4 +1,4 @@
-export type QuestionType = 'multiple-choice' | 'free-text' | 'blurred-image' | 'music' | 'select-wrong' | 'closest-without-going-over';
+export type QuestionType = 'multiple-choice' | 'free-text' | 'blurred-image' | 'music' | 'select-wrong' | 'closest-without-going-over' | 'put-in-order';
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
 export interface QuizQuestion {
