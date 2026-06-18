@@ -141,7 +141,9 @@ export default function QuizCreator() {
         options: q.data.options.filter(Boolean).length > 0 ? q.data.options.filter(Boolean) : null,
         correct_answer: q.data.type === 'closest-without-going-over'
           ? String(q.data.numericAnswer)
-          : q.data.type === 'select-wrong' ? (q.data.correctAnswers[0] || '') : q.data.correctAnswer,
+          : q.data.type === 'select-wrong' ? (q.data.correctAnswers[0] || '')
+          : q.data.type === 'put-in-order' ? JSON.stringify(q.data.options.filter(Boolean))
+          : q.data.correctAnswer,
         acceptable_answers: q.data.type === 'select-wrong'
           ? (q.data.correctAnswers.length > 0 ? q.data.correctAnswers : null)
           : (q.data.acceptableAnswers.length > 0 ? q.data.acceptableAnswers : null),
