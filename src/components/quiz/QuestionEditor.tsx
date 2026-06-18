@@ -72,6 +72,9 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
       if (form.numericAnswer === '' || isNaN(Number(form.numericAnswer))) return;
     } else if (form.type === 'select-wrong') {
       if (form.correctAnswers.length === 0) return;
+    } else if (form.type === 'put-in-order') {
+      const filled = form.options.filter((o) => o.trim()).length;
+      if (filled < 2) return;
     } else {
       if (!form.correctAnswer.trim()) return;
     }
@@ -79,6 +82,7 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
   };
 
   const isClosest = form.type === 'closest-without-going-over';
+  const isOrder = form.type === 'put-in-order';
 
   const needsOptions = form.type === 'multiple-choice' || form.type === 'music' || form.type === 'select-wrong';
   const needsImage = form.type === 'blurred-image';
