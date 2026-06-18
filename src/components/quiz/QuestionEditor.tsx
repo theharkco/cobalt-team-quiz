@@ -123,6 +123,7 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
               <SelectItem value="music">Music</SelectItem>
               <SelectItem value="select-wrong">Select Wrong Answers</SelectItem>
               <SelectItem value="closest-without-going-over">Closest Without Going Over</SelectItem>
+              <SelectItem value="put-in-order">Put in Order</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -164,7 +165,7 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
       </div>
 
       {/* Correct answer (not for select-wrong or closest) */}
-      {!needsCorrectAnswers && !isClosest && (
+      {!needsCorrectAnswers && !isClosest && !isOrder && (
         <div>
           <label className="text-sm font-body text-muted-foreground mb-1 block">Correct Answer *</label>
           <Input
