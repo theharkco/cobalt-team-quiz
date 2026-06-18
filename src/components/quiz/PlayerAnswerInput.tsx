@@ -121,6 +121,12 @@ export default function PlayerAnswerInput({ question, onSubmit, onSubmitMultiple
     );
   }
 
+  // Put-in-order: drag-and-drop ranking
+  if (question.type === 'put-in-order') {
+    return <PutInOrderInput question={question} onSubmit={onSubmit} />;
+  }
+
+
   // Closest Without Going Over: numeric input
   if (question.type === 'closest-without-going-over') {
     return (
