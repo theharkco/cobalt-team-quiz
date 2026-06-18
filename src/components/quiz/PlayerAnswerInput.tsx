@@ -188,3 +188,94 @@ export default function PlayerAnswerInput({ question, onSubmit, onSubmitMultiple
     </motion.div>
   );
 }
+
+// ---------- Put-in-Order drag list ----------
+
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  // Avoid the (very rare) case where shuffle returns same order
+  if (arr.length > 1 && a.every((v, i) => v === arr[i])) {
+    [a[0], a[1]] = [a[1], a[0]];
+  }
+  return a;
+}
+
+function PutInOrderInput({ question, onSubmit }: { question: QuizQuestion; onSubmit: (answer: string) => void }) {
+  const initial = useMemo(() => shuffle(question.options || []), [question.id]);
+  const [order, setOrder] = useState<string[]>(initial);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    setOrder((prev) => {
+      const oldIndex = prev.indexOf(String(active.id));
+      const newIndex = prev.indexOf(String(over.id));
+      if (oldIndex === -1 || newIndex === -1) return prev;
+      return arrayMove(prev, oldIndex, newIndex);
+    });
+  };
+
+  return (
+    <motion.div
+      initial={{ y: 20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      className="w-full max-w-md mx-auto space-y-4"
+    >
+      <p className="text-center text-sm font-body text-muted-foreground">
+        🔀 Drag to reorder — <span className="font-bold text-primary">top = first</span>
+      </p>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={order} strategy={verticalListSortingStrategy}>
+          <div className="space-y-2">
+            {order.map((item, i) => (
+              <SortableOrderItem key={item} id={item} label={item} position={i + 1} />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
+      <Button
+        onClick={() => onSubmit(JSON.stringify(order))}
+        className="w-full h-14 text-lg font-display font-bold rounded-xl gradient-fun text-foreground border-none hover:opacity-90"
+      >
+        Lock In Order 🔒
+      </Button>
+    </motion.div>
+  );
+}
+
+function SortableOrderItem({ id, label, position }: { id: string; label: string; position: number }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : undefined,
+    opacity: isDragging ? 0.85 : 1,
+  };
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className={`flex items-center gap-3 bg-card border-2 border-border rounded-xl p-3 md:p-4 touch-none cursor-grab active:cursor-grabbing ${
+        isDragging ? 'shadow-lg ring-2 ring-primary/50 border-primary' : 'hover:border-primary/40'
+      }`}
+    >
+      <div className="w-9 h-9 rounded-full gradient-fun flex items-center justify-center font-display font-bold text-foreground text-sm shrink-0">
+        {position}
+      </div>
+      <span className="flex-1 font-display font-bold text-foreground text-base md:text-lg">{label}</span>
+      <GripVertical className="w-5 h-5 text-muted-foreground shrink-0" />
+    </div>
+  );
+}
+
