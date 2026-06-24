@@ -299,6 +299,12 @@ export default function HostView() {
       await updateStatus('finished');
       await refreshPlayers();
     } else {
+      // Reset reveal state BEFORE the session update so the new question
+      // never renders momentarily with the previous reveal styling.
+      setShowAnswer(false);
+      setHasScored(false);
+      setRankedGuesses([]);
+      setAnswerCount(0);
       await updateStatus('question', next, { question_started_at: null });
       startQuestionWithPreCountdown(next);
     }
