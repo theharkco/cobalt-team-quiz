@@ -252,7 +252,24 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
       )}
 
 
-      {/* Options for MC / Music / Select-wrong */}
+      {/* Highbrow input-type selector (highbrow-lowbrow only) */}
+      {isHighbrowLowbrow && (
+        <div>
+          <label className="text-sm font-body text-muted-foreground mb-1 block">🎩 Highbrow Input Type</label>
+          <Select value={form.highbrowInputType} onValueChange={(v) => update('highbrowInputType', v as 'multiple-choice' | 'free-text')}>
+            <SelectTrigger className="bg-muted border-border">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="multiple-choice">Multiple Choice</SelectItem>
+              <SelectItem value="free-text">Free Text</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {/* Options for MC / Music / Select-wrong / Highbrow-MC */}
+
       <AnimatePresence>
         {needsOptions && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="space-y-2 overflow-hidden">
