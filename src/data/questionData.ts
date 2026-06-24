@@ -245,7 +245,23 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     category: 'Music',
     difficulty: 'hard',
   },
+  {
+    id: 24,
+    type: 'highbrow-lowbrow',
+    question: '🎩 Which 1818 epistolary novel about a creature stitched from corpses is widely cited as the first work of science fiction?',
+    lowbrowQuestion: '🎈 What classic horror monster has bolts in his neck and was reanimated by a mad scientist?',
+    highbrowInputType: 'free-text',
+    lowbrowInputType: 'multiple-choice',
+    options: [],
+    lowbrowOptions: ['Dracula', 'Frankenstein', 'The Mummy', 'The Wolf Man'],
+    correctAnswer: 'Frankenstein',
+    acceptableAnswers: ['frankenstein', "frankenstein's monster", 'mary shelley frankenstein'],
+    category: 'Literature',
+    difficulty: 'medium',
+    explanation: "Mary Shelley's Frankenstein (1818) is often credited as the first true sci-fi novel.",
+  },
 ];
+
 
 export const PLAYER_COLORS = [
   '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
