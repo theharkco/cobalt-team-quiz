@@ -238,8 +238,32 @@ export default function PlayerView() {
       return;
     }
 
+    // Highbrow/Lowbrow: parse { side, answer } and score 200/100/0
+    if (question.type === 'highbrow-lowbrow') {
+      let side: 'highbrow' | 'lowbrow' = 'highbrow';
+      let rawAnswer = '';
+      try {
+        const parsed = JSON.parse(answer);
+        side = parsed.side === 'lowbrow' ? 'lowbrow' : 'highbrow';
+        rawAnswer = String(parsed.answer ?? '');
+      } catch {
+        rawAnswer = answer;
+      }
+      // Reuse checkAnswer (compares against correctAnswer + acceptableAnswers).
+      // Strict for MC, fuzzy for free-text.
+      const effectiveType = side === 'highbrow'
+        ? (question.highbrowInputType ?? 'multiple-choice')
+        : (question.lowbrowInputType ?? 'multiple-choice');
+      const probe: QuizQuestion = { ...question, type: effectiveType };
+      const mq = checkAnswer(probe, rawAnswer);
+      const isCorrect = mq !== 'none';
+      const pts = calculateHighbrowLowbrowScore(isCorrect, side);
+      const kind: ResultKind = isCorrect ? 'exact' : 'wrong';
+      await submitResult(answer, isCorrect, pts, timeTaken, kind);
+      return;
+    }
 
-    const mq = checkAnswer(question, answer);
+
     const isCorrect = mq !== 'none';
     const points = calculateScore(mq, timeTaken, totalTimeMs);
     const kind: ResultKind = mq === 'exact' ? 'exact' : mq === 'close' ? 'close' : 'wrong';
