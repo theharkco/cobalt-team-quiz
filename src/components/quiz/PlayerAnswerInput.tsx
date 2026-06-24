@@ -126,6 +126,12 @@ export default function PlayerAnswerInput({ question, onSubmit, onSubmitMultiple
     return <PutInOrderInput question={question} onSubmit={onSubmit} />;
   }
 
+  // Highbrow/Lowbrow: two-stage answer with optional reveal
+  if (question.type === 'highbrow-lowbrow') {
+    return <HighbrowLowbrowInput question={question} onSubmit={onSubmit} />;
+  }
+
+
 
   // Closest Without Going Over: numeric input
   if (question.type === 'closest-without-going-over') {
