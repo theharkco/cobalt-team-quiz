@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
-import { QUIZ_QUESTIONS, checkAnswer, calculateScore, checkSelectWrongAnswer, calculateSelectWrongScore, calculatePutInOrderScore } from '@/data/questions';
+import { QUIZ_QUESTIONS, checkAnswer, calculateScore, checkSelectWrongAnswer, calculateSelectWrongScore, calculatePutInOrderScore, calculateHighbrowLowbrowScore } from '@/data/questions';
 import type { QuizQuestion } from '@/data/questionTypes';
 import type { Player, QuizSession } from '@/types/quiz';
 import QuestionDisplay from '@/components/quiz/QuestionDisplay';
