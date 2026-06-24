@@ -174,14 +174,17 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
 
       {/* Question text */}
       <div>
-        <label className="text-sm font-body text-muted-foreground mb-1 block">Question *</label>
+        <label className="text-sm font-body text-muted-foreground mb-1 block">
+          {isHighbrowLowbrow ? '🎩 Highbrow Prompt (200 pts) *' : 'Question *'}
+        </label>
         <Textarea
           value={form.question}
           onChange={(e) => update('question', e.target.value)}
-          placeholder="Enter your question..."
+          placeholder={isHighbrowLowbrow ? 'Enter the harder version of the question...' : 'Enter your question...'}
           className="bg-muted border-border text-foreground min-h-[80px]"
         />
       </div>
+
 
       {/* Correct answer (not for select-wrong or closest) */}
       {!needsCorrectAnswers && !isClosest && !isOrder && (
