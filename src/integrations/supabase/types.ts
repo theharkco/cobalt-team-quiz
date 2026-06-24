@@ -74,8 +74,12 @@ export type Database = {
           created_at: string
           difficulty: string | null
           explanation: string | null
+          highbrow_input_type: string | null
           id: string
           image_url: string | null
+          lowbrow_input_type: string | null
+          lowbrow_options: Json | null
+          lowbrow_question: string | null
           options: Json | null
           question: string
           quiz_id: string
@@ -92,8 +96,12 @@ export type Database = {
           created_at?: string
           difficulty?: string | null
           explanation?: string | null
+          highbrow_input_type?: string | null
           id?: string
           image_url?: string | null
+          lowbrow_input_type?: string | null
+          lowbrow_options?: Json | null
+          lowbrow_question?: string | null
           options?: Json | null
           question: string
           quiz_id: string
@@ -110,8 +118,12 @@ export type Database = {
           created_at?: string
           difficulty?: string | null
           explanation?: string | null
+          highbrow_input_type?: string | null
           id?: string
           image_url?: string | null
+          lowbrow_input_type?: string | null
+          lowbrow_options?: Json | null
+          lowbrow_question?: string | null
           options?: Json | null
           question?: string
           quiz_id?: string

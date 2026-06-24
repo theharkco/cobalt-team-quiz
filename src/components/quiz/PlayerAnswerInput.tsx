@@ -126,6 +126,12 @@ export default function PlayerAnswerInput({ question, onSubmit, onSubmitMultiple
     return <PutInOrderInput question={question} onSubmit={onSubmit} />;
   }
 
+  // Highbrow/Lowbrow: two-stage answer with optional reveal
+  if (question.type === 'highbrow-lowbrow') {
+    return <HighbrowLowbrowInput question={question} onSubmit={onSubmit} />;
+  }
+
+
 
   // Closest Without Going Over: numeric input
   if (question.type === 'closest-without-going-over') {
@@ -278,4 +284,108 @@ function SortableOrderItem({ id, label, position }: { id: string; label: string;
     </div>
   );
 }
+
+// ---------- Highbrow / Lowbrow ----------
+
+function HighbrowLowbrowInput({ question, onSubmit }: { question: QuizQuestion; onSubmit: (answer: string) => void }) {
+  const [side, setSide] = useState<'highbrow' | 'lowbrow'>('highbrow');
+  const [textAnswer, setTextAnswer] = useState('');
+
+  const inputType = side === 'highbrow'
+    ? (question.highbrowInputType ?? 'multiple-choice')
+    : (question.lowbrowInputType ?? 'multiple-choice');
+  const opts = side === 'highbrow'
+    ? (question.options ?? [])
+    : (question.lowbrowOptions ?? []);
+  const prompt = side === 'highbrow'
+    ? question.question
+    : (question.lowbrowQuestion ?? '');
+  const points = side === 'highbrow' ? 200 : 100;
+
+  const submit = (answer: string) => {
+    onSubmit(JSON.stringify({ side, answer }));
+  };
+
+  return (
+    <motion.div
+      key={side}
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="w-full max-w-lg mx-auto space-y-4"
+    >
+      <div className="flex items-center justify-center gap-2">
+        <span
+          className={`px-4 py-1.5 rounded-full font-display font-bold text-sm tracking-wide ${
+            side === 'highbrow'
+              ? 'bg-quiz-purple text-foreground'
+              : 'bg-quiz-orange text-foreground'
+          }`}
+        >
+          {side === 'highbrow' ? '🎩 HIGHBROW' : '🎈 LOWBROW'} · {points} PTS
+        </span>
+      </div>
+
+      {side === 'lowbrow' && (
+        <div className="text-center text-xs font-body text-muted-foreground">
+          Highbrow locked — answering this for {points} points
+        </div>
+      )}
+
+      <div className="bg-card border-2 border-border rounded-2xl p-4 md:p-5">
+        <p className="text-lg md:text-xl font-display font-bold text-foreground text-center">
+          {prompt}
+        </p>
+      </div>
+
+      {inputType === 'multiple-choice' ? (
+        <div className="grid grid-cols-2 gap-3">
+          {opts.map((option, i) => (
+            <motion.button
+              key={`${side}-${i}`}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: i * 0.05, type: 'spring', bounce: 0.5 }}
+              onClick={() => submit(option)}
+              className={`${optionColors[i % optionColors.length]} rounded-xl p-4 md:p-5 text-center transition-transform font-display font-bold text-foreground text-base md:text-lg border-none cursor-pointer`}
+            >
+              <span className="text-xl mr-2">{optionIcons[i % optionIcons.length]}</span>
+              {option}
+            </motion.button>
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <Input
+            value={textAnswer}
+            onChange={(e) => setTextAnswer(e.target.value)}
+            placeholder="Type your answer..."
+            className="text-center text-lg font-body h-14 bg-card border-2 border-border text-foreground placeholder:text-muted-foreground rounded-xl"
+            autoFocus
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && textAnswer.trim()) submit(textAnswer.trim());
+            }}
+          />
+          <Button
+            onClick={() => textAnswer.trim() && submit(textAnswer.trim())}
+            disabled={!textAnswer.trim()}
+            className="w-full h-14 text-lg font-display font-bold rounded-xl gradient-fun text-foreground border-none hover:opacity-90"
+          >
+            Submit Answer 🚀
+          </Button>
+        </div>
+      )}
+
+      {side === 'highbrow' && question.lowbrowQuestion && (
+        <Button
+          onClick={() => { setTextAnswer(''); setSide('lowbrow'); }}
+          variant="outline"
+          className="w-full h-12 font-display font-bold rounded-xl border-2 border-quiz-orange/60 text-quiz-orange hover:bg-quiz-orange/10 hover:text-quiz-orange"
+        >
+          🎈 Reveal Lowbrow Question (for 100 points)
+        </Button>
+      )}
+    </motion.div>
+  );
+}
+
 

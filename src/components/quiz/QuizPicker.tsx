@@ -72,7 +72,16 @@ export default function QuizPicker({ onSelect, onBack }: Props) {
       category: (q.category as string | null) || undefined,
       difficulty: (q.difficulty as QuizQuestion['difficulty']) || undefined,
       explanation: (q.explanation as string | null) || undefined,
+      timeLimitSeconds: (q.time_limit_seconds as number | null) || 15,
+      numericAnswer: (q.type as string) === 'closest-without-going-over'
+        ? parseFloat(q.correct_answer as string)
+        : undefined,
+      lowbrowQuestion: (q.lowbrow_question as string | null) || undefined,
+      highbrowInputType: (q.highbrow_input_type as 'multiple-choice' | 'free-text' | null) || undefined,
+      lowbrowInputType: (q.lowbrow_input_type as 'multiple-choice' | 'free-text' | null) || undefined,
+      lowbrowOptions: (q.lowbrow_options as string[] | null) || undefined,
     }));
+
 
     onSelect(questions, quiz.id);
   };

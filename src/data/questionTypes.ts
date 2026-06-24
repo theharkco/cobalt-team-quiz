@@ -1,5 +1,7 @@
-export type QuestionType = 'multiple-choice' | 'free-text' | 'blurred-image' | 'music' | 'select-wrong' | 'closest-without-going-over' | 'put-in-order';
+export type QuestionType = 'multiple-choice' | 'free-text' | 'blurred-image' | 'music' | 'select-wrong' | 'closest-without-going-over' | 'put-in-order' | 'highbrow-lowbrow';
 export type Difficulty = 'easy' | 'medium' | 'hard';
+
+export type HighbrowLowbrowInputType = 'multiple-choice' | 'free-text';
 
 export interface QuizQuestion {
   id: number;
@@ -17,6 +19,11 @@ export interface QuizQuestion {
   correctAnswers?: string[]; // for select-wrong: the correct options (players must avoid these)
   timeLimitSeconds?: number; // per-question time limit, defaults to 15
   numericAnswer?: number; // for closest-without-going-over: the correct numeric value
+  // highbrow-lowbrow: same correct answer, two prompts with independent input modes
+  lowbrowQuestion?: string;
+  highbrowInputType?: HighbrowLowbrowInputType;
+  lowbrowInputType?: HighbrowLowbrowInputType;
+  lowbrowOptions?: string[];
 }
 
 export type MatchQuality = 'exact' | 'close' | 'none';

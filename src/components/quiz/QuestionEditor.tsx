@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import type { QuestionType, Difficulty } from '@/data/questionTypes';
+import type { QuestionType, Difficulty, HighbrowLowbrowInputType } from '@/data/questionTypes';
 
 export interface QuestionFormData {
   type: QuestionType;
@@ -22,6 +22,11 @@ export interface QuestionFormData {
   explanation: string;
   timeLimitSeconds: number;
   numericAnswer: number | '';
+  // highbrow-lowbrow
+  lowbrowQuestion: string;
+  highbrowInputType: HighbrowLowbrowInputType;
+  lowbrowInputType: HighbrowLowbrowInputType;
+  lowbrowOptions: string[];
 }
 
 const DEFAULT_BLUR_LEVELS = [50, 38, 28, 18, 10, 4, 0];
@@ -42,8 +47,13 @@ function createEmptyQuestion(): QuestionFormData {
     explanation: '',
     timeLimitSeconds: 15,
     numericAnswer: '',
+    lowbrowQuestion: '',
+    highbrowInputType: 'multiple-choice',
+    lowbrowInputType: 'multiple-choice',
+    lowbrowOptions: ['', '', '', ''],
   };
 }
+
 
 interface Props {
   initialData?: QuestionFormData;
@@ -75,6 +85,11 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
     } else if (form.type === 'put-in-order') {
       const filled = form.options.filter((o) => o.trim()).length;
       if (filled < 2) return;
+    } else if (form.type === 'highbrow-lowbrow') {
+      if (!form.correctAnswer.trim()) return;
+      if (!form.lowbrowQuestion.trim()) return;
+      if (form.highbrowInputType === 'multiple-choice' && form.options.filter((o) => o.trim()).length < 2) return;
+      if (form.lowbrowInputType === 'multiple-choice' && form.lowbrowOptions.filter((o) => o.trim()).length < 2) return;
     } else {
       if (!form.correctAnswer.trim()) return;
     }
@@ -83,12 +98,14 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
 
   const isClosest = form.type === 'closest-without-going-over';
   const isOrder = form.type === 'put-in-order';
+  const isHighbrowLowbrow = form.type === 'highbrow-lowbrow';
 
-  const needsOptions = form.type === 'multiple-choice' || form.type === 'music' || form.type === 'select-wrong';
+  const needsOptions = form.type === 'multiple-choice' || form.type === 'music' || form.type === 'select-wrong' || (isHighbrowLowbrow && form.highbrowInputType === 'multiple-choice');
   const needsImage = form.type === 'blurred-image';
   const needsSpotify = form.type === 'music';
-  const needsAcceptable = form.type === 'free-text' || form.type === 'blurred-image';
+  const needsAcceptable = form.type === 'free-text' || form.type === 'blurred-image' || isHighbrowLowbrow;
   const needsCorrectAnswers = form.type === 'select-wrong';
+
 
   return (
     <motion.div
@@ -124,6 +141,8 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
               <SelectItem value="select-wrong">Select Wrong Answers</SelectItem>
               <SelectItem value="closest-without-going-over">Closest Without Going Over</SelectItem>
               <SelectItem value="put-in-order">Put in Order</SelectItem>
+              <SelectItem value="highbrow-lowbrow">Highbrow / Lowbrow</SelectItem>
+
             </SelectContent>
           </Select>
         </div>
@@ -155,14 +174,17 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
 
       {/* Question text */}
       <div>
-        <label className="text-sm font-body text-muted-foreground mb-1 block">Question *</label>
+        <label className="text-sm font-body text-muted-foreground mb-1 block">
+          {isHighbrowLowbrow ? '🎩 Highbrow Prompt (200 pts) *' : 'Question *'}
+        </label>
         <Textarea
           value={form.question}
           onChange={(e) => update('question', e.target.value)}
-          placeholder="Enter your question..."
+          placeholder={isHighbrowLowbrow ? 'Enter the harder version of the question...' : 'Enter your question...'}
           className="bg-muted border-border text-foreground min-h-[80px]"
         />
       </div>
+
 
       {/* Correct answer (not for select-wrong or closest) */}
       {!needsCorrectAnswers && !isClosest && !isOrder && (
@@ -230,13 +252,35 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
       )}
 
 
-      {/* Options for MC / Music / Select-wrong */}
+      {/* Highbrow input-type selector (highbrow-lowbrow only) */}
+      {isHighbrowLowbrow && (
+        <div>
+          <label className="text-sm font-body text-muted-foreground mb-1 block">🎩 Highbrow Input Type</label>
+          <Select value={form.highbrowInputType} onValueChange={(v) => update('highbrowInputType', v as 'multiple-choice' | 'free-text')}>
+            <SelectTrigger className="bg-muted border-border">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="multiple-choice">Multiple Choice</SelectItem>
+              <SelectItem value="free-text">Free Text</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {/* Options for MC / Music / Select-wrong / Highbrow-MC */}
+
       <AnimatePresence>
         {needsOptions && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="space-y-2 overflow-hidden">
             <label className="text-sm font-body text-muted-foreground block">
-              {needsCorrectAnswers ? 'All Options (mix of correct and wrong)' : 'Answer Options (include the correct answer)'}
+              {needsCorrectAnswers
+                ? 'All Options (mix of correct and wrong)'
+                : isHighbrowLowbrow
+                  ? '🎩 Highbrow Options (include the correct answer)'
+                  : 'Answer Options (include the correct answer)'}
             </label>
+
             {form.options.map((opt, i) => (
               <div key={i} className="flex gap-2 items-center">
                 <Input
@@ -301,7 +345,76 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
         )}
       </AnimatePresence>
 
-      {/* Acceptable answers for free-text / blurred-image */}
+      {/* Lowbrow section (highbrow-lowbrow only) */}
+      {isHighbrowLowbrow && (
+        <div className="border-2 border-quiz-orange/40 rounded-2xl p-4 space-y-4 bg-quiz-orange/5">
+          <p className="text-xs font-display font-bold text-quiz-orange uppercase tracking-wide">
+            🎈 Lowbrow Prompt (100 pts) — same correct answer, easier framing
+          </p>
+          <div>
+            <label className="text-sm font-body text-muted-foreground mb-1 block">Lowbrow Question *</label>
+            <Textarea
+              value={form.lowbrowQuestion}
+              onChange={(e) => update('lowbrowQuestion', e.target.value)}
+              placeholder="Enter the easier version (or a major hint)..."
+              className="bg-muted border-border text-foreground min-h-[70px]"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-body text-muted-foreground mb-1 block">Lowbrow Input Type</label>
+            <Select value={form.lowbrowInputType} onValueChange={(v) => update('lowbrowInputType', v as 'multiple-choice' | 'free-text')}>
+              <SelectTrigger className="bg-muted border-border">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="multiple-choice">Multiple Choice</SelectItem>
+                <SelectItem value="free-text">Free Text</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {form.lowbrowInputType === 'multiple-choice' && (
+            <div className="space-y-2">
+              <label className="text-sm font-body text-muted-foreground block">
+                Lowbrow Options (include the correct answer)
+              </label>
+              {form.lowbrowOptions.map((opt, i) => (
+                <div key={i} className="flex gap-2 items-center">
+                  <Input
+                    value={opt}
+                    onChange={(e) => {
+                      const next = [...form.lowbrowOptions];
+                      next[i] = e.target.value;
+                      update('lowbrowOptions', next);
+                    }}
+                    placeholder={`Option ${i + 1}`}
+                    className="bg-muted border-border text-foreground flex-1"
+                  />
+                  {form.lowbrowOptions.length > 2 && (
+                    <button
+                      type="button"
+                      onClick={() => update('lowbrowOptions', form.lowbrowOptions.filter((_, idx) => idx !== i))}
+                      className="text-destructive hover:text-destructive/80 text-sm px-1"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => update('lowbrowOptions', [...form.lowbrowOptions, ''])}
+                className="text-muted-foreground"
+              >
+                + Add Option
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+
+
       <AnimatePresence>
         {needsAcceptable && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
@@ -382,7 +495,24 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
       <div className="flex gap-3 pt-2">
         <Button
           onClick={handleSave}
-          disabled={!form.question.trim() || (isClosest ? (form.numericAnswer === '' || isNaN(Number(form.numericAnswer))) : isOrder ? form.options.filter((o) => o.trim()).length < 2 : needsCorrectAnswers ? form.correctAnswers.length === 0 : !form.correctAnswer.trim())}
+          disabled={
+            !form.question.trim() ||
+            (isClosest
+              ? (form.numericAnswer === '' || isNaN(Number(form.numericAnswer)))
+              : isOrder
+                ? form.options.filter((o) => o.trim()).length < 2
+                : needsCorrectAnswers
+                  ? form.correctAnswers.length === 0
+                  : isHighbrowLowbrow
+                    ? (
+                        !form.correctAnswer.trim() ||
+                        !form.lowbrowQuestion.trim() ||
+                        (form.highbrowInputType === 'multiple-choice' && form.options.filter((o) => o.trim()).length < 2) ||
+                        (form.lowbrowInputType === 'multiple-choice' && form.lowbrowOptions.filter((o) => o.trim()).length < 2)
+                      )
+                    : !form.correctAnswer.trim())
+          }
+
           className="flex-1 h-12 font-display font-bold rounded-xl gradient-fun text-foreground border-none hover:opacity-90"
         >
           ✅ Save Question

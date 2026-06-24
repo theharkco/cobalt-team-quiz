@@ -65,10 +65,15 @@ export default function QuizCreator() {
               numericAnswer: (q.type as string) === 'closest-without-going-over'
                 ? parseFloat(q.correct_answer as string)
                 : '',
+              lowbrowQuestion: (q.lowbrow_question as string) || '',
+              highbrowInputType: ((q.highbrow_input_type as string) || 'multiple-choice') as 'multiple-choice' | 'free-text',
+              lowbrowInputType: ((q.lowbrow_input_type as string) || 'multiple-choice') as 'multiple-choice' | 'free-text',
+              lowbrowOptions: (q.lowbrow_options as string[]) || ['', '', '', ''],
             },
           }))
         );
       }
+
       setLoading(false);
     })();
   }, [quizId]);
@@ -154,7 +159,14 @@ export default function QuizCreator() {
         difficulty: q.data.difficulty,
         explanation: q.data.explanation || null,
         time_limit_seconds: q.data.timeLimitSeconds,
+        lowbrow_question: q.data.type === 'highbrow-lowbrow' ? (q.data.lowbrowQuestion || null) : null,
+        highbrow_input_type: q.data.type === 'highbrow-lowbrow' ? q.data.highbrowInputType : null,
+        lowbrow_input_type: q.data.type === 'highbrow-lowbrow' ? q.data.lowbrowInputType : null,
+        lowbrow_options: q.data.type === 'highbrow-lowbrow'
+          ? (q.data.lowbrowOptions.filter(Boolean).length > 0 ? q.data.lowbrowOptions.filter(Boolean) : null)
+          : null,
       }));
+
 
       const { error: insertErr } = await supabase.from('custom_quiz_questions').insert(questionRows);
       if (insertErr) throw insertErr;

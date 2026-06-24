@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
-import { QUIZ_QUESTIONS, checkAnswer, calculateScore, checkSelectWrongAnswer, calculateSelectWrongScore, calculatePutInOrderScore } from '@/data/questions';
+import { QUIZ_QUESTIONS, checkAnswer, calculateScore, checkSelectWrongAnswer, calculateSelectWrongScore, calculatePutInOrderScore, calculateHighbrowLowbrowScore } from '@/data/questions';
 import type { QuizQuestion } from '@/data/questionTypes';
 import type { Player, QuizSession } from '@/types/quiz';
 import QuestionDisplay from '@/components/quiz/QuestionDisplay';
@@ -151,6 +151,11 @@ export default function PlayerView() {
                 numericAnswer: (q.type as string) === 'closest-without-going-over'
                   ? parseFloat(q.correct_answer as string)
                   : undefined,
+                lowbrowQuestion: (q.lowbrow_question as string | null) || undefined,
+                highbrowInputType: (q.highbrow_input_type as 'multiple-choice' | 'free-text' | null) || undefined,
+                lowbrowInputType: (q.lowbrow_input_type as 'multiple-choice' | 'free-text' | null) || undefined,
+                lowbrowOptions: (q.lowbrow_options as string[] | null) || undefined,
+
               }))
             );
           }
@@ -238,9 +243,34 @@ export default function PlayerView() {
       return;
     }
 
+    // Highbrow/Lowbrow: parse { side, answer } and score 200/100/0
+    if (question.type === 'highbrow-lowbrow') {
+      let side: 'highbrow' | 'lowbrow' = 'highbrow';
+      let rawAnswer = '';
+      try {
+        const parsed = JSON.parse(answer);
+        side = parsed.side === 'lowbrow' ? 'lowbrow' : 'highbrow';
+        rawAnswer = String(parsed.answer ?? '');
+      } catch {
+        rawAnswer = answer;
+      }
+      // Reuse checkAnswer (compares against correctAnswer + acceptableAnswers).
+      // Strict for MC, fuzzy for free-text.
+      const effectiveType = side === 'highbrow'
+        ? (question.highbrowInputType ?? 'multiple-choice')
+        : (question.lowbrowInputType ?? 'multiple-choice');
+      const probe: QuizQuestion = { ...question, type: effectiveType };
+      const mq = checkAnswer(probe, rawAnswer);
+      const isCorrect = mq !== 'none';
+      const pts = calculateHighbrowLowbrowScore(isCorrect, side);
+      const kind: ResultKind = isCorrect ? 'exact' : 'wrong';
+      await submitResult(answer, isCorrect, pts, timeTaken, kind);
+      return;
+    }
 
     const mq = checkAnswer(question, answer);
     const isCorrect = mq !== 'none';
+
     const points = calculateScore(mq, timeTaken, totalTimeMs);
     const kind: ResultKind = mq === 'exact' ? 'exact' : mq === 'close' ? 'close' : 'wrong';
 
