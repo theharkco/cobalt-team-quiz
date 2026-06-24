@@ -159,7 +159,14 @@ export default function QuizCreator() {
         difficulty: q.data.difficulty,
         explanation: q.data.explanation || null,
         time_limit_seconds: q.data.timeLimitSeconds,
+        lowbrow_question: q.data.type === 'highbrow-lowbrow' ? (q.data.lowbrowQuestion || null) : null,
+        highbrow_input_type: q.data.type === 'highbrow-lowbrow' ? q.data.highbrowInputType : null,
+        lowbrow_input_type: q.data.type === 'highbrow-lowbrow' ? q.data.lowbrowInputType : null,
+        lowbrow_options: q.data.type === 'highbrow-lowbrow'
+          ? (q.data.lowbrowOptions.filter(Boolean).length > 0 ? q.data.lowbrowOptions.filter(Boolean) : null)
+          : null,
       }));
+
 
       const { error: insertErr } = await supabase.from('custom_quiz_questions').insert(questionRows);
       if (insertErr) throw insertErr;
