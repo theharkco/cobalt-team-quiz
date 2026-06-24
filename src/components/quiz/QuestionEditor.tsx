@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import type { QuestionType, Difficulty } from '@/data/questionTypes';
+import type { QuestionType, Difficulty, HighbrowLowbrowInputType } from '@/data/questionTypes';
 
 export interface QuestionFormData {
   type: QuestionType;
@@ -22,6 +22,11 @@ export interface QuestionFormData {
   explanation: string;
   timeLimitSeconds: number;
   numericAnswer: number | '';
+  // highbrow-lowbrow
+  lowbrowQuestion: string;
+  highbrowInputType: HighbrowLowbrowInputType;
+  lowbrowInputType: HighbrowLowbrowInputType;
+  lowbrowOptions: string[];
 }
 
 const DEFAULT_BLUR_LEVELS = [50, 38, 28, 18, 10, 4, 0];
@@ -42,8 +47,13 @@ function createEmptyQuestion(): QuestionFormData {
     explanation: '',
     timeLimitSeconds: 15,
     numericAnswer: '',
+    lowbrowQuestion: '',
+    highbrowInputType: 'multiple-choice',
+    lowbrowInputType: 'multiple-choice',
+    lowbrowOptions: ['', '', '', ''],
   };
 }
+
 
 interface Props {
   initialData?: QuestionFormData;
