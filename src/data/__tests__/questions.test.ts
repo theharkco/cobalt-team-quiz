@@ -38,9 +38,10 @@ describe('Types are importable', () => {
 });
 
 describe('QUIZ_QUESTIONS', () => {
-  it('has 23 questions', () => {
-    expect(QUIZ_QUESTIONS).toHaveLength(23);
+  it('has 24 questions', () => {
+    expect(QUIZ_QUESTIONS).toHaveLength(24);
   });
+
 
   it('each question has required fields', () => {
     QUIZ_QUESTIONS.forEach((q) => {
