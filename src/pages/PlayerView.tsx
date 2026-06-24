@@ -151,6 +151,11 @@ export default function PlayerView() {
                 numericAnswer: (q.type as string) === 'closest-without-going-over'
                   ? parseFloat(q.correct_answer as string)
                   : undefined,
+                lowbrowQuestion: (q.lowbrow_question as string | null) || undefined,
+                highbrowInputType: (q.highbrow_input_type as 'multiple-choice' | 'free-text' | null) || undefined,
+                lowbrowInputType: (q.lowbrow_input_type as 'multiple-choice' | 'free-text' | null) || undefined,
+                lowbrowOptions: (q.lowbrow_options as string[] | null) || undefined,
+
               }))
             );
           }
