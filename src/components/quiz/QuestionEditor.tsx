@@ -85,6 +85,11 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
     } else if (form.type === 'put-in-order') {
       const filled = form.options.filter((o) => o.trim()).length;
       if (filled < 2) return;
+    } else if (form.type === 'highbrow-lowbrow') {
+      if (!form.correctAnswer.trim()) return;
+      if (!form.lowbrowQuestion.trim()) return;
+      if (form.highbrowInputType === 'multiple-choice' && form.options.filter((o) => o.trim()).length < 2) return;
+      if (form.lowbrowInputType === 'multiple-choice' && form.lowbrowOptions.filter((o) => o.trim()).length < 2) return;
     } else {
       if (!form.correctAnswer.trim()) return;
     }
@@ -93,12 +98,14 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
 
   const isClosest = form.type === 'closest-without-going-over';
   const isOrder = form.type === 'put-in-order';
+  const isHighbrowLowbrow = form.type === 'highbrow-lowbrow';
 
   const needsOptions = form.type === 'multiple-choice' || form.type === 'music' || form.type === 'select-wrong';
   const needsImage = form.type === 'blurred-image';
   const needsSpotify = form.type === 'music';
-  const needsAcceptable = form.type === 'free-text' || form.type === 'blurred-image';
+  const needsAcceptable = form.type === 'free-text' || form.type === 'blurred-image' || isHighbrowLowbrow;
   const needsCorrectAnswers = form.type === 'select-wrong';
+
 
   return (
     <motion.div
