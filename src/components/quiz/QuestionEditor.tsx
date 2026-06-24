@@ -345,7 +345,76 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
         )}
       </AnimatePresence>
 
-      {/* Acceptable answers for free-text / blurred-image */}
+      {/* Lowbrow section (highbrow-lowbrow only) */}
+      {isHighbrowLowbrow && (
+        <div className="border-2 border-quiz-orange/40 rounded-2xl p-4 space-y-4 bg-quiz-orange/5">
+          <p className="text-xs font-display font-bold text-quiz-orange uppercase tracking-wide">
+            🎈 Lowbrow Prompt (100 pts) — same correct answer, easier framing
+          </p>
+          <div>
+            <label className="text-sm font-body text-muted-foreground mb-1 block">Lowbrow Question *</label>
+            <Textarea
+              value={form.lowbrowQuestion}
+              onChange={(e) => update('lowbrowQuestion', e.target.value)}
+              placeholder="Enter the easier version (or a major hint)..."
+              className="bg-muted border-border text-foreground min-h-[70px]"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-body text-muted-foreground mb-1 block">Lowbrow Input Type</label>
+            <Select value={form.lowbrowInputType} onValueChange={(v) => update('lowbrowInputType', v as 'multiple-choice' | 'free-text')}>
+              <SelectTrigger className="bg-muted border-border">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="multiple-choice">Multiple Choice</SelectItem>
+                <SelectItem value="free-text">Free Text</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {form.lowbrowInputType === 'multiple-choice' && (
+            <div className="space-y-2">
+              <label className="text-sm font-body text-muted-foreground block">
+                Lowbrow Options (include the correct answer)
+              </label>
+              {form.lowbrowOptions.map((opt, i) => (
+                <div key={i} className="flex gap-2 items-center">
+                  <Input
+                    value={opt}
+                    onChange={(e) => {
+                      const next = [...form.lowbrowOptions];
+                      next[i] = e.target.value;
+                      update('lowbrowOptions', next);
+                    }}
+                    placeholder={`Option ${i + 1}`}
+                    className="bg-muted border-border text-foreground flex-1"
+                  />
+                  {form.lowbrowOptions.length > 2 && (
+                    <button
+                      type="button"
+                      onClick={() => update('lowbrowOptions', form.lowbrowOptions.filter((_, idx) => idx !== i))}
+                      className="text-destructive hover:text-destructive/80 text-sm px-1"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => update('lowbrowOptions', [...form.lowbrowOptions, ''])}
+                className="text-muted-foreground"
+              >
+                + Add Option
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+
+
       <AnimatePresence>
         {needsAcceptable && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
