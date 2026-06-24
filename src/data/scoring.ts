@@ -100,3 +100,16 @@ export function calculatePutInOrderScore(
   }
   return { points, correctCount: correct, total };
 }
+
+/**
+ * Highbrow/Lowbrow: flat scoring with no time bonus.
+ * Highbrow (harder prompt) = 200 pts, Lowbrow (easier prompt) = 100 pts.
+ */
+export function calculateHighbrowLowbrowScore(
+  isCorrect: boolean,
+  side: 'highbrow' | 'lowbrow',
+): number {
+  if (!isCorrect) return 0;
+  return side === 'highbrow' ? 200 : 100;
+}
+
