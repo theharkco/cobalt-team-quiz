@@ -141,6 +141,8 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
               <SelectItem value="select-wrong">Select Wrong Answers</SelectItem>
               <SelectItem value="closest-without-going-over">Closest Without Going Over</SelectItem>
               <SelectItem value="put-in-order">Put in Order</SelectItem>
+              <SelectItem value="highbrow-lowbrow">Highbrow / Lowbrow</SelectItem>
+
             </SelectContent>
           </Select>
         </div>
