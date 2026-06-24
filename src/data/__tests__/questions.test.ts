@@ -177,3 +177,20 @@ describe('calculateScore', () => {
     });
   });
 });
+
+describe('calculateHighbrowLowbrowScore', () => {
+  it('awards 200 for correct highbrow', async () => {
+    const { calculateHighbrowLowbrowScore } = await import('@/data/scoring');
+    expect(calculateHighbrowLowbrowScore(true, 'highbrow')).toBe(200);
+  });
+  it('awards 100 for correct lowbrow', async () => {
+    const { calculateHighbrowLowbrowScore } = await import('@/data/scoring');
+    expect(calculateHighbrowLowbrowScore(true, 'lowbrow')).toBe(100);
+  });
+  it('awards 0 for wrong answers on either side', async () => {
+    const { calculateHighbrowLowbrowScore } = await import('@/data/scoring');
+    expect(calculateHighbrowLowbrowScore(false, 'highbrow')).toBe(0);
+    expect(calculateHighbrowLowbrowScore(false, 'lowbrow')).toBe(0);
+  });
+});
+
