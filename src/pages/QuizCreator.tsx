@@ -65,10 +65,15 @@ export default function QuizCreator() {
               numericAnswer: (q.type as string) === 'closest-without-going-over'
                 ? parseFloat(q.correct_answer as string)
                 : '',
+              lowbrowQuestion: (q.lowbrow_question as string) || '',
+              highbrowInputType: ((q.highbrow_input_type as string) || 'multiple-choice') as 'multiple-choice' | 'free-text',
+              lowbrowInputType: ((q.lowbrow_input_type as string) || 'multiple-choice') as 'multiple-choice' | 'free-text',
+              lowbrowOptions: (q.lowbrow_options as string[]) || ['', '', '', ''],
             },
           }))
         );
       }
+
       setLoading(false);
     })();
   }, [quizId]);
