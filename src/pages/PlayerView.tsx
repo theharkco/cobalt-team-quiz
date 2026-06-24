@@ -263,8 +263,9 @@ export default function PlayerView() {
       return;
     }
 
-
+    const mq = checkAnswer(question, answer);
     const isCorrect = mq !== 'none';
+
     const points = calculateScore(mq, timeTaken, totalTimeMs);
     const kind: ResultKind = mq === 'exact' ? 'exact' : mq === 'close' ? 'close' : 'wrong';
 
