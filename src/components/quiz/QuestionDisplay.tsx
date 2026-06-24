@@ -181,8 +181,82 @@ export default function QuestionDisplay({
         </div>
       )}
 
+      {/* Highbrow/Lowbrow (host only) */}
+      {isHost && !hideOptions && question.type === 'highbrow-lowbrow' && (
+        <div className="space-y-5 mt-2 max-w-2xl mx-auto">
+          {/* Highbrow card */}
+          <div className="bg-card border-2 border-quiz-purple/70 rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-3">
+              <span className="px-3 py-1 rounded-full bg-quiz-purple text-foreground font-display font-bold text-xs tracking-wide">
+                🎩 HIGHBROW · 200 PTS
+              </span>
+            </div>
+            <p className="text-xl md:text-2xl font-display font-bold text-foreground">
+              {question.question}
+            </p>
+            {(question.highbrowInputType ?? 'multiple-choice') === 'multiple-choice' && question.options && (
+              <div className="grid grid-cols-2 gap-2 mt-4">
+                {question.options.map((opt, i) => {
+                  const isAnswer = opt.toLowerCase() === question.correctAnswer.toLowerCase();
+                  return (
+                    <div
+                      key={i}
+                      className={`${optionColors[i % optionColors.length]} rounded-xl p-3 text-center relative ${
+                        revealAnswer && isAnswer ? 'ring-4 ring-quiz-green' : ''
+                      }`}
+                    >
+                      <span className="text-base mr-2">{optionIcons[i % optionIcons.length]}</span>
+                      <span className="font-display font-bold text-foreground">{opt}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Lowbrow card — hidden during play, visible on reveal */}
+          {revealAnswer && question.lowbrowQuestion && (
+            <div className="bg-card border-2 border-quiz-orange/70 rounded-2xl p-5">
+              <div className="flex items-center justify-between mb-3">
+                <span className="px-3 py-1 rounded-full bg-quiz-orange text-foreground font-display font-bold text-xs tracking-wide">
+                  🎈 LOWBROW · 100 PTS
+                </span>
+              </div>
+              <p className="text-xl md:text-2xl font-display font-bold text-foreground">
+                {question.lowbrowQuestion}
+              </p>
+              {(question.lowbrowInputType ?? 'multiple-choice') === 'multiple-choice' && question.lowbrowOptions && (
+                <div className="grid grid-cols-2 gap-2 mt-4">
+                  {question.lowbrowOptions.map((opt, i) => {
+                    const isAnswer = opt.toLowerCase() === question.correctAnswer.toLowerCase();
+                    return (
+                      <div
+                        key={i}
+                        className={`${optionColors[i % optionColors.length]} rounded-xl p-3 text-center ${
+                          isAnswer ? 'ring-4 ring-quiz-green' : ''
+                        }`}
+                      >
+                        <span className="text-base mr-2">{optionIcons[i % optionIcons.length]}</span>
+                        <span className="font-display font-bold text-foreground">{opt}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {!revealAnswer && (
+            <p className="text-center text-sm font-body text-muted-foreground">
+              Players may reveal the Lowbrow prompt for 100 pts instead.
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Multiple choice / select-wrong options (host view - display only) */}
-      {isHost && !hideOptions && question.options && question.type !== 'put-in-order' && (
+      {isHost && !hideOptions && question.options && question.type !== 'put-in-order' && question.type !== 'highbrow-lowbrow' && (
+
         <div className={`grid ${question.options.length > 4 ? 'grid-cols-3' : 'grid-cols-2'} gap-4 mt-4`}>
           {question.options.map((option, i) => {
             const isCorrectAnswer = question.type === 'select-wrong'
