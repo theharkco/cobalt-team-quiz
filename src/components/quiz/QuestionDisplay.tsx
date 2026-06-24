@@ -113,17 +113,27 @@ export default function QuestionDisplay({
         )}
       </motion.div>
 
-      {/* Question text — hidden for highbrow-lowbrow on host (cards render their own prompts) */}
-      {!(isHost && question.type === 'highbrow-lowbrow') && (
+      {/* Question text — replaced with a banner for highbrow-lowbrow (each card shows its own prompt) */}
+      {question.type === 'highbrow-lowbrow' ? (
+        <motion.h2
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.1, type: "spring" }}
+          className="text-xl md:text-2xl font-display font-bold text-center text-foreground mb-6 leading-tight"
+        >
+          🎩 Highbrow <span className="text-muted-foreground mx-2">vs</span> 🎈 Lowbrow
+        </motion.h2>
+      ) : (
         <motion.h2
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.1, type: "spring" }}
           className="text-2xl md:text-4xl font-display font-bold text-center text-foreground mb-8 leading-tight"
         >
-          {question.type === 'highbrow-lowbrow' ? '🎩 vs 🎈 Highbrow / Lowbrow' : question.question}
+          {question.question}
         </motion.h2>
       )}
+
 
 
       {/* Blurred image */}
