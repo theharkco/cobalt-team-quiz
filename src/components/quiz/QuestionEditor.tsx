@@ -257,8 +257,13 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
         {needsOptions && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="space-y-2 overflow-hidden">
             <label className="text-sm font-body text-muted-foreground block">
-              {needsCorrectAnswers ? 'All Options (mix of correct and wrong)' : 'Answer Options (include the correct answer)'}
+              {needsCorrectAnswers
+                ? 'All Options (mix of correct and wrong)'
+                : isHighbrowLowbrow
+                  ? '🎩 Highbrow Options (include the correct answer)'
+                  : 'Answer Options (include the correct answer)'}
             </label>
+
             {form.options.map((opt, i) => (
               <div key={i} className="flex gap-2 items-center">
                 <Input
