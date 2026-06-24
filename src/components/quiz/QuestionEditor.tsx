@@ -100,7 +100,7 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
   const isOrder = form.type === 'put-in-order';
   const isHighbrowLowbrow = form.type === 'highbrow-lowbrow';
 
-  const needsOptions = form.type === 'multiple-choice' || form.type === 'music' || form.type === 'select-wrong';
+  const needsOptions = form.type === 'multiple-choice' || form.type === 'music' || form.type === 'select-wrong' || (isHighbrowLowbrow && form.highbrowInputType === 'multiple-choice');
   const needsImage = form.type === 'blurred-image';
   const needsSpotify = form.type === 'music';
   const needsAcceptable = form.type === 'free-text' || form.type === 'blurred-image' || isHighbrowLowbrow;
