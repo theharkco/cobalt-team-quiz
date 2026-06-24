@@ -495,7 +495,24 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
       <div className="flex gap-3 pt-2">
         <Button
           onClick={handleSave}
-          disabled={!form.question.trim() || (isClosest ? (form.numericAnswer === '' || isNaN(Number(form.numericAnswer))) : isOrder ? form.options.filter((o) => o.trim()).length < 2 : needsCorrectAnswers ? form.correctAnswers.length === 0 : !form.correctAnswer.trim())}
+          disabled={
+            !form.question.trim() ||
+            (isClosest
+              ? (form.numericAnswer === '' || isNaN(Number(form.numericAnswer)))
+              : isOrder
+                ? form.options.filter((o) => o.trim()).length < 2
+                : needsCorrectAnswers
+                  ? form.correctAnswers.length === 0
+                  : isHighbrowLowbrow
+                    ? (
+                        !form.correctAnswer.trim() ||
+                        !form.lowbrowQuestion.trim() ||
+                        (form.highbrowInputType === 'multiple-choice' && form.options.filter((o) => o.trim()).length < 2) ||
+                        (form.lowbrowInputType === 'multiple-choice' && form.lowbrowOptions.filter((o) => o.trim()).length < 2)
+                      )
+                    : !form.correctAnswer.trim())
+          }
+
           className="flex-1 h-12 font-display font-bold rounded-xl gradient-fun text-foreground border-none hover:opacity-90"
         >
           ✅ Save Question
