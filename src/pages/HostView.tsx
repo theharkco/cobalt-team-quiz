@@ -27,6 +27,9 @@ export default function HostView() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(-1);
   const [rankedGuesses, setRankedGuesses] = useState<{ playerName: string; guess: number; points: number; over: boolean }[]>([]);
   const [hasScored, setHasScored] = useState(false);
+  // Brief full-screen fade shown while a new question hydrates, so the old
+  // question never visibly swaps into the new one mid-render.
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const quizQuestions = useMemo<QuizQuestion[]>(() => {
     if (!sessionId) return QUIZ_QUESTIONS;
@@ -272,6 +275,7 @@ export default function HostView() {
   };
 
   const startQuestionWithPreCountdown = (questionIndex: number) => {
+    setIsTransitioning(true);
     setAnswerCount(0);
     setCurrentQuestionIndex(questionIndex);
     setShowAnswer(false);
@@ -293,6 +297,8 @@ export default function HostView() {
       setSession((prev) => prev ? { ...prev, question_started_at: now } : prev);
       timer.start();
     });
+    // Keep the fade up until the new question + countdown have painted.
+    window.setTimeout(() => setIsTransitioning(false), 350);
   };
 
   const startQuiz = async () => {
@@ -323,6 +329,9 @@ export default function HostView() {
       await updateStatus('finished');
       await refreshPlayers();
     } else {
+      // Cover the swap with a fade BEFORE the async session update so the old
+      // question never flickers into the new one while it hydrates.
+      setIsTransitioning(true);
       // Reset reveal state BEFORE the session update so the new question
       // never renders momentarily with the previous reveal styling.
       setShowAnswer(false);
@@ -415,6 +424,23 @@ export default function HostView() {
     const questionTimeLimit = currentQ.timeLimitSeconds ?? 15;
     return (
       <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4 py-8">
+        <AnimatePresence>
+          {isTransitioning && (
+            <motion.div
+              key="question-transition"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center gap-2"
+            >
+              <p className="text-muted-foreground font-body text-sm uppercase tracking-widest">Get ready</p>
+              <p className="text-4xl md:text-5xl font-display font-bold text-gradient animate-pulse">
+                Question {session.current_question + 1}
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
         {!isPreCountdown && (
           <div className="absolute top-6 right-6">
             <CountdownTimer duration={questionTimeLimit} timeElapsed={timer.timeElapsed} onComplete={onTimerComplete} isRunning={timer.isRunning} size={100} />
