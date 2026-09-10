@@ -62,7 +62,7 @@ function RecordingQuestionDisplay(props: {
 const updateSession = (apply: () => void) =>
   new Promise<void>((resolve) => {
     setTimeout(() => {
-      act(() => apply());
+      apply();
       resolve();
     }, 0);
   });
@@ -81,7 +81,7 @@ function HostHarness({ ordering }: { ordering: "buggy" | "fixed" }) {
       // started (a later tick), leaving a window where the new question was
       // already on screen with the reveal still on.
       await new Promise((r) => setTimeout(r, 0));
-      act(() => setShowAnswer(false));
+      setShowAnswer(false);
     }
   };
 
