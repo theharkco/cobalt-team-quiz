@@ -12,6 +12,11 @@ interface QuestionDisplayProps {
   timeElapsedMs?: number;
   hideOptions?: boolean;
   revealAnswer?: boolean;
+  /**
+   * Epoch ms of the shared question start (server `question_started_at`), used
+   * to start the music clip at the same position on every device.
+   */
+  questionStartedAtMs?: number;
 }
 
 const optionColors = [
@@ -56,6 +61,7 @@ export default function QuestionDisplay({
   timeElapsedMs = 0,
   hideOptions,
   revealAnswer,
+  questionStartedAtMs,
 }: QuestionDisplayProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const prevQuestionId = useRef(question.id);
