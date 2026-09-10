@@ -14,6 +14,7 @@ import Leaderboard from '@/components/quiz/Leaderboard';
 import { useTimer } from '@/hooks/useTimer';
 import { usePreCountdown } from '@/hooks/usePreCountdown';
 import { retryOnce } from '@/lib/retryAsync';
+import { resetForNextQuestion } from '@/lib/questionTransition';
 import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import Emoji from '@/components/quiz/Emoji';

@@ -8,6 +8,7 @@ import type { Player, QuizSession, SessionStatus } from '@/types/quiz';
 import { useTimer } from '@/hooks/useTimer';
 import { usePreCountdown } from '@/hooks/usePreCountdown';
 import { retryOnce } from '@/lib/retryAsync';
+import { resetForNextQuestion } from '@/lib/questionTransition';
 import { toast } from '@/hooks/use-toast';
 import CountdownTimer from '@/components/quiz/CountdownTimer';
 import QuestionDisplay from '@/components/quiz/QuestionDisplay';
