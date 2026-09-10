@@ -37,6 +37,7 @@ export default function MusicPlayer({
 }: Props) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [blocked, setBlocked] = useState(false);
+  const [retryFailed, setRetryFailed] = useState(false);
   const [muted, setMuted] = useState(false);
 
   /** Where in the clip this device should currently be, in seconds. */
