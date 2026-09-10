@@ -67,9 +67,9 @@ describe('QUIZ_QUESTIONS', () => {
     });
   });
 
-  it('music questions have spotifyEmbedUrl', () => {
+  it('music questions have an audio preview clip', () => {
     QUIZ_QUESTIONS.filter((q) => q.type === 'music').forEach((q) => {
-      expect(q.spotifyEmbedUrl).toBeDefined();
+      expect(q.audioPreviewUrl).toBeDefined();
     });
   });
 });
