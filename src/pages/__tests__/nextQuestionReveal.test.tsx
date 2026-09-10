@@ -104,6 +104,9 @@ const flashFrames = () =>
 describe("next-question transition", () => {
   beforeEach(() => {
     frames = [];
+    // We deliberately render outside act() (see tick above), so silence the
+    // act() advisory warnings for this suite.
+    (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = false;
   });
 
   it("reproduces the answer flash when reveal state is cleared after the question swaps", async () => {
