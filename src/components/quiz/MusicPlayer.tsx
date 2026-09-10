@@ -5,6 +5,8 @@ interface Props {
   previewUrl: string;
   /** When true the clip plays; when false it pauses. */
   playing: boolean;
+  /** Only the host device outputs sound; others just show the animation. */
+  audible?: boolean;
   /** Show track title/artist (only after the answer is revealed). */
   trackName?: string;
   artistName?: string;
@@ -13,7 +15,7 @@ interface Props {
 
 const BAR_COUNT = 7;
 
-export default function MusicPlayer({ previewUrl, playing, trackName, artistName, revealTrack }: Props) {
+export default function MusicPlayer({ previewUrl, playing, audible = true, trackName, artistName, revealTrack }: Props) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [blocked, setBlocked] = useState(false);
 
