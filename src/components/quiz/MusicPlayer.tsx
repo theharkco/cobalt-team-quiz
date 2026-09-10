@@ -100,13 +100,34 @@ export default function MusicPlayer({
     return () => window.clearInterval(id);
   }, [playing, audible, muted, startEpochMs, syncPosition]);
 
-  const start = () => {
+  const start = useCallback(() => {
     const el = audioRef.current;
     if (!el) return;
     setMuted(false);
     syncPosition(el);
-    el.play().then(() => setBlocked(false)).catch(() => setBlocked(true));
-  };
+    el.play()
+      .then(() => {
+        setBlocked(false);
+        setRetryFailed(false);
+      })
+      .catch(() => {
+        setBlocked(true);
+        setRetryFailed(true);
+      });
+  }, [syncPosition]);
+
+  // A tap anywhere on the screen counts as the gesture browsers wait for, so
+  // players don't have to find the button — but the button stays visible.
+  useEffect(() => {
+    if (!blocked || !audible || !playing) return;
+    const unlock = () => start();
+    document.addEventListener('pointerdown', unlock);
+    document.addEventListener('keydown', unlock);
+    return () => {
+      document.removeEventListener('pointerdown', unlock);
+      document.removeEventListener('keydown', unlock);
+    };
+  }, [blocked, audible, playing, start]);
 
   return (
     <motion.div
@@ -121,10 +142,10 @@ export default function MusicPlayer({
         {Array.from({ length: BAR_COUNT }).map((_, i) => (
           <motion.span
             key={i}
-            className="w-4 rounded-full bg-quiz-purple"
-            animate={playing ? { height: [16, 72, 30, 88, 20] } : { height: 16 }}
+            className={`w-4 rounded-full ${blocked ? 'bg-muted' : 'bg-quiz-purple'}`}
+            animate={playing && !blocked ? { height: [16, 72, 30, 88, 20] } : { height: 16 }}
             transition={
-              playing
+              playing && !blocked
                 ? { duration: 1.1 + i * 0.13, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' }
                 : { duration: 0.3 }
             }
@@ -133,13 +154,30 @@ export default function MusicPlayer({
         ))}
       </div>
 
-      {audible && blocked && (
-        <button
-          onClick={start}
-          className="px-6 py-3 rounded-full bg-primary font-display font-bold text-primary-foreground shadow-lg animate-pulse"
+      {audible && blocked && playing && (
+        <motion.div
+          initial={{ y: 8, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="w-full max-w-sm rounded-2xl border-2 border-primary/60 bg-card p-5 text-center flex flex-col items-center gap-3"
+          role="alert"
         >
-          ▶ Tap to hear the clip
-        </button>
+          <p className="font-display font-bold text-lg text-foreground">🔇 Sound is off on this device</p>
+          <p className="font-body text-sm text-muted-foreground">
+            Your browser needs one tap before it will play the clip. The song is already running for
+            everyone — tap to join in where they are.
+          </p>
+          <button
+            onClick={start}
+            className="w-full px-6 py-4 rounded-2xl bg-primary font-display font-bold text-lg text-primary-foreground shadow-lg animate-pulse"
+          >
+            ▶ Turn on sound
+          </button>
+          {retryFailed && (
+            <p className="font-body text-xs text-muted-foreground">
+              Still silent? Check the mute switch or volume on your phone, then tap again.
+            </p>
+          )}
+        </motion.div>
       )}
 
       {audible && !blocked && playing && (
