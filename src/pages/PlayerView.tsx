@@ -73,7 +73,10 @@ export default function PlayerView() {
         setLastPoints(0);
         setResultKind('timeout');
         setLastPutInOrderPicks(null);
-        timer.stop();
+        // reset (not just stop) so the new question never renders with the
+        // previous question's elapsed time — that briefly un-blurred images and
+        // flagged the question as already revealed.
+        timer.reset();
         stopTicking();
         clearPreCountdown();
         // Refresh player from DB to pick up any host-awarded scores (e.g. from closest-without-going-over)
