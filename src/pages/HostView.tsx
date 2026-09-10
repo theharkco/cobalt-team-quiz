@@ -27,6 +27,9 @@ export default function HostView() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(-1);
   const [rankedGuesses, setRankedGuesses] = useState<{ playerName: string; guess: number; points: number; over: boolean }[]>([]);
   const [hasScored, setHasScored] = useState(false);
+  // Brief full-screen fade shown while a new question hydrates, so the old
+  // question never visibly swaps into the new one mid-render.
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const quizQuestions = useMemo<QuizQuestion[]>(() => {
     if (!sessionId) return QUIZ_QUESTIONS;
