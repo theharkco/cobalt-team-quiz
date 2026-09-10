@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
+import MusicTrackPicker from './MusicTrackPicker';
 import type { QuestionType, Difficulty, HighbrowLowbrowInputType } from '@/data/questionTypes';
 
 export interface QuestionFormData {
@@ -17,6 +18,9 @@ export interface QuestionFormData {
   imageUrl: string;
   blurLevels: number[];
   spotifyEmbedUrl: string;
+  audioPreviewUrl: string;
+  trackName: string;
+  artistName: string;
   category: string;
   difficulty: Difficulty;
   explanation: string;
@@ -42,6 +46,9 @@ function createEmptyQuestion(): QuestionFormData {
     imageUrl: '',
     blurLevels: DEFAULT_BLUR_LEVELS,
     spotifyEmbedUrl: '',
+    audioPreviewUrl: '',
+    trackName: '',
+    artistName: '',
     category: '',
     difficulty: 'medium',
     explanation: '',
@@ -446,16 +453,17 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
         )}
       </AnimatePresence>
 
-      {/* Spotify URL for music */}
+      {/* Song clip for music questions */}
       <AnimatePresence>
         {needsSpotify && (
-          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-            <label className="text-sm font-body text-muted-foreground mb-1 block">Spotify Embed URL</label>
-            <Input
-              value={form.spotifyEmbedUrl}
-              onChange={(e) => update('spotifyEmbedUrl', e.target.value)}
-              placeholder="https://open.spotify.com/embed/track/..."
-              className="bg-muted border-border text-foreground"
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <MusicTrackPicker
+              previewUrl={form.audioPreviewUrl}
+              trackName={form.trackName}
+              artistName={form.artistName}
+              onSelect={({ previewUrl, trackName, artistName }) =>
+                setForm((prev) => ({ ...prev, audioPreviewUrl: previewUrl, trackName, artistName }))
+              }
             />
           </motion.div>
         )}

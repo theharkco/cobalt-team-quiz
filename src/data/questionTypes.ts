@@ -12,7 +12,10 @@ export interface QuizQuestion {
   acceptableAnswers?: string[]; // for fuzzy matching free text
   imageUrl?: string;
   blurLevels?: number[]; // blur values at different time points (px)
-  spotifyEmbedUrl?: string;
+  spotifyEmbedUrl?: string; // legacy, kept for old quizzes
+  audioPreviewUrl?: string; // 30-second Apple Music preview clip (mp3/m4a)
+  trackName?: string;
+  artistName?: string;
   category?: string;
   difficulty?: Difficulty;
   explanation?: string; // shown after the answer is revealed

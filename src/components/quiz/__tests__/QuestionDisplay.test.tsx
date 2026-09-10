@@ -28,8 +28,17 @@ const musicQuestion: QuizQuestion = {
   question: '🎵 Name the artist!',
   options: ['X', 'Y'],
   correctAnswer: 'X',
-  spotifyEmbedUrl: 'https://open.spotify.com/embed/track/abc',
+  audioPreviewUrl: 'https://example.com/preview.m4a',
+  trackName: 'Some Song',
+  artistName: 'X',
   category: 'Music',
+};
+
+const legacyMusicQuestion: QuizQuestion = {
+  ...musicQuestion,
+  id: 4,
+  audioPreviewUrl: undefined,
+  spotifyEmbedUrl: 'https://open.spotify.com/embed/track/abc',
 };
 
 describe('QuestionDisplay', () => {
@@ -65,20 +74,34 @@ describe('QuestionDisplay', () => {
     expect(img?.getAttribute('src')).toBe('/test.jpg');
   });
 
-  it('renders music emoji for music questions', () => {
-    render(<QuestionDisplay question={musicQuestion} questionNumber={1} totalQuestions={15} />);
-    expect(screen.getByText('🎵')).toBeInTheDocument();
+  it('renders an audio element on the host for music questions', () => {
+    const { container } = render(
+      <QuestionDisplay question={musicQuestion} questionNumber={1} totalQuestions={15} isHost />
+    );
+    const audio = container.querySelector('audio');
+    expect(audio).toBeInTheDocument();
+    expect(audio?.getAttribute('src')).toBe('https://example.com/preview.m4a');
   });
 
-  it('renders iframe in a cropped container for music questions', () => {
+  it('does not output audio on player devices', () => {
     const { container } = render(
       <QuestionDisplay question={musicQuestion} questionNumber={1} totalQuestions={15} />
     );
-    const iframe = container.querySelector('iframe');
-    expect(iframe).toBeInTheDocument();
-    const wrapper = iframe?.closest('.overflow-hidden');
-    expect(wrapper).toBeInTheDocument();
-    expect(wrapper?.classList.contains('h-[30px]')).toBe(true);
+    expect(container.querySelector('audio')).not.toBeInTheDocument();
+  });
+
+  it('reveals the track name once the answer is revealed', () => {
+    render(
+      <QuestionDisplay question={musicQuestion} questionNumber={1} totalQuestions={15} isHost revealAnswer />
+    );
+    expect(screen.getByText('Some Song')).toBeInTheDocument();
+  });
+
+  it('falls back to the legacy embed when no clip is set', () => {
+    const { container } = render(
+      <QuestionDisplay question={legacyMusicQuestion} questionNumber={1} totalQuestions={15} />
+    );
+    expect(container.querySelector('iframe')).toBeInTheDocument();
   });
 
   it('does not render category when not provided', () => {

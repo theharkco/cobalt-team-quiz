@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
+import MusicPlayer from "./MusicPlayer";
 import type { QuizQuestion } from "@/data/questions";
 
 interface QuestionDisplayProps {
@@ -160,8 +161,20 @@ export default function QuestionDisplay({
         </motion.div>
       )}
 
-      {/* Spotify embed */}
-      {question.type === "music" && question.spotifyEmbedUrl && (
+      {/* Music clip — Apple 30s preview, plays automatically on the host device */}
+      {question.type === "music" && question.audioPreviewUrl && (
+        <MusicPlayer
+          previewUrl={question.audioPreviewUrl}
+          playing={timeElapsedMs > 0 && !hideOptions && !revealAnswer}
+          audible={Boolean(isHost)}
+          trackName={question.trackName}
+          artistName={question.artistName}
+          revealTrack={revealAnswer}
+        />
+      )}
+
+      {/* Legacy Spotify embed fallback for older quizzes */}
+      {question.type === "music" && !question.audioPreviewUrl && question.spotifyEmbedUrl && (
         <MusicEmbed spotifyEmbedUrl={question.spotifyEmbedUrl} />
       )}
 
