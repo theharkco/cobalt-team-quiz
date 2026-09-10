@@ -5,7 +5,7 @@ interface Props {
   previewUrl: string;
   /** When true the clip plays; when false it pauses. */
   playing: boolean;
-  /** Only the host device outputs sound; others just show the animation. */
+  /** Whether this device should output sound (host screen and player phones both do). */
   audible?: boolean;
   /** Show track title/artist (only after the answer is revealed). */
   trackName?: string;
@@ -18,6 +18,7 @@ const BAR_COUNT = 7;
 export default function MusicPlayer({ previewUrl, playing, audible = true, trackName, artistName, revealTrack }: Props) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [blocked, setBlocked] = useState(false);
+  const [muted, setMuted] = useState(false);
 
   // Restart the clip whenever the source changes
   useEffect(() => {
@@ -31,17 +32,18 @@ export default function MusicPlayer({ previewUrl, playing, audible = true, track
   useEffect(() => {
     const el = audioRef.current;
     if (!el) return;
-    if (playing && audible) {
+    if (playing && audible && !muted) {
       el.volume = 0.85;
       el.play().then(() => setBlocked(false)).catch(() => setBlocked(true));
     } else {
       el.pause();
     }
-  }, [playing, audible, previewUrl]);
+  }, [playing, audible, muted, previewUrl]);
 
   const start = () => {
     const el = audioRef.current;
     if (!el) return;
+    setMuted(false);
     el.play().then(() => setBlocked(false)).catch(() => setBlocked(true));
   };
 
@@ -70,12 +72,21 @@ export default function MusicPlayer({ previewUrl, playing, audible = true, track
         ))}
       </div>
 
-      {blocked && (
+      {audible && blocked && (
         <button
           onClick={start}
-          className="px-5 py-2 rounded-full bg-primary font-display font-bold text-primary-foreground"
+          className="px-6 py-3 rounded-full bg-primary font-display font-bold text-primary-foreground shadow-lg animate-pulse"
         >
-          ▶ Play the clip
+          ▶ Tap to hear the clip
+        </button>
+      )}
+
+      {audible && !blocked && playing && (
+        <button
+          onClick={() => (muted ? start() : setMuted(true))}
+          className="px-4 py-1.5 rounded-full bg-secondary text-secondary-foreground font-body text-sm"
+        >
+          {muted ? '🔇 Sound off — tap to listen' : '🔊 Mute on this device'}
         </button>
       )}
 
