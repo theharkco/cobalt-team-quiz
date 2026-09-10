@@ -16,7 +16,7 @@
  */
 import { describe, it, expect, beforeEach } from "vitest";
 import { useState } from "react";
-import { render, screen, act, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import QuestionDisplay from "@/components/quiz/QuestionDisplay";
 import type { QuizQuestion } from "@/data/questions";
 
@@ -93,6 +93,11 @@ function HostHarness({ ordering }: { ordering: "buggy" | "fixed" }) {
   );
 }
 
+// Advance real time WITHOUT wrapping in act(): act() batches every update in
+// its scope into a single render, which would hide the intermediate frame this
+// test exists to catch.
+const tick = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 const flashFrames = () =>
   frames.filter((f) => f.questionId === 102 && f.revealAnswer);
 
@@ -103,22 +108,17 @@ describe("next-question transition", () => {
 
   it("reproduces the answer flash when reveal state is cleared after the question swaps", async () => {
     render(<HostHarness ordering="buggy" />);
-    await act(async () => {
-      screen.getByRole("button", { name: "Next Question" }).click();
-      await new Promise((r) => setTimeout(r, 20));
-    });
+    screen.getByRole("button", { name: "Next Question" }).click();
+    await tick(30);
 
-    console.log('FRAMES', JSON.stringify(frames));
     // The bug: the new question rendered while the answer was still revealed.
     expect(flashFrames().length).toBeGreaterThan(0);
   });
 
   it("never renders the next question with revealAnswer enabled", async () => {
     render(<HostHarness ordering="fixed" />);
-    await act(async () => {
-      screen.getByRole("button", { name: "Next Question" }).click();
-      await new Promise((r) => setTimeout(r, 20));
-    });
+    screen.getByRole("button", { name: "Next Question" }).click();
+    await tick(30);
 
     // The new question must have rendered...
     expect(frames.some((f) => f.questionId === 102)).toBe(true);
