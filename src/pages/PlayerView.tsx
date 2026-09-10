@@ -33,6 +33,9 @@ export default function PlayerView() {
   const [resultKind, setResultKind] = useState<ResultKind>('timeout');
   const [lastPutInOrderPicks, setLastPutInOrderPicks] = useState<string[] | null>(null);
   const [customQuestions, setCustomQuestions] = useState<QuizQuestion[] | null>(null);
+  // Brief full-screen fade while a new question hydrates, so the previous
+  // question/result never visibly swaps into the new one mid-render.
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const timer = useTimer();
   const { preCountdown, startPreCountdown, clearPreCountdown } = usePreCountdown();
   const lastQuestionRef = useRef(-1);
