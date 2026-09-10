@@ -95,6 +95,9 @@ export default function HostView() {
     setHasScored(true);
 
     (async () => {
+      // Short grace period so a guess submitted right on the buzzer still counts
+      await new Promise((r) => setTimeout(r, 500));
+
       const { data: answers } = await supabase
         .from('answers')
         .select('*')
@@ -105,6 +108,12 @@ export default function HostView() {
         setRankedGuesses([]);
         return;
       }
+
+      // Guard against double-awarding if the host reloads after the reveal:
+      // scored rows already carry their points.
+      const alreadyScored =
+        answers.some((a) => (a.points_earned ?? 0) > 0) ||
+        sessionStorage.getItem(`cwgo-scored-${session.id}-${session.current_question}`) === '1';
 
       const guesses = answers.map((a) => ({
         playerId: a.player_id,
