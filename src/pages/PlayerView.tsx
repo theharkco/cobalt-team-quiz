@@ -176,6 +176,12 @@ export default function PlayerView() {
           if (elapsed < qTimeMs) {
             timer.start(serverStart);
             startTicking(() => Math.max(0, (qTimeMs - (Date.now() - serverStart)) / 1000));
+          } else {
+            // Reloaded after the question already ran out — show the timed-out
+            // state instead of an open input that could still be submitted.
+            setAnswered(true);
+            setLastPoints(0);
+            setResultKind('timeout');
           }
         }
       }
@@ -205,6 +211,10 @@ export default function PlayerView() {
             handleSessionTransition(prev, s);
             return s;
           }
+          // Keep the server start time in sync even when nothing else changed,
+          // so speed bonuses are measured from the host's clock if realtime
+          // updates were missed.
+          if (prev && prev.question_started_at !== s.question_started_at) return s;
           return prev;
         });
       }
