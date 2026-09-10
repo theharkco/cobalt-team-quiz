@@ -95,6 +95,9 @@ export default function HostView() {
     setHasScored(true);
 
     (async () => {
+      // Short grace period so a guess submitted right on the buzzer still counts
+      await new Promise((r) => setTimeout(r, 500));
+
       const { data: answers } = await supabase
         .from('answers')
         .select('*')
@@ -105,6 +108,12 @@ export default function HostView() {
         setRankedGuesses([]);
         return;
       }
+
+      // Guard against double-awarding if the host reloads after the reveal:
+      // scored rows already carry their points.
+      const alreadyScored =
+        answers.some((a) => (a.points_earned ?? 0) > 0) ||
+        sessionStorage.getItem(`cwgo-scored-${session.id}-${session.current_question}`) === '1';
 
       const guesses = answers.map((a) => ({
         playerId: a.player_id,
@@ -131,6 +140,9 @@ export default function HostView() {
         });
       setRankedGuesses(ranked);
 
+      if (alreadyScored) return;
+      sessionStorage.setItem(`cwgo-scored-${session.id}-${session.current_question}`, '1');
+
       try {
         for (const g of guesses) {
           const pts = scores.get(g.playerId) || 0;
@@ -139,16 +151,21 @@ export default function HostView() {
             .update({ points_earned: pts, is_correct: pts > 0 })
             .eq('id', g.answerId);
         }
+        // Read scores fresh from the database so we never add points on top of
+        // a stale local value.
+        const { data: freshPlayers } = await supabase
+          .from('players')
+          .select('id, score')
+          .eq('session_id', session.id);
+        const scoreById = new Map((freshPlayers ?? []).map((p) => [p.id, p.score]));
         for (const g of guesses) {
           const pts = scores.get(g.playerId) || 0;
-          if (pts > 0) {
-            const player = players.find((p) => p.id === g.playerId);
-            if (player) {
-              await supabase
-                .from('players')
-                .update({ score: player.score + pts })
-                .eq('id', player.id);
-            }
+          const base = scoreById.get(g.playerId);
+          if (pts > 0 && base !== undefined) {
+            await supabase
+              .from('players')
+              .update({ score: base + pts })
+              .eq('id', g.playerId);
           }
         }
         refreshPlayers();
@@ -260,6 +277,13 @@ export default function HostView() {
     setShowAnswer(false);
     setHasScored(false);
     setRankedGuesses([]);
+    // Clear the previous question's elapsed time. Without this the new question
+    // renders for a moment with the old value (fully un-blurred image, expired
+    // countdown, clip already playing) before the timer actually starts.
+    timer.reset();
+    // Snapshot scores as the question begins so the leaderboard can show the
+    // points won on this question, however they were awarded.
+    setPreviousScores(Object.fromEntries(players.map((p) => [p.id, p.score])));
     startPreCountdown(async () => {
       const now = new Date().toISOString();
       await supabase
@@ -272,7 +296,10 @@ export default function HostView() {
   };
 
   const startQuiz = async () => {
-    setPreviousScores({});
+    setShowAnswer(false);
+    setHasScored(false);
+    setRankedGuesses([]);
+    setAnswerCount(0);
     await updateStatus('question', 0, { question_started_at: null });
     startQuestionWithPreCountdown(0);
   };
@@ -283,12 +310,9 @@ export default function HostView() {
   };
 
   const showLeaderboard = async () => {
-    const prev: Record<string, number> = {};
-    players.forEach((p) => {
-      prev[p.id] = p.score;
-    });
+    // previousScores was captured when the question started, so the leaderboard
+    // animates this question's gains — including host-awarded ones.
     await refreshPlayers();
-    setPreviousScores(prev);
     await updateStatus('leaderboard');
   };
 
