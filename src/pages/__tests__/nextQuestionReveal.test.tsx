@@ -22,7 +22,7 @@ import type { QuizQuestion } from "@/data/questions";
 
 const questions: QuizQuestion[] = [
   {
-    id: "q-first",
+    id: 101,
     question: "Put these in order",
     type: "put-in-order",
     options: ["Alpha", "Beta", "Gamma", "Delta"],
@@ -30,7 +30,7 @@ const questions: QuizQuestion[] = [
     timeLimitSeconds: 15,
   } as QuizQuestion,
   {
-    id: "q-second",
+    id: 102,
     question: "And these",
     type: "put-in-order",
     options: ["One", "Two", "Three", "Four"],
@@ -39,7 +39,7 @@ const questions: QuizQuestion[] = [
   } as QuizQuestion,
 ];
 
-type Frame = { questionId: string; revealAnswer: boolean };
+type Frame = { questionId: number; revealAnswer: boolean };
 let frames: Frame[] = [];
 
 function RecordingQuestionDisplay(props: {
@@ -94,7 +94,7 @@ function HostHarness({ ordering }: { ordering: "buggy" | "fixed" }) {
 }
 
 const flashFrames = () =>
-  frames.filter((f) => f.questionId === "q-second" && f.revealAnswer);
+  frames.filter((f) => f.questionId === 102 && f.revealAnswer);
 
 describe("next-question transition", () => {
   beforeEach(() => {
@@ -120,7 +120,7 @@ describe("next-question transition", () => {
     });
 
     // The new question must have rendered...
-    expect(frames.some((f) => f.questionId === "q-second")).toBe(true);
+    expect(frames.some((f) => f.questionId === 102)).toBe(true);
     // ...and never once with the answer revealed.
     expect(flashFrames()).toEqual([]);
 
