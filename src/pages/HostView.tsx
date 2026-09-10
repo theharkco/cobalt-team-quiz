@@ -140,6 +140,9 @@ export default function HostView() {
         });
       setRankedGuesses(ranked);
 
+      if (alreadyScored) return;
+      sessionStorage.setItem(`cwgo-scored-${session.id}-${session.current_question}`, '1');
+
       try {
         for (const g of guesses) {
           const pts = scores.get(g.playerId) || 0;
@@ -148,16 +151,21 @@ export default function HostView() {
             .update({ points_earned: pts, is_correct: pts > 0 })
             .eq('id', g.answerId);
         }
+        // Read scores fresh from the database so we never add points on top of
+        // a stale local value.
+        const { data: freshPlayers } = await supabase
+          .from('players')
+          .select('id, score')
+          .eq('session_id', session.id);
+        const scoreById = new Map((freshPlayers ?? []).map((p) => [p.id, p.score]));
         for (const g of guesses) {
           const pts = scores.get(g.playerId) || 0;
-          if (pts > 0) {
-            const player = players.find((p) => p.id === g.playerId);
-            if (player) {
-              await supabase
-                .from('players')
-                .update({ score: player.score + pts })
-                .eq('id', player.id);
-            }
+          const base = scoreById.get(g.playerId);
+          if (pts > 0 && base !== undefined) {
+            await supabase
+              .from('players')
+              .update({ score: base + pts })
+              .eq('id', g.playerId);
           }
         }
         refreshPlayers();
