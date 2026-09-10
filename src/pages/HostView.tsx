@@ -275,6 +275,7 @@ export default function HostView() {
   };
 
   const startQuestionWithPreCountdown = (questionIndex: number) => {
+    setIsTransitioning(true);
     setAnswerCount(0);
     setCurrentQuestionIndex(questionIndex);
     setShowAnswer(false);
