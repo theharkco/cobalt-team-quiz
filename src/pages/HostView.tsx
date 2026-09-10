@@ -329,6 +329,9 @@ export default function HostView() {
       await updateStatus('finished');
       await refreshPlayers();
     } else {
+      // Cover the swap with a fade BEFORE the async session update so the old
+      // question never flickers into the new one while it hydrates.
+      setIsTransitioning(true);
       // Reset reveal state BEFORE the session update so the new question
       // never renders momentarily with the previous reveal styling.
       setShowAnswer(false);
