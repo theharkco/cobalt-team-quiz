@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
+import MusicTrackPicker from './MusicTrackPicker';
 import type { QuestionType, Difficulty, HighbrowLowbrowInputType } from '@/data/questionTypes';
 
 export interface QuestionFormData {
@@ -17,6 +18,9 @@ export interface QuestionFormData {
   imageUrl: string;
   blurLevels: number[];
   spotifyEmbedUrl: string;
+  audioPreviewUrl: string;
+  trackName: string;
+  artistName: string;
   category: string;
   difficulty: Difficulty;
   explanation: string;
@@ -42,6 +46,9 @@ function createEmptyQuestion(): QuestionFormData {
     imageUrl: '',
     blurLevels: DEFAULT_BLUR_LEVELS,
     spotifyEmbedUrl: '',
+    audioPreviewUrl: '',
+    trackName: '',
+    artistName: '',
     category: '',
     difficulty: 'medium',
     explanation: '',
