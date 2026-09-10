@@ -8,6 +8,7 @@ import type { Player, QuizSession, SessionStatus } from '@/types/quiz';
 import { useTimer } from '@/hooks/useTimer';
 import { usePreCountdown } from '@/hooks/usePreCountdown';
 import { retryOnce } from '@/lib/retryAsync';
+import { resetForNextQuestion } from '@/lib/questionTransition';
 import { toast } from '@/hooks/use-toast';
 import CountdownTimer from '@/components/quiz/CountdownTimer';
 import QuestionDisplay from '@/components/quiz/QuestionDisplay';
@@ -274,17 +275,24 @@ export default function HostView() {
     }
   };
 
+  // Everything that must never survive a question swap, in one place.
+  const resetQuestionState = useCallback(() => {
+    resetForNextQuestion({
+      clearRevealState: () => {
+        setShowAnswer(false);
+        setHasScored(false);
+        setRankedGuesses([]);
+      },
+      timer,
+      clearPreCountdown,
+      onCleanup: () => setAnswerCount(0),
+    });
+  }, [timer, clearPreCountdown]);
+
   const startQuestionWithPreCountdown = (questionIndex: number) => {
     setIsTransitioning(true);
-    setAnswerCount(0);
+    resetQuestionState();
     setCurrentQuestionIndex(questionIndex);
-    setShowAnswer(false);
-    setHasScored(false);
-    setRankedGuesses([]);
-    // Clear the previous question's elapsed time. Without this the new question
-    // renders for a moment with the old value (fully un-blurred image, expired
-    // countdown, clip already playing) before the timer actually starts.
-    timer.reset();
     // Snapshot scores as the question begins so the leaderboard can show the
     // points won on this question, however they were awarded.
     setPreviousScores(Object.fromEntries(players.map((p) => [p.id, p.score])));
@@ -302,10 +310,7 @@ export default function HostView() {
   };
 
   const startQuiz = async () => {
-    setShowAnswer(false);
-    setHasScored(false);
-    setRankedGuesses([]);
-    setAnswerCount(0);
+    resetQuestionState();
     await updateStatus('question', 0, { question_started_at: null });
     startQuestionWithPreCountdown(0);
   };
@@ -334,10 +339,7 @@ export default function HostView() {
       setIsTransitioning(true);
       // Reset reveal state BEFORE the session update so the new question
       // never renders momentarily with the previous reveal styling.
-      setShowAnswer(false);
-      setHasScored(false);
-      setRankedGuesses([]);
-      setAnswerCount(0);
+      resetQuestionState();
       await updateStatus('question', next, { question_started_at: null });
       startQuestionWithPreCountdown(next);
     }
