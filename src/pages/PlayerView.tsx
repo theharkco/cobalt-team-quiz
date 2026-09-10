@@ -67,22 +67,29 @@ export default function PlayerView() {
     if (data) setPlayers(data as Player[]);
   }, [sessionId]);
 
+  // Everything that must never survive a question swap, in one place
+  // (shared ordering with the host screen).
+  const resetQuestionState = useCallback(() => {
+    resetForNextQuestion({
+      clearRevealState: () => {
+        setAnswered(false);
+        setLastPoints(0);
+        setResultKind('timeout');
+        setLastPutInOrderPicks(null);
+      },
+      timer,
+      clearPreCountdown,
+      onCleanup: stopTicking,
+    });
+  }, [timer, clearPreCountdown]);
+
   const handleSessionTransition = useCallback(
     (prev: QuizSession | null, next: QuizSession) => {
       // New question transition
       if (prev && next.current_question !== prev.current_question && next.current_question !== lastQuestionRef.current) {
         lastQuestionRef.current = next.current_question;
         setIsTransitioning(true);
-        setAnswered(false);
-        setLastPoints(0);
-        setResultKind('timeout');
-        setLastPutInOrderPicks(null);
-        // reset (not just stop) so the new question never renders with the
-        // previous question's elapsed time — that briefly un-blurred images and
-        // flagged the question as already revealed.
-        timer.reset();
-        stopTicking();
-        clearPreCountdown();
+        resetQuestionState();
         // Refresh player from DB to pick up any host-awarded scores (e.g. from closest-without-going-over)
         refreshPlayer();
 
