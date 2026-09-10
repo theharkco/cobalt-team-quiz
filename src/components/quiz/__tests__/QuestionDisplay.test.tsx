@@ -28,8 +28,17 @@ const musicQuestion: QuizQuestion = {
   question: '🎵 Name the artist!',
   options: ['X', 'Y'],
   correctAnswer: 'X',
-  spotifyEmbedUrl: 'https://open.spotify.com/embed/track/abc',
+  audioPreviewUrl: 'https://example.com/preview.m4a',
+  trackName: 'Some Song',
+  artistName: 'X',
   category: 'Music',
+};
+
+const legacyMusicQuestion: QuizQuestion = {
+  ...musicQuestion,
+  id: 4,
+  audioPreviewUrl: undefined,
+  spotifyEmbedUrl: 'https://open.spotify.com/embed/track/abc',
 };
 
 describe('QuestionDisplay', () => {
