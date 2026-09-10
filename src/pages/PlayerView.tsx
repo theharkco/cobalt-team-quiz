@@ -105,6 +105,8 @@ export default function PlayerView() {
             return currentSession;
           });
         });
+        // Keep the fade up until the new question + countdown have painted.
+        window.setTimeout(() => setIsTransitioning(false), 400);
       }
 
       if (next.status === 'leaderboard' || next.status === 'finished') {
