@@ -173,6 +173,7 @@ export default function QuestionDisplay({
           previewUrl={question.audioPreviewUrl}
           playing={timeElapsedMs > 0 && !hideOptions && !revealAnswer}
           audible
+          startEpochMs={questionStartedAtMs}
           trackName={question.trackName}
           artistName={question.artistName}
           revealTrack={revealAnswer}
