@@ -83,11 +83,13 @@ describe('QuestionDisplay', () => {
     expect(audio?.getAttribute('src')).toBe('https://example.com/preview.m4a');
   });
 
-  it('does not output audio on player devices', () => {
+  it('also outputs audio on player devices so everyone hears the clip', () => {
     const { container } = render(
       <QuestionDisplay question={musicQuestion} questionNumber={1} totalQuestions={15} />
     );
-    expect(container.querySelector('audio')).not.toBeInTheDocument();
+    const audio = container.querySelector('audio');
+    expect(audio).toBeInTheDocument();
+    expect(audio?.getAttribute('src')).toBe('https://example.com/preview.m4a');
   });
 
   it('reveals the track name once the answer is revealed', () => {
