@@ -72,6 +72,7 @@ export default function PlayerView() {
       // New question transition
       if (prev && next.current_question !== prev.current_question && next.current_question !== lastQuestionRef.current) {
         lastQuestionRef.current = next.current_question;
+        setIsTransitioning(true);
         setAnswered(false);
         setLastPoints(0);
         setResultKind('timeout');
@@ -107,6 +108,7 @@ export default function PlayerView() {
       }
 
       if (next.status === 'leaderboard' || next.status === 'finished') {
+        setIsTransitioning(false);
         timer.stop();
         stopTicking();
         clearPreCountdown();
@@ -421,6 +423,23 @@ export default function PlayerView() {
 
     return (
       <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4 py-6">
+        <AnimatePresence>
+          {isTransitioning && (
+            <motion.div
+              key="question-transition"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center gap-2"
+            >
+              <p className="text-muted-foreground font-body text-xs uppercase tracking-widest">Get ready</p>
+              <p className="text-3xl font-display font-bold text-gradient animate-pulse">
+                Question {session.current_question + 1}
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
         {!isPreCountdown && (
           <div className="absolute top-4 right-4">
             <CountdownTimer duration={currentQ.timeLimitSeconds ?? 15} timeElapsed={timer.timeElapsed} onComplete={onTimerComplete} isRunning={timer.isRunning} size={70} />
