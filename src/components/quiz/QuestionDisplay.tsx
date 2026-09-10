@@ -161,12 +161,12 @@ export default function QuestionDisplay({
         </motion.div>
       )}
 
-      {/* Music clip — Apple 30s preview, plays automatically on the host device */}
+      {/* Music clip — Apple 30s preview, plays on the host screen and on each player's phone */}
       {question.type === "music" && question.audioPreviewUrl && (
         <MusicPlayer
           previewUrl={question.audioPreviewUrl}
           playing={timeElapsedMs > 0 && !hideOptions && !revealAnswer}
-          audible={Boolean(isHost)}
+          audible
           trackName={question.trackName}
           artistName={question.artistName}
           revealTrack={revealAnswer}
