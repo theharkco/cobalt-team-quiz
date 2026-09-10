@@ -31,13 +31,13 @@ export default function MusicPlayer({ previewUrl, playing, audible = true, track
   useEffect(() => {
     const el = audioRef.current;
     if (!el) return;
-    if (playing) {
+    if (playing && audible) {
       el.volume = 0.85;
       el.play().then(() => setBlocked(false)).catch(() => setBlocked(true));
     } else {
       el.pause();
     }
-  }, [playing, previewUrl]);
+  }, [playing, audible, previewUrl]);
 
   const start = () => {
     const el = audioRef.current;
@@ -52,7 +52,7 @@ export default function MusicPlayer({ previewUrl, playing, audible = true, track
       transition={{ delay: 0.15 }}
       className="flex flex-col items-center gap-4 mb-8"
     >
-      <audio ref={audioRef} src={previewUrl} preload="auto" />
+      {audible && <audio ref={audioRef} src={previewUrl} preload="auto" />}
 
       <div className="flex items-end justify-center gap-2 h-24">
         {Array.from({ length: BAR_COUNT }).map((_, i) => (
