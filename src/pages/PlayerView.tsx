@@ -126,7 +126,7 @@ export default function PlayerView() {
         refreshPlayers();
       }
     },
-    [timer, refreshPlayer, refreshPlayers, clearPreCountdown, startPreCountdown]
+    [timer, refreshPlayer, refreshPlayers, clearPreCountdown, startPreCountdown, resetQuestionState]
   );
 
   useEffect(() => {
