@@ -424,6 +424,23 @@ export default function HostView() {
     const questionTimeLimit = currentQ.timeLimitSeconds ?? 15;
     return (
       <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4 py-8">
+        <AnimatePresence>
+          {isTransitioning && (
+            <motion.div
+              key="question-transition"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center gap-2"
+            >
+              <p className="text-muted-foreground font-body text-sm uppercase tracking-widest">Get ready</p>
+              <p className="text-4xl md:text-5xl font-display font-bold text-gradient animate-pulse">
+                Question {session.current_question + 1}
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
         {!isPreCountdown && (
           <div className="absolute top-6 right-6">
             <CountdownTimer duration={questionTimeLimit} timeElapsed={timer.timeElapsed} onComplete={onTimerComplete} isRunning={timer.isRunning} size={100} />
