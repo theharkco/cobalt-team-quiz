@@ -277,6 +277,13 @@ export default function HostView() {
     setShowAnswer(false);
     setHasScored(false);
     setRankedGuesses([]);
+    // Clear the previous question's elapsed time. Without this the new question
+    // renders for a moment with the old value (fully un-blurred image, expired
+    // countdown, clip already playing) before the timer actually starts.
+    timer.reset();
+    // Snapshot scores as the question begins so the leaderboard can show the
+    // points won on this question, however they were awarded.
+    setPreviousScores(Object.fromEntries(players.map((p) => [p.id, p.score])));
     startPreCountdown(async () => {
       const now = new Date().toISOString();
       await supabase
@@ -289,7 +296,10 @@ export default function HostView() {
   };
 
   const startQuiz = async () => {
-    setPreviousScores({});
+    setShowAnswer(false);
+    setHasScored(false);
+    setRankedGuesses([]);
+    setAnswerCount(0);
     await updateStatus('question', 0, { question_started_at: null });
     startQuestionWithPreCountdown(0);
   };
@@ -300,12 +310,9 @@ export default function HostView() {
   };
 
   const showLeaderboard = async () => {
-    const prev: Record<string, number> = {};
-    players.forEach((p) => {
-      prev[p.id] = p.score;
-    });
+    // previousScores was captured when the question started, so the leaderboard
+    // animates this question's gains — including host-awarded ones.
     await refreshPlayers();
-    setPreviousScores(prev);
     await updateStatus('leaderboard');
   };
 
