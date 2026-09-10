@@ -68,6 +68,8 @@ export type Database = {
       custom_quiz_questions: {
         Row: {
           acceptable_answers: Json | null
+          artist_name: string | null
+          audio_preview_url: string | null
           blur_levels: Json | null
           category: string | null
           correct_answer: string
@@ -86,10 +88,13 @@ export type Database = {
           sort_order: number
           spotify_embed_url: string | null
           time_limit_seconds: number
+          track_name: string | null
           type: string
         }
         Insert: {
           acceptable_answers?: Json | null
+          artist_name?: string | null
+          audio_preview_url?: string | null
           blur_levels?: Json | null
           category?: string | null
           correct_answer: string
@@ -108,10 +113,13 @@ export type Database = {
           sort_order?: number
           spotify_embed_url?: string | null
           time_limit_seconds?: number
+          track_name?: string | null
           type?: string
         }
         Update: {
           acceptable_answers?: Json | null
+          artist_name?: string | null
+          audio_preview_url?: string | null
           blur_levels?: Json | null
           category?: string | null
           correct_answer?: string
@@ -130,6 +138,7 @@ export type Database = {
           sort_order?: number
           spotify_embed_url?: string | null
           time_limit_seconds?: number
+          track_name?: string | null
           type?: string
         }
         Relationships: [
