@@ -108,6 +108,7 @@ describe("next-question transition", () => {
       await new Promise((r) => setTimeout(r, 20));
     });
 
+    console.log('FRAMES', JSON.stringify(frames));
     // The bug: the new question rendered while the answer was still revealed.
     expect(flashFrames().length).toBeGreaterThan(0);
   });
