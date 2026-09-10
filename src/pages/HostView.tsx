@@ -297,6 +297,8 @@ export default function HostView() {
       setSession((prev) => prev ? { ...prev, question_started_at: now } : prev);
       timer.start();
     });
+    // Keep the fade up until the new question + countdown have painted.
+    window.setTimeout(() => setIsTransitioning(false), 350);
   };
 
   const startQuiz = async () => {
