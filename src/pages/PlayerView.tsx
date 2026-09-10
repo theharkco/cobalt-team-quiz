@@ -465,6 +465,7 @@ export default function PlayerView() {
             questionNumber={session.current_question + 1}
             totalQuestions={quizQuestions.length}
             timeElapsedMs={timer.timeElapsed}
+            questionStartedAtMs={session.question_started_at ? new Date(session.question_started_at).getTime() : undefined}
             hideOptions={isPreCountdown}
             revealAnswer={answered || timer.timeElapsed >= (currentQ.timeLimitSeconds ?? 15) * 1000}
           />

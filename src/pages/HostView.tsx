@@ -456,6 +456,7 @@ export default function HostView() {
             totalQuestions={quizQuestions.length}
             isHost
             timeElapsedMs={timer.timeElapsed}
+            questionStartedAtMs={session.question_started_at ? new Date(session.question_started_at).getTime() : undefined}
             hideOptions={isPreCountdown}
             revealAnswer={showAnswer}
           />
