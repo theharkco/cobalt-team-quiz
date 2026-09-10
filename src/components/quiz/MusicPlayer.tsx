@@ -72,12 +72,21 @@ export default function MusicPlayer({ previewUrl, playing, audible = true, track
         ))}
       </div>
 
-      {blocked && (
+      {audible && blocked && (
         <button
           onClick={start}
-          className="px-5 py-2 rounded-full bg-primary font-display font-bold text-primary-foreground"
+          className="px-6 py-3 rounded-full bg-primary font-display font-bold text-primary-foreground shadow-lg animate-pulse"
         >
-          ▶ Play the clip
+          ▶ Tap to hear the clip
+        </button>
+      )}
+
+      {audible && !blocked && playing && (
+        <button
+          onClick={() => (muted ? start() : setMuted(true))}
+          className="px-4 py-1.5 rounded-full bg-secondary text-secondary-foreground font-body text-sm"
+        >
+          {muted ? '🔇 Sound off — tap to listen' : '🔊 Mute on this device'}
         </button>
       )}
 
