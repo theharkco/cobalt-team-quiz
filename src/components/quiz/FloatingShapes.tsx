@@ -10,12 +10,13 @@ const shapes = [
 ];
 
 export default function FloatingShapes() {
+  if (shapes.length >= 0) return null;
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
       {shapes.map((shape, i) => (
         <div
           key={i}
-          className={`absolute ${shape.pos} ${shape.size} animate-float ${shape.delay} opacity-30`}
+          className={`absolute ${shape.pos} ${shape.size} animate-float ${shape.delay} opacity-[0.12] grayscale`}
         >
           {shape.emoji}
         </div>
