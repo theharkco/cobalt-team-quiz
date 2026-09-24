@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,51 +6,51 @@
 
 @layer base {
   :root {
-    --background: 200 12% 10%;
-    --foreground: 40 25% 90%;
-    --card: 200 10% 15%;
-    --card-foreground: 40 30% 92%;
-    --popover: 200 10% 15%;
-    --popover-foreground: 40 30% 92%;
-    --primary: 0 100% 71%;
-    --primary-foreground: 195 8% 19%;
-    --secondary: 176 56% 55%;
-    --secondary-foreground: 195 8% 19%;
-    --muted: 200 9% 20%;
-    --muted-foreground: 40 12% 76%;
-    --accent: 51 100% 71%;
-    --accent-foreground: 195 8% 19%;
-    --destructive: 0 72% 55%;
+    --background: 250 22% 7%;
+    --foreground: 36 33% 91%;
+    --card: 250 18% 11%;
+    --card-foreground: 36 33% 91%;
+    --popover: 250 18% 12%;
+    --popover-foreground: 36 33% 91%;
+    --primary: 18 96% 60%;
+    --primary-foreground: 250 30% 8%;
+    --secondary: 162 62% 52%;
+    --secondary-foreground: 250 30% 8%;
+    --muted: 250 14% 16%;
+    --muted-foreground: 36 12% 68%;
+    --accent: 44 96% 64%;
+    --accent-foreground: 250 30% 8%;
+    --destructive: 356 80% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 200 8% 42%;
-    --input: 200 8% 48%;
-    --ring: 40 30% 92%;
+    --border: 250 12% 22%;
+    --input: 250 12% 26%;
+    --ring: 18 96% 60%;
     --radius: 1rem;
-    --rule: 200 8% 26%;
-    --ink: 200 20% 4%;
-    --shadow-color: 200 30% 32%;
+    --rule: 250 12% 18%;
+    --ink: 250 30% 4%;
+    --shadow-color: 250 30% 3%;
 
-    --quiz-green: 150 55% 45%;
-    --quiz-blue: 176 56% 45%;
-    --quiz-orange: 29 100% 63%;
-    --quiz-purple: 250 50% 62%;
-    --quiz-pink: 0 100% 71%;
-    --quiz-yellow: 51 100% 65%;
+    --quiz-green: 152 60% 48%;
+    --quiz-blue: 205 90% 62%;
+    --quiz-orange: 30 96% 60%;
+    --quiz-purple: 262 80% 70%;
+    --quiz-pink: 336 90% 66%;
+    --quiz-yellow: 44 96% 64%;
 
-    --shadow-ink: 6px 6px 0 0 hsl(var(--shadow-color));
-    --shadow-ink-sm: 4px 4px 0 0 hsl(var(--shadow-color));
+    --shadow-ink: 0 1px 0 0 hsl(0 0% 100% / 0.05) inset, 0 20px 50px -20px hsl(var(--shadow-color) / 0.9), 0 2px 6px hsl(var(--shadow-color) / 0.5);
+    --shadow-ink-sm: 0 1px 0 0 hsl(0 0% 100% / 0.25) inset, 0 4px 0 0 hsl(var(--shadow-color) / 0.55), 0 8px 18px -6px hsl(var(--shadow-color) / 0.7);
     --gradient-fun: hsl(var(--primary));
-    --gradient-correct: hsl(150 55% 45%);
-    --gradient-wrong: hsl(0 72% 55%);
+    --gradient-correct: hsl(152 60% 42%);
+    --gradient-wrong: hsl(356 80% 56%);
 
-    --sidebar-background: 200 10% 15%;
-    --sidebar-foreground: 40 25% 90%;
-    --sidebar-primary: 0 100% 71%;
-    --sidebar-primary-foreground: 195 8% 19%;
-    --sidebar-accent: 210 17% 95%;
-    --sidebar-accent-foreground: 195 8% 19%;
-    --sidebar-border: 195 8% 19%;
-    --sidebar-ring: 195 8% 19%;
+    --sidebar-background: 250 18% 11%;
+    --sidebar-foreground: 36 33% 91%;
+    --sidebar-primary: 18 96% 60%;
+    --sidebar-primary-foreground: 250 30% 8%;
+    --sidebar-accent: 250 14% 16%;
+    --sidebar-accent-foreground: 36 33% 91%;
+    --sidebar-border: 250 12% 22%;
+    --sidebar-ring: 18 96% 60%;
   }
 }
 
@@ -60,46 +60,49 @@
   }
 
   body {
-    @apply bg-background text-foreground;
-    font-family: 'Nunito', sans-serif;
-    background-image: radial-gradient(hsl(var(--foreground) / 0.06) 1px, transparent 1px);
-    background-size: 22px 22px;
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Figtree', sans-serif;
+    background-image:
+      radial-gradient(60rem 36rem at 50% -10%, hsl(var(--primary) / 0.14), transparent 60%),
+      radial-gradient(40rem 30rem at 100% 100%, hsl(var(--secondary) / 0.07), transparent 60%);
+    background-attachment: fixed;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Fredoka', sans-serif;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    letter-spacing: -0.02em;
   }
 }
 
 @layer utilities {
   .gradient-fun {
     background: hsl(var(--primary));
-    color: hsl(var(--ink));
-    border: 3px solid hsl(var(--ink)) !important;
     color: hsl(var(--primary-foreground)) !important;
+    border: 0 !important;
     box-shadow: var(--shadow-ink-sm);
-    transition: transform .12s ease, box-shadow .12s ease;
+    transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
   }
-  .gradient-fun:active { transform: translate(4px,4px); box-shadow: none; }
+  .gradient-fun:hover { filter: brightness(1.06); }
+  .gradient-fun:active { transform: translateY(3px); box-shadow: 0 1px 0 0 hsl(var(--shadow-color) / 0.55); }
 
   .text-gradient {
     color: hsl(var(--primary));
-    text-shadow: 4px 4px 0 hsl(var(--ink));
   }
 
   .paper-card {
-    background: hsl(var(--card));
-    border: 4px solid hsl(var(--ink));
-    border-radius: 1.5rem;
+    background: linear-gradient(180deg, hsl(var(--card)), hsl(var(--card) / 0.92));
+    border: 1px solid hsl(var(--border));
+    border-radius: 1.75rem;
     box-shadow: var(--shadow-ink);
   }
 
   .tactile {
-    border: 3px solid hsl(var(--ink));
+    border: 0;
     box-shadow: var(--shadow-ink-sm);
-    transition: transform .12s ease, box-shadow .12s ease;
+    transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
   }
-  .tactile:active { transform: translate(4px,4px); box-shadow: none; }
+  .tactile:hover { filter: brightness(1.06); }
+  .tactile:active { transform: translateY(3px); box-shadow: 0 1px 0 0 hsl(var(--shadow-color) / 0.55); }
 
   .animate-float {
     animation: float 6s ease-in-out infinite;

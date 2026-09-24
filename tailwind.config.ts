@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ["Fredoka", "sans-serif"],
-        body: ["Nunito", "sans-serif"],
+        display: ["Bricolage Grotesque", "sans-serif"],
+        body: ["Figtree", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
