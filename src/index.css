@@ -1,56 +1,54 @@
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700;800&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 250 22% 7%;
-    --foreground: 36 33% 91%;
-    --card: 250 18% 11%;
-    --card-foreground: 36 33% 91%;
-    --popover: 250 18% 12%;
-    --popover-foreground: 36 33% 91%;
-    --primary: 18 96% 60%;
-    --primary-foreground: 250 30% 8%;
-    --secondary: 162 62% 52%;
-    --secondary-foreground: 250 30% 8%;
-    --muted: 250 14% 16%;
-    --muted-foreground: 36 12% 68%;
-    --accent: 44 96% 64%;
-    --accent-foreground: 250 30% 8%;
-    --destructive: 356 80% 60%;
+    --background: 222 24% 7%;
+    --foreground: 48 22% 92%;
+    --card: 222 20% 11%;
+    --card-foreground: 48 22% 92%;
+    --popover: 222 20% 12%;
+    --popover-foreground: 48 22% 92%;
+    --primary: 187 92% 56%;
+    --primary-foreground: 222 30% 7%;
+    --secondary: 78 90% 58%;
+    --secondary-foreground: 222 30% 7%;
+    --muted: 222 15% 17%;
+    --muted-foreground: 215 13% 69%;
+    --accent: 332 84% 62%;
+    --accent-foreground: 222 30% 7%;
+    --destructive: 353 82% 62%;
     --destructive-foreground: 0 0% 100%;
-    --border: 250 12% 22%;
-    --input: 250 12% 26%;
-    --ring: 18 96% 60%;
-    --radius: 1rem;
-    --rule: 250 12% 18%;
-    --ink: 250 30% 4%;
-    --shadow-color: 250 30% 3%;
+    --border: 218 14% 25%;
+    --input: 218 14% 30%;
+    --ring: 187 92% 56%;
+    --radius: 0.625rem;
+    --rule: 218 14% 19%;
+    --ink: 222 34% 4%;
+    --shadow-color: 222 42% 2%;
 
-    --quiz-green: 152 60% 48%;
-    --quiz-blue: 205 90% 62%;
-    --quiz-orange: 30 96% 60%;
-    --quiz-purple: 262 80% 70%;
-    --quiz-pink: 336 90% 66%;
-    --quiz-yellow: 44 96% 64%;
+    --quiz-green: 78 90% 58%;
+    --quiz-blue: 187 92% 56%;
+    --quiz-orange: 38 96% 61%;
+    --quiz-purple: 269 84% 72%;
+    --quiz-pink: 332 84% 62%;
+    --quiz-yellow: 53 94% 62%;
 
-    --shadow-ink: 0 1px 0 0 hsl(0 0% 100% / 0.05) inset, 0 20px 50px -20px hsl(var(--shadow-color) / 0.9), 0 2px 6px hsl(var(--shadow-color) / 0.5);
-    --shadow-ink-sm: 0 1px 0 0 hsl(0 0% 100% / 0.25) inset, 0 4px 0 0 hsl(var(--shadow-color) / 0.55), 0 8px 18px -6px hsl(var(--shadow-color) / 0.7);
+    --shadow-ink: 0 1px 0 hsl(var(--foreground) / 0.06) inset, 0 28px 70px -34px hsl(var(--shadow-color));
+    --shadow-ink-sm: 0 1px 0 hsl(var(--foreground) / 0.08) inset, 0 10px 24px -16px hsl(var(--shadow-color));
     --gradient-fun: hsl(var(--primary));
     --gradient-correct: hsl(152 60% 42%);
     --gradient-wrong: hsl(356 80% 56%);
 
-    --sidebar-background: 250 18% 11%;
-    --sidebar-foreground: 36 33% 91%;
-    --sidebar-primary: 18 96% 60%;
-    --sidebar-primary-foreground: 250 30% 8%;
-    --sidebar-accent: 250 14% 16%;
-    --sidebar-accent-foreground: 36 33% 91%;
-    --sidebar-border: 250 12% 22%;
-    --sidebar-ring: 18 96% 60%;
+    --sidebar-background: 222 20% 11%;
+    --sidebar-foreground: 48 22% 92%;
+    --sidebar-primary: 187 92% 56%;
+    --sidebar-primary-foreground: 222 30% 7%;
+    --sidebar-accent: 222 15% 17%;
+    --sidebar-accent-foreground: 48 22% 92%;
+    --sidebar-border: 218 14% 25%;
+    --sidebar-ring: 187 92% 56%;
   }
 }
 
@@ -61,16 +59,15 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Figtree', sans-serif;
-    background-image:
-      radial-gradient(60rem 36rem at 50% -10%, hsl(var(--primary) / 0.14), transparent 60%),
-      radial-gradient(40rem 30rem at 100% 100%, hsl(var(--secondary) / 0.07), transparent 60%);
-    background-attachment: fixed;
+    font-family: 'Manrope', sans-serif;
+    min-width: 320px;
+    background-image: linear-gradient(hsl(var(--foreground) / 0.025) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground) / 0.025) 1px, transparent 1px);
+    background-size: 42px 42px;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Bricolage Grotesque', sans-serif;
-    letter-spacing: -0.02em;
+    font-family: 'Space Grotesk', sans-serif;
+    letter-spacing: 0;
   }
 }
 
@@ -78,7 +75,7 @@
   .gradient-fun {
     background: hsl(var(--primary));
     color: hsl(var(--primary-foreground)) !important;
-    border: 0 !important;
+    border: 1px solid hsl(var(--primary) / 0.65) !important;
     box-shadow: var(--shadow-ink-sm);
     transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
   }
@@ -92,7 +89,7 @@
   .paper-card {
     background: linear-gradient(180deg, hsl(var(--card)), hsl(var(--card) / 0.92));
     border: 1px solid hsl(var(--border));
-    border-radius: 1.75rem;
+    border-radius: 0.75rem;
     box-shadow: var(--shadow-ink);
   }
 
@@ -138,6 +135,40 @@
 
   .animate-emoji-float {
     animation: emojiFloat 2s ease-out forwards;
+  }
+
+  .quiz-screen {
+    @apply relative min-h-screen overflow-hidden bg-background text-foreground;
+  }
+
+  .stage-grid {
+    @apply pointer-events-none absolute inset-0;
+    background-image: linear-gradient(hsl(var(--primary) / 0.035) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary) / 0.035) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: linear-gradient(to bottom, black, transparent 88%);
+  }
+
+  .stage-chrome {
+    @apply relative z-20 flex h-14 items-center border-b border-border bg-background/85 px-4 backdrop-blur md:px-8;
+  }
+
+  .stage-brand {
+    @apply font-display text-xs font-bold tracking-[0.18em] text-primary;
+  }
+
+  .stage-eyebrow {
+    @apply ml-4 border-l border-border pl-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground;
+  }
+
+  .stage-corner { @apply ml-auto; }
+  .stage-content { @apply relative z-10 mx-auto w-full; }
+  .stage-kicker { @apply text-xs font-bold uppercase tracking-[0.22em] text-muted-foreground; }
+  .stage-panel { @apply border border-border bg-card/90 shadow-[var(--shadow-ink)]; }
+  .stage-rule { @apply h-px bg-border; }
+  .status-dot { @apply inline-block h-2 w-2 rounded-full bg-secondary shadow-[0_0_12px_hsl(var(--secondary)/0.7)]; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
   }
 }
 
