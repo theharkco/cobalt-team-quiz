@@ -56,120 +56,122 @@ const Index = () => {
     return <QuizPicker onSelect={handleHost} onBack={() => setShowPicker(false)} />;
   }
 
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4">
-      <FloatingShapes />
+  const tile =
+    'tactile flex flex-col items-center justify-center p-6 rounded-2xl text-foreground disabled:opacity-50';
 
-      <div className="relative z-10 flex flex-col items-center gap-8 max-w-md w-full">
+  return (
+    <div className="min-h-screen flex items-center justify-center p-6">
+      <div className="max-w-md w-full space-y-8">
         <motion.div
-          initial={{ y: -50, opacity: 0 }}
+          initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ type: 'spring', bounce: 0.5 }}
+          transition={{ type: 'spring', bounce: 0.45 }}
           className="text-center"
         >
-          <h1 className="text-6xl md:text-8xl font-display font-bold text-gradient mb-2">
-            Quiz Clash
+          <h1 className="text-6xl md:text-7xl font-display font-bold tracking-tight italic -rotate-2 leading-[0.95] text-foreground">
+            QUIZ
+            <br />
+            <span className="text-gradient">CLASH</span>
           </h1>
-          <p className="text-lg font-body text-muted-foreground">
-            ⚡ Real-time multiplayer quiz battle ⚡
-          </p>
         </motion.div>
 
-        {!showJoin ? (
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.2, type: 'spring' }}
-            className="flex flex-col gap-4 w-full"
-          >
-            <Button
-              onClick={() => setShowPicker(true)}
-              disabled={loading}
-              className="h-16 text-xl font-display font-bold rounded-2xl gradient-fun text-foreground border-none hover:opacity-90 transition-all hover:scale-105 active:scale-95"
-            >
-              🎤 Host a Quiz
-            </Button>
-            <Button
-              onClick={() => setShowJoin(true)}
-              variant="outline"
-              className="h-16 text-xl font-display font-bold rounded-2xl border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all hover:scale-105 active:scale-95"
-            >
-              🎮 Join a Quiz
-            </Button>
-            <Button
-              onClick={() => navigate('/create')}
-              variant="outline"
-              className="h-14 text-lg font-display font-bold rounded-2xl border-2 border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all"
-            >
-              ✏️ Create a Quiz
-            </Button>
-          </motion.div>
-        ) : (
-          <motion.div
-            key={codeOk ? 'name' : 'code'}
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="flex flex-col gap-4 w-full"
-          >
-            {!codeOk ? (
-              <Input
-                value={joinCode}
-                onChange={(e) => setJoinCode(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                placeholder="4-digit code"
-                inputMode="numeric"
-                className="h-14 text-center text-3xl font-display tracking-[0.5em] bg-card border-2 border-border text-foreground placeholder:text-muted-foreground placeholder:text-lg placeholder:tracking-normal rounded-xl"
-                maxLength={4}
-                autoFocus
-                onKeyDown={(e) => e.key === 'Enter' && handleCheckCode()}
-              />
-            ) : (
-              <>
-                <p className="text-center font-body text-muted-foreground">
-                  Joining quiz <span className="font-display font-bold text-foreground">{joinCode}</span>
-                </p>
-                <Input
-                  value={playerName}
-                  onChange={(e) => setPlayerName(e.target.value)}
-                  placeholder="Your name"
-                  className="h-14 text-center text-lg font-body bg-card border-2 border-border text-foreground placeholder:text-muted-foreground rounded-xl"
-                  autoFocus
-                  onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.1, type: 'spring', bounce: 0.35 }}
+          className="paper-card p-8 space-y-6 transition-transform hover:-translate-y-1"
+        >
+          {!codeOk ? (
+            <div className="space-y-3">
+              <label htmlFor="pin" className="text-sm font-display font-semibold uppercase tracking-wider text-muted-foreground ml-1">
+                Enter game pin
+              </label>
+              <div className="flex gap-3">
+                <input
+                  id="pin"
+                  value={joinCode}
+                  onChange={(e) => { setJoinCode(e.target.value.replace(/\D/g, '').slice(0, 4)); setError(null); }}
+                  placeholder="0000"
+                  inputMode="numeric"
+                  maxLength={4}
+                  onKeyDown={(e) => e.key === 'Enter' && handleCheckCode()}
+                  className="w-full min-w-0 bg-muted border-[3px] border-foreground rounded-2xl px-5 py-4 text-2xl font-display font-bold tracking-[0.3em] focus:outline-none focus:bg-card placeholder:text-foreground/20"
                 />
-              </>
-            )}
-            {error && (
-              <p className="text-destructive text-center font-body font-bold animate-shake">{error}</p>
-            )}
-            {!codeOk ? (
-              <Button
-                onClick={handleCheckCode}
-                disabled={loading || joinCode.length !== 4}
-                className="h-14 text-lg font-display font-bold rounded-xl gradient-fun text-foreground border-none hover:opacity-90"
-              >
-                {loading ? '⏳ Checking...' : 'Next →'}
-              </Button>
-            ) : (
-              <Button
-                onClick={handleJoin}
-                disabled={loading || !playerName.trim()}
-                className="h-14 text-lg font-display font-bold rounded-xl gradient-fun text-foreground border-none hover:opacity-90"
-              >
-                {loading ? '⏳ Joining...' : '🚀 Join Game'}
-              </Button>
-            )}
-            <Button
-              onClick={() => {
-                setError(null);
-                if (codeOk) setCodeOk(false);
-                else setShowJoin(false);
-              }}
-              variant="ghost"
-              className="text-muted-foreground font-body"
-            >
-              ← Back
-            </Button>
-          </motion.div>
-        )}
+                <button
+                  onClick={handleCheckCode}
+                  disabled={loading || joinCode.length !== 4}
+                  className="tactile bg-secondary text-secondary-foreground font-display font-bold px-7 rounded-2xl uppercase disabled:opacity-50"
+                >
+                  {loading ? '…' : 'Join'}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between ml-1">
+                <label htmlFor="name" className="text-sm font-display font-semibold uppercase tracking-wider text-muted-foreground">
+                  Game {joinCode} — your name
+                </label>
+                <button
+                  onClick={() => { setCodeOk(false); setError(null); }}
+                  className="text-sm font-semibold text-muted-foreground underline underline-offset-4 hover:text-foreground"
+                >
+                  Change pin
+                </button>
+              </div>
+              <div className="flex gap-3">
+                <input
+                  id="name"
+                  value={playerName}
+                  onChange={(e) => { setPlayerName(e.target.value); setError(null); }}
+                  placeholder="e.g. Quizzly Bear"
+                  autoFocus
+                  maxLength={24}
+                  onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
+                  className="w-full min-w-0 bg-muted border-[3px] border-foreground rounded-2xl px-5 py-4 text-xl font-display font-semibold focus:outline-none focus:bg-card placeholder:text-foreground/25"
+                />
+                <button
+                  onClick={handleJoin}
+                  disabled={loading || !playerName.trim()}
+                  className="tactile bg-secondary text-secondary-foreground font-display font-bold px-7 rounded-2xl uppercase disabled:opacity-50"
+                >
+                  {loading ? '…' : 'Go'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {error && (
+            <p className="text-destructive font-semibold text-sm ml-1 animate-shake">{error}</p>
+          )}
+
+          <div className="flex items-center">
+            <div className="flex-grow border-t-2 border-[hsl(var(--rule))]" />
+            <span className="mx-4 text-muted-foreground/60 font-display font-semibold text-sm uppercase">Or</span>
+            <div className="flex-grow border-t-2 border-[hsl(var(--rule))]" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <button onClick={() => setShowPicker(true)} disabled={loading} className={`${tile} bg-accent`}>
+              <span className="relative w-12 h-12 mb-3 bg-card border-2 border-foreground rounded-lg flex items-center justify-center">
+                <span className="absolute w-5 h-5 border-[3px] border-foreground rounded-full" />
+                <span className="absolute w-1.5 h-1.5 bg-foreground rounded-full" />
+              </span>
+              <span className="font-display font-bold uppercase text-sm">Host quiz</span>
+            </button>
+            <button onClick={() => navigate('/create')} className={`${tile} bg-quiz-orange`}>
+              <span className="relative w-12 h-12 mb-3 bg-card border-2 border-foreground rounded-lg flex items-center justify-center">
+                <span className="absolute w-1.5 h-6 bg-foreground rounded-full" />
+                <span className="absolute w-6 h-1.5 bg-foreground rounded-full" />
+              </span>
+              <span className="font-display font-bold uppercase text-sm">Create</span>
+            </button>
+          </div>
+        </motion.div>
+
+        <p className="text-center font-display font-semibold text-xs uppercase tracking-wider text-muted-foreground/70">
+          Grab a screen, share the pin, play together
+        </p>
       </div>
     </div>
   );
