@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import { Volume2, VolumeX } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface Props {
   previewUrl: string;
@@ -135,11 +137,11 @@ export default function MusicPlayer({
       initial={{ scale: 0.9, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ delay: 0.15 }}
-      className="flex flex-col items-center gap-4 mb-8"
+      className="flex flex-col items-center gap-4 mb-6"
     >
       {audible && <audio ref={audioRef} src={previewUrl} preload="auto" />}
 
-      <div className="flex items-end justify-center gap-2 h-24">
+      <div className="stage-panel flex h-28 w-full max-w-sm items-end justify-center gap-2 rounded-lg px-8 pb-6 pt-4">
         {Array.from({ length: BAR_COUNT }).map((_, i) => (
           <motion.span
             key={i}
@@ -167,12 +169,12 @@ export default function MusicPlayer({
             Your browser needs one tap before it will play the clip. The song is already running for
             everyone — tap to join in where they are.
           </p>
-          <button
+          <Button
             onClick={start}
-            className="w-full px-6 py-4 rounded-2xl bg-primary font-display font-bold text-lg text-primary-foreground shadow-lg animate-pulse"
+            className="w-full h-12"
           >
-            ▶ Turn on sound
-          </button>
+            <Volume2 /> Turn on sound
+          </Button>
           {retryFailed && (
             <p className="font-body text-xs text-muted-foreground">
               Still silent? Check the mute switch or volume on your phone, then tap again.
@@ -182,12 +184,11 @@ export default function MusicPlayer({
       )}
 
       {audible && !blocked && playing && (
-        <button
+        <Button variant="outline" size="sm"
           onClick={() => (muted ? start() : setMuted(true))}
-          className="px-4 py-1.5 rounded-full bg-secondary text-secondary-foreground font-body text-sm"
         >
-          {muted ? '🔇 Sound off — tap to listen' : '🔊 Mute on this device'}
-        </button>
+          {muted ? <><VolumeX /> Sound off — tap to listen</> : <><Volume2 /> Mute on this device</>}
+        </Button>
       )}
 
       {revealTrack && (trackName || artistName) && (

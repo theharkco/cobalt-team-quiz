@@ -20,12 +20,12 @@ interface QuestionDisplayProps {
 }
 
 const optionColors = [
-  "bg-quiz-pink hover:bg-quiz-pink/80",
-  "bg-quiz-blue hover:bg-quiz-blue/80",
-  "bg-quiz-orange hover:bg-quiz-orange/80",
-  "bg-quiz-purple hover:bg-quiz-purple/80",
-  "bg-primary/60 hover:bg-primary/50",
-  "bg-accent hover:bg-accent/80",
+  "border-quiz-pink/55 bg-quiz-pink/10",
+  "border-quiz-blue/55 bg-quiz-blue/10",
+  "border-quiz-orange/55 bg-quiz-orange/10",
+  "border-quiz-purple/55 bg-quiz-purple/10",
+  "border-primary/55 bg-primary/10",
+  "border-accent/55 bg-accent/10",
 ];
 
 const optionIcons = ["▲", "◆", "●", "★", "■", "⬟"];
@@ -38,8 +38,7 @@ function MusicEmbed({ spotifyEmbedUrl }: { spotifyEmbedUrl: string }) {
       transition={{ delay: 0.2 }}
       className="flex flex-col items-center mb-8"
     >
-      <span className="text-4xl mb-2">🎵</span>
-      <div className="relative w-[60px] rounded-2xl overflow-hidden border-4 border-border h-[55px]">
+      <div className="relative w-[60px] rounded-md overflow-hidden border border-border h-[55px]">
         <iframe
           src={spotifyEmbedUrl}
           width="300"
@@ -96,18 +95,18 @@ export default function QuestionDisplay({
   return (
     <div className="w-full max-w-3xl mx-auto">
       {/* Question header */}
-      <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="text-center mb-6">
-        <span className="text-sm font-body font-bold text-primary uppercase tracking-wider">
-          Question {questionNumber} of {totalQuestions}
+      <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex flex-wrap items-center justify-center gap-2 text-center mb-6">
+        <span className="stage-kicker text-primary">
+          Question {String(questionNumber).padStart(2,'0')} of {String(totalQuestions).padStart(2,'0')}
         </span>
         {question.category && (
-          <span className="ml-3 px-3 py-1 rounded-full bg-muted text-muted-foreground text-xs font-bold">
+          <span className="px-3 py-1 rounded bg-muted text-muted-foreground text-xs font-bold">
             {question.category}
           </span>
         )}
         {question.difficulty && (
           <span
-            className={`ml-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${
+            className={`px-3 py-1 rounded text-xs font-bold uppercase ${
               question.difficulty === 'easy'
                 ? 'bg-quiz-green/20 text-quiz-green'
                 : question.difficulty === 'medium'
@@ -128,14 +127,14 @@ export default function QuestionDisplay({
           transition={{ delay: 0.1, type: "spring" }}
           className="text-xl md:text-2xl font-display font-bold text-center text-foreground mb-6 leading-tight"
         >
-          🎩 Highbrow <span className="text-muted-foreground mx-2">vs</span> 🎈 Lowbrow
+          Highbrow <span className="text-muted-foreground mx-2">versus</span> Lowbrow
         </motion.h2>
       ) : (
         <motion.h2
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.1, type: "spring" }}
-          className="text-2xl md:text-4xl font-display font-bold text-center text-foreground mb-8 leading-tight"
+          className="text-2xl md:text-4xl font-display font-bold text-center text-foreground mb-8 leading-[1.12]"
         >
           {question.question}
         </motion.h2>
@@ -151,7 +150,7 @@ export default function QuestionDisplay({
           transition={{ delay: 0.2 }}
           className="flex justify-center mb-8"
         >
-          <div className="relative w-72 h-72 md:w-96 md:h-96 rounded-2xl overflow-hidden border-4 border-border">
+          <div className="relative w-72 h-72 md:w-96 md:h-96 rounded-lg overflow-hidden border border-border">
             {!imageLoaded && <Skeleton className="absolute inset-0 w-full h-full" />}
             <img
               src={question.imageUrl}
@@ -199,12 +198,12 @@ export default function QuestionDisplay({
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.2 + i * 0.08, type: 'spring', bounce: 0.4 }}
-              className={`flex items-center gap-3 bg-card border-2 rounded-xl p-3 md:p-4 ${
+              className={`flex items-center gap-3 bg-card border rounded-md p-3 md:p-4 ${
                 revealAnswer ? 'border-quiz-green' : 'border-border'
               }`}
             >
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-display font-bold text-foreground text-sm shrink-0 ${
-                revealAnswer ? 'bg-quiz-green' : 'bg-muted'
+              <div className={`w-10 h-10 rounded flex items-center justify-center font-display font-bold text-sm shrink-0 ${
+                revealAnswer ? 'bg-secondary text-secondary-foreground' : 'bg-muted text-primary'
               }`}>
                 {revealAnswer ? i + 1 : '?'}
               </div>
@@ -218,10 +217,10 @@ export default function QuestionDisplay({
       {isHost && !hideOptions && question.type === 'highbrow-lowbrow' && (
         <div className="space-y-5 mt-2 max-w-2xl mx-auto">
           {/* Highbrow card */}
-          <div className="bg-card border-2 border-quiz-purple/70 rounded-2xl p-5">
+          <div className="bg-card border border-quiz-purple/70 rounded-lg p-5">
             <div className="flex items-center justify-between mb-3">
-              <span className="px-3 py-1 rounded-full bg-quiz-purple text-foreground font-display font-bold text-xs tracking-wide">
-                🎩 HIGHBROW · 200 PTS
+               <span className="px-3 py-1 rounded bg-quiz-purple/15 text-quiz-purple border border-quiz-purple/40 font-display font-bold text-xs">
+                 HIGHBROW · 200 PTS
               </span>
             </div>
             <p className="text-xl md:text-2xl font-display font-bold text-foreground">
@@ -234,7 +233,7 @@ export default function QuestionDisplay({
                   return (
                     <div
                       key={i}
-                      className={`${optionColors[i % optionColors.length]} rounded-xl p-3 text-center relative ${
+                       className={`${optionColors[i % optionColors.length]} rounded-md border p-3 text-left relative ${
                         revealAnswer && isAnswer ? 'ring-4 ring-quiz-green' : ''
                       }`}
                     >
@@ -249,10 +248,10 @@ export default function QuestionDisplay({
 
           {/* Lowbrow card — hidden during play, visible on reveal */}
           {revealAnswer && question.lowbrowQuestion && (
-            <div className="bg-card border-2 border-quiz-orange/70 rounded-2xl p-5">
+            <div className="bg-card border border-quiz-orange/70 rounded-lg p-5">
               <div className="flex items-center justify-between mb-3">
-                <span className="px-3 py-1 rounded-full bg-quiz-orange text-foreground font-display font-bold text-xs tracking-wide">
-                  🎈 LOWBROW · 100 PTS
+                <span className="px-3 py-1 rounded bg-quiz-orange/15 text-quiz-orange border border-quiz-orange/40 font-display font-bold text-xs">
+                  LOWBROW · 100 PTS
                 </span>
               </div>
               <p className="text-xl md:text-2xl font-display font-bold text-foreground">
@@ -265,7 +264,7 @@ export default function QuestionDisplay({
                     return (
                       <div
                         key={i}
-                        className={`${optionColors[i % optionColors.length]} rounded-xl p-3 text-center ${
+                         className={`${optionColors[i % optionColors.length]} rounded-md border p-3 text-left ${
                           isAnswer ? 'ring-4 ring-quiz-green' : ''
                         }`}
                       >
@@ -290,7 +289,7 @@ export default function QuestionDisplay({
       {/* Multiple choice / select-wrong options (host view - display only) */}
       {isHost && !hideOptions && question.options && question.type !== 'put-in-order' && question.type !== 'highbrow-lowbrow' && (
 
-        <div className={`grid ${question.options.length > 4 ? 'grid-cols-3' : 'grid-cols-2'} gap-4 mt-4`}>
+        <div className={`grid ${question.options.length > 4 ? 'md:grid-cols-3' : 'grid-cols-2'} gap-3 mt-4`}>
           {question.options.map((option, i) => {
             const isCorrectAnswer = question.type === 'select-wrong'
               ? question.correctAnswers?.map(a => a.toLowerCase()).includes(option.toLowerCase())
@@ -301,7 +300,7 @@ export default function QuestionDisplay({
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.3 + i * 0.1, type: "spring", bounce: 0.4 }}
-                className={`${optionColors[i % optionColors.length]} rounded-xl p-4 md:p-6 text-center cursor-default relative ${
+                className={`${optionColors[i % optionColors.length]} min-h-24 rounded-md border p-4 md:p-6 text-left cursor-default relative ${
                   revealAnswer && isCorrectAnswer && question.type === 'select-wrong'
                     ? 'ring-4 ring-quiz-green'
                     : ''

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, arrayMove, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical } from 'lucide-react';
+import { Check, GripVertical, LockKeyhole, Send } from 'lucide-react';
 import type { QuizQuestion } from '@/data/questions';
 
 interface PlayerAnswerInputProps {
@@ -16,12 +16,12 @@ interface PlayerAnswerInputProps {
 }
 
 const optionColors = [
-  'bg-quiz-pink hover:bg-quiz-pink/80 active:scale-95',
-  'bg-quiz-blue hover:bg-quiz-blue/80 active:scale-95',
-  'bg-quiz-orange hover:bg-quiz-orange/80 active:scale-95',
-  'bg-quiz-purple hover:bg-quiz-purple/80 active:scale-95',
-  'bg-quiz-green hover:bg-quiz-green/80 active:scale-95',
-  'bg-primary hover:bg-primary/80 active:scale-95',
+  'border-quiz-pink/55 hover:border-quiz-pink bg-quiz-pink/10',
+  'border-quiz-blue/55 hover:border-quiz-blue bg-quiz-blue/10',
+  'border-quiz-orange/55 hover:border-quiz-orange bg-quiz-orange/10',
+  'border-quiz-purple/55 hover:border-quiz-purple bg-quiz-purple/10',
+  'border-quiz-green/55 hover:border-quiz-green bg-quiz-green/10',
+  'border-primary/55 hover:border-primary bg-primary/10',
 ];
 
 const optionIcons = ['▲', '◆', '●', '★', '■', '⬟'];
@@ -37,9 +37,9 @@ export default function PlayerAnswerInput({ question, onSubmit, onSubmitMultiple
         animate={{ scale: 1 }}
         className="text-center py-12"
       >
-        <span className="text-6xl mb-4 block animate-bounce-in">✅</span>
-        <p className="text-xl font-display font-bold text-foreground">Answer submitted!</p>
-        <p className="text-muted-foreground mt-2">Waiting for others...</p>
+        <span className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-secondary text-secondary-foreground"><Check /></span>
+        <p className="text-xl font-display font-bold text-foreground">Answer locked</p>
+        <p className="text-muted-foreground mt-2">Eyes up. The reveal is next.</p>
       </motion.div>
     );
   }
@@ -70,7 +70,7 @@ export default function PlayerAnswerInput({ question, onSubmit, onSubmitMultiple
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: i * 0.08, type: 'spring', bounce: 0.5 }}
                 onClick={() => toggleOption(option)}
-                className={`${optionColors[i % optionColors.length]} rounded-xl p-4 md:p-6 text-center transition-all font-display font-bold text-foreground text-base md:text-lg border-none cursor-pointer relative ${
+                className={`${optionColors[i % optionColors.length]} min-h-24 rounded-md border p-4 md:p-6 text-left transition-all font-display font-bold text-foreground text-base md:text-lg cursor-pointer relative ${
                   isSelected ? 'ring-4 ring-destructive scale-95 opacity-80' : ''
                 }`}
               >
@@ -92,9 +92,9 @@ export default function PlayerAnswerInput({ question, onSubmit, onSubmitMultiple
         <Button
           onClick={() => onSubmitMultiple?.(Array.from(selectedWrong))}
           disabled={selectedWrong.size === 0}
-          className="w-full h-14 text-lg font-display font-bold rounded-xl gradient-fun text-foreground border-none hover:opacity-90"
+          className="w-full h-14 text-base"
         >
-          Submit {selectedWrong.size} answer{selectedWrong.size !== 1 ? 's' : ''} 🚀
+          <LockKeyhole /> Lock {selectedWrong.size} answer{selectedWrong.size !== 1 ? 's' : ''}
         </Button>
       </div>
     );
@@ -111,7 +111,7 @@ export default function PlayerAnswerInput({ question, onSubmit, onSubmitMultiple
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: i * 0.08, type: 'spring', bounce: 0.5 }}
             onClick={() => onSubmit(option)}
-            className={`${optionColors[i % optionColors.length]} rounded-xl p-4 md:p-6 text-center transition-transform font-display font-bold text-foreground text-base md:text-lg border-none cursor-pointer`}
+            className={`${optionColors[i % optionColors.length]} min-h-24 rounded-md border p-4 md:p-6 text-left transition-transform font-display font-bold text-foreground text-base md:text-lg cursor-pointer active:scale-[0.98]`}
           >
             <span className="text-xl mr-2">{optionIcons[i % optionIcons.length]}</span>
             {option}
@@ -150,7 +150,7 @@ export default function PlayerAnswerInput({ question, onSubmit, onSubmitMultiple
           value={textAnswer}
           onChange={(e) => setTextAnswer(e.target.value)}
           placeholder="Enter your guess..."
-          className="text-center text-2xl font-display font-bold h-16 bg-card border-2 border-border text-foreground placeholder:text-muted-foreground rounded-xl"
+          className="text-center text-3xl font-display font-bold h-20 bg-card border border-border text-foreground placeholder:text-muted-foreground rounded-md"
           autoFocus
           onKeyDown={(e) => {
             if (e.key === 'Enter' && textAnswer.trim()) onSubmit(textAnswer.trim());
@@ -159,9 +159,9 @@ export default function PlayerAnswerInput({ question, onSubmit, onSubmitMultiple
         <Button
           onClick={() => textAnswer.trim() && onSubmit(textAnswer.trim())}
           disabled={!textAnswer.trim()}
-          className="w-full h-14 text-lg font-display font-bold rounded-xl gradient-fun text-foreground border-none hover:opacity-90"
+          className="w-full h-14 text-base"
         >
-          Lock In Guess 🎯
+          <LockKeyhole /> Lock in guess
         </Button>
       </motion.div>
     );
@@ -178,7 +178,7 @@ export default function PlayerAnswerInput({ question, onSubmit, onSubmitMultiple
         value={textAnswer}
         onChange={(e) => setTextAnswer(e.target.value)}
         placeholder="Type your answer..."
-        className="text-center text-lg font-body h-14 bg-card border-2 border-border text-foreground placeholder:text-muted-foreground rounded-xl"
+        className="text-center text-lg font-body h-16 bg-card border border-border text-foreground placeholder:text-muted-foreground rounded-md"
         autoFocus
         onKeyDown={(e) => {
           if (e.key === 'Enter' && textAnswer.trim()) onSubmit(textAnswer.trim());
@@ -187,9 +187,9 @@ export default function PlayerAnswerInput({ question, onSubmit, onSubmitMultiple
       <Button
         onClick={() => textAnswer.trim() && onSubmit(textAnswer.trim())}
         disabled={!textAnswer.trim()}
-        className="w-full h-14 text-lg font-display font-bold rounded-xl gradient-fun text-foreground border-none hover:opacity-90"
+        className="w-full h-14 text-base"
       >
-        Submit Answer 🚀
+        <Send /> Submit answer
       </Button>
     </motion.div>
   );
@@ -250,9 +250,9 @@ function PutInOrderInput({ question, onSubmit }: { question: QuizQuestion; onSub
       </DndContext>
       <Button
         onClick={() => onSubmit(JSON.stringify(order))}
-        className="w-full h-14 text-lg font-display font-bold rounded-xl gradient-fun text-foreground border-none hover:opacity-90"
+        className="w-full h-14 text-base"
       >
-        Lock In Order 🔒
+        <LockKeyhole /> Lock in order
       </Button>
     </motion.div>
   );
@@ -272,11 +272,11 @@ function SortableOrderItem({ id, label, position }: { id: string; label: string;
       style={style}
       {...attributes}
       {...listeners}
-      className={`flex items-center gap-3 bg-card border-2 border-border rounded-xl p-3 md:p-4 touch-none cursor-grab active:cursor-grabbing ${
+      className={`flex items-center gap-3 bg-card border border-border rounded-md p-3 md:p-4 touch-none cursor-grab active:cursor-grabbing ${
         isDragging ? 'shadow-lg ring-2 ring-primary/50 border-primary' : 'hover:border-primary/40'
       }`}
     >
-      <div className="w-9 h-9 rounded-full gradient-fun flex items-center justify-center font-display font-bold text-foreground text-sm shrink-0">
+      <div className="w-9 h-9 rounded bg-primary/15 text-primary border border-primary/30 flex items-center justify-center font-display font-bold text-sm shrink-0">
         {position}
       </div>
       <span className="flex-1 font-display font-bold text-foreground text-base md:text-lg">{label}</span>
@@ -331,7 +331,7 @@ function HighbrowLowbrowInput({ question, onSubmit }: { question: QuizQuestion; 
         </div>
       )}
 
-      <div className="bg-card border-2 border-border rounded-2xl p-4 md:p-5">
+      <div className="bg-card border border-border rounded-md p-4 md:p-5">
         <p className="text-lg md:text-xl font-display font-bold text-foreground text-center">
           {prompt}
         </p>
@@ -346,7 +346,7 @@ function HighbrowLowbrowInput({ question, onSubmit }: { question: QuizQuestion; 
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: i * 0.05, type: 'spring', bounce: 0.5 }}
               onClick={() => submit(option)}
-              className={`${optionColors[i % optionColors.length]} rounded-xl p-4 md:p-5 text-center transition-transform font-display font-bold text-foreground text-base md:text-lg border-none cursor-pointer`}
+              className={`${optionColors[i % optionColors.length]} rounded-md border p-4 md:p-5 text-left transition-transform font-display font-bold text-foreground text-base md:text-lg cursor-pointer`}
             >
               <span className="text-xl mr-2">{optionIcons[i % optionIcons.length]}</span>
               {option}
@@ -368,9 +368,9 @@ function HighbrowLowbrowInput({ question, onSubmit }: { question: QuizQuestion; 
           <Button
             onClick={() => textAnswer.trim() && submit(textAnswer.trim())}
             disabled={!textAnswer.trim()}
-            className="w-full h-14 text-lg font-display font-bold rounded-xl gradient-fun text-foreground border-none hover:opacity-90"
+            className="w-full h-14 text-base"
           >
-            Submit Answer 🚀
+            <Send /> Submit answer
           </Button>
         </div>
       )}

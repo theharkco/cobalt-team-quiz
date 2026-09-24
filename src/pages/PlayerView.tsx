@@ -9,7 +9,6 @@ import QuestionDisplay from '@/components/quiz/QuestionDisplay';
 import PlayerAnswerInput from '@/components/quiz/PlayerAnswerInput';
 import CountdownTimer from '@/components/quiz/CountdownTimer';
 import PreCountdownOverlay from '@/components/quiz/PreCountdownOverlay';
-import FloatingShapes from '@/components/quiz/FloatingShapes';
 import Leaderboard from '@/components/quiz/Leaderboard';
 import { useTimer } from '@/hooks/useTimer';
 import { usePreCountdown } from '@/hooks/usePreCountdown';
@@ -20,6 +19,9 @@ import { Button } from '@/components/ui/button';
 import Emoji from '@/components/quiz/Emoji';
 import confetti from 'canvas-confetti';
 import { playCorrect, playWrong, startTicking, stopTicking } from '@/lib/sounds';
+import QuizScreen from '@/components/quiz/QuizScreen';
+import QuestionTransitionOverlay from '@/components/quiz/QuestionTransitionOverlay';
+import { Check, Hourglass, RotateCcw } from 'lucide-react';
 
 type ResultKind = 'exact' | 'close' | 'wrong' | 'timeout' | 'deferred';
 
@@ -403,24 +405,13 @@ export default function PlayerView() {
   // LOBBY
   if (!session || session.status === 'lobby') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4">
-        <FloatingShapes />
-        <div className="relative z-10 flex flex-col items-center gap-6">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', bounce: 0.5 }}
-            className="text-center"
-          >
-            <Emoji className="text-8xl mb-4 animate-bounce-in" label="game">🎮</Emoji>
-            <h2 className="text-3xl font-display font-bold text-foreground mb-2">You&apos;re in!</h2>
-            <p className="text-lg font-body text-muted-foreground">
-              Welcome, <span className="text-primary font-bold">{player?.name}</span>
-            </p>
-            <p className="text-muted-foreground mt-4 animate-pulse">Waiting for host to start...</p>
-          </motion.div>
-        </div>
-      </div>
+      <QuizScreen eyebrow="Team checked in" contentClassName="max-w-md px-5 py-10">
+        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex min-h-[calc(100vh-8rem)] flex-col justify-center">
+          <p className="stage-kicker flex items-center gap-2"><span className="status-dot"/> Connected to the room</p>
+          <div className="my-8 border-y border-border py-10"><p className="text-sm text-muted-foreground">Playing as</p><h1 className="mt-2 break-words font-display text-5xl font-bold">{player?.name}</h1></div>
+          <div className="stage-panel rounded-lg p-5"><div className="flex items-center gap-4"><div className="grid h-12 w-12 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground"><Hourglass /></div><div><p className="font-bold">Waiting for the host</p><p className="text-sm text-muted-foreground">Keep this screen open. The first question will appear here.</p></div></div></div>
+        </motion.div>
+      </QuizScreen>
     );
   }
 
@@ -432,34 +423,14 @@ export default function PlayerView() {
     const isCorrectResult = resultKind === 'exact' || resultKind === 'close';
 
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4 py-6">
+      <QuizScreen eyebrow={`Question ${session.current_question + 1} / ${quizQuestions.length}`} corner={<div className="rounded-md bg-muted px-3 py-1.5 text-sm font-bold tabular-nums"><span className="text-secondary">{player?.score ?? 0}</span> pts</div>} contentClassName="max-w-xl px-4 py-5">
         <AnimatePresence>
           {isTransitioning && (
-            <motion.div
-              key="question-transition"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center gap-2"
-            >
-              <p className="text-muted-foreground font-body text-xs uppercase tracking-widest">Get ready</p>
-              <p className="text-3xl font-display font-bold text-gradient animate-pulse">
-                Question {session.current_question + 1}
-              </p>
-            </motion.div>
+            <QuestionTransitionOverlay questionNumber={session.current_question + 1} />
           )}
         </AnimatePresence>
-        {!isPreCountdown && (
-          <div className="absolute top-4 right-4">
-            <CountdownTimer duration={currentQ.timeLimitSeconds ?? 15} timeElapsed={timer.timeElapsed} onComplete={onTimerComplete} isRunning={timer.isRunning} size={70} />
-          </div>
-        )}
-        <div className="absolute top-4 left-4 bg-card rounded-xl px-3 py-1">
-          <span className="font-display font-bold text-primary text-sm">{player?.score ?? 0} pts</span>
-        </div>
-
-        <div className="relative z-10 flex flex-col items-center gap-6 w-full max-w-lg mt-16">
+        <div className="flex min-h-[calc(100vh-7rem)] flex-col items-center justify-center gap-5 pt-4">
+          {!isPreCountdown && !answered && <div className="self-end"><CountdownTimer duration={currentQ.timeLimitSeconds ?? 15} timeElapsed={timer.timeElapsed} onComplete={onTimerComplete} isRunning={timer.isRunning} size={62} /></div>}
           <QuestionDisplay
             question={currentQ}
             questionNumber={session.current_question + 1}
@@ -477,11 +448,9 @@ export default function PlayerView() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: 'spring', bounce: 0.5 }}
-              className={`text-center p-6 rounded-2xl ${resultKind === 'deferred' ? 'bg-primary/20' : resultKind === 'exact' ? 'bg-quiz-green/20' : resultKind === 'close' ? 'bg-yellow-500/20 border-2 border-yellow-500/50' : 'bg-destructive/20'}`}
+              className={`stage-panel w-full border-l-4 text-center p-6 rounded-lg ${resultKind === 'deferred' ? 'border-primary' : resultKind === 'exact' ? 'border-secondary' : resultKind === 'close' ? 'border-quiz-yellow' : 'border-destructive'}`}
             >
-              <Emoji className="text-5xl mb-2" label="result">
-                {resultKind === 'exact' ? '🎉' : resultKind === 'close' ? '👍' : resultKind === 'timeout' ? '⏰' : resultKind === 'deferred' ? '🎯' : '💥'}
-              </Emoji>
+              <div className={`mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full ${resultKind === 'exact' ? 'bg-secondary text-secondary-foreground' : resultKind === 'close' ? 'bg-quiz-yellow text-secondary-foreground' : resultKind === 'deferred' ? 'bg-primary text-primary-foreground' : 'bg-destructive text-destructive-foreground'}`}>{resultKind === 'exact' ? <Check/> : resultKind === 'close' || resultKind === 'deferred' ? <Hourglass/> : <span className="text-xl font-bold">×</span>}</div>
               <p className="text-xl font-display font-bold text-foreground">
                 {resultKind === 'exact'
                   ? `+${lastPoints} points!`
@@ -561,7 +530,7 @@ export default function PlayerView() {
             <PlayerAnswerInput question={currentQ} onSubmit={handleSubmitAnswer} onSubmitMultiple={handleSubmitMultiple} disabled={answered} />
           )}
         </div>
-      </div>
+      </QuizScreen>
     );
   }
 
@@ -569,41 +538,31 @@ export default function PlayerView() {
   if (session.status === 'leaderboard') {
     const rank = players.findIndex((p) => p.id === playerId) + 1;
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4">
-        <FloatingShapes />
-        <div className="relative z-10 text-center">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', bounce: 0.5 }}
-          >
-            <Emoji className="text-6xl mb-4" label="rank">
-              {rank <= 3 ? ['🥇', '🥈', '🥉'][rank - 1] : '📊'}
-            </Emoji>
-            <h2 className="text-4xl font-display font-bold text-foreground mb-2">#{rank}</h2>
-            <p className="text-2xl font-display font-bold text-primary">{player?.score ?? 0} points</p>
-            <p className="text-muted-foreground mt-4 animate-pulse">Next question coming up...</p>
-          </motion.div>
-        </div>
-      </div>
+      <QuizScreen eyebrow="Round standings" contentClassName="max-w-md px-5 py-10">
+        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex min-h-[calc(100vh-8rem)] flex-col justify-center">
+          <p className="stage-kicker">Current position</p>
+          <div className="my-7 flex items-end gap-5 border-y border-border py-8"><span className="font-display text-8xl font-bold text-primary tabular-nums">{String(rank).padStart(2, '0')}</span><span className="mb-3 font-display text-2xl font-bold text-muted-foreground">of {players.length}</span></div>
+          <div className="flex items-center justify-between"><span className="font-bold">{player?.name}</span><span className="font-display text-2xl font-bold text-secondary tabular-nums">{player?.score ?? 0} pts</span></div>
+          <p className="mt-8 flex items-center gap-3 text-sm text-muted-foreground"><span className="status-dot"/> Next question is being prepared</p>
+        </motion.div>
+      </QuizScreen>
     );
   }
 
   // FINISHED
   if (session.status === 'finished') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4 py-8">
-        <FloatingShapes />
-        <div className="relative z-10 w-full max-w-2xl flex flex-col items-center gap-6">
+      <QuizScreen eyebrow="Final results" contentClassName="max-w-3xl px-4 py-10 md:px-8">
+        <div className="flex min-h-[calc(100vh-9rem)] w-full flex-col items-center justify-center gap-8">
           <Leaderboard players={players} isFinal />
           <Button
             onClick={() => navigate('/')}
-            className="h-14 px-10 text-lg font-display font-bold rounded-xl bg-primary text-primary-foreground hover:opacity-90 hover:scale-105 active:scale-95 transition-all"
+            className="h-12 px-8"
           >
-            🎮 Play Again
+            <RotateCcw /> Play again
           </Button>
         </div>
-      </div>
+      </QuizScreen>
     );
   }
 

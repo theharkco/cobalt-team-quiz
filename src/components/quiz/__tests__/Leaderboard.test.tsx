@@ -16,7 +16,7 @@ const players: Player[] = [
 describe('Leaderboard', () => {
   it('renders leaderboard title', () => {
     render(<Leaderboard players={players} />);
-    expect(screen.getByText('📊 Leaderboard')).toBeInTheDocument();
+    expect(screen.getByText('The standings.')).toBeInTheDocument();
   });
 
   it('displays all players', () => {
@@ -39,19 +39,19 @@ describe('Leaderboard', () => {
 
   it('renders final results view with podium', () => {
     render(<Leaderboard players={players} isFinal />);
-    expect(screen.getByText('🏆 Final Results! 🏆')).toBeInTheDocument();
+    expect(screen.getByText('Champions crowned.')).toBeInTheDocument();
   });
 
-  it('shows medals for top 3 in regular view', () => {
+  it('shows numbered ranks for the top 3 in regular view', () => {
     render(<Leaderboard players={players} />);
-    expect(screen.getByText('🥇')).toBeInTheDocument();
-    expect(screen.getByText('🥈')).toBeInTheDocument();
-    expect(screen.getByText('🥉')).toBeInTheDocument();
+    expect(screen.getByText('01')).toBeInTheDocument();
+    expect(screen.getByText('02')).toBeInTheDocument();
+    expect(screen.getByText('03')).toBeInTheDocument();
   });
 
   it('renders empty leaderboard without crashing', () => {
     render(<Leaderboard players={[]} />);
-    expect(screen.getByText('📊 Leaderboard')).toBeInTheDocument();
+    expect(screen.getByText('The standings.')).toBeInTheDocument();
   });
 
   it('sorts players by score descending', () => {

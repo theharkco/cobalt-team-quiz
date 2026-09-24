@@ -119,7 +119,7 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="bg-card border-2 border-border rounded-2xl p-6 space-y-5"
+      className="stage-panel rounded-lg p-5 md:p-7 space-y-5"
     >
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-display font-bold text-foreground">
@@ -127,7 +127,7 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
         </h3>
         {onDelete && (
           <Button variant="ghost" size="sm" onClick={onDelete} className="text-destructive hover:text-destructive">
-            🗑️ Delete
+            Delete
           </Button>
         )}
       </div>
@@ -182,7 +182,7 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
       {/* Question text */}
       <div>
         <label className="text-sm font-body text-muted-foreground mb-1 block">
-          {isHighbrowLowbrow ? '🎩 Highbrow Prompt (200 pts) *' : 'Question *'}
+            {isHighbrowLowbrow ? 'Highbrow prompt · 200 pts *' : 'Question *'}
         </label>
         <Textarea
           value={form.question}
@@ -228,14 +228,14 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
       {isOrder && (
         <div className="space-y-2">
           <label className="text-sm font-body text-muted-foreground block">
-            Items in <span className="text-primary font-bold">correct order</span> (1st → 4th)
+            Items in <span className="text-primary font-bold">correct order</span> (first to fourth)
           </label>
           {[0, 1, 2, 3].map((i) => {
             const ordinals = ['1st', '2nd', '3rd', '4th'];
             const value = form.options[i] ?? '';
             return (
               <div key={i} className="flex gap-2 items-center">
-                <div className="w-10 h-10 rounded-full gradient-fun flex items-center justify-center font-display font-bold text-foreground text-xs shrink-0">
+                <div className="w-10 h-10 rounded bg-primary/15 border border-primary/30 flex items-center justify-center font-display font-bold text-primary text-xs shrink-0">
                   {ordinals[i]}
                 </div>
                 <Input
@@ -262,7 +262,7 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
       {/* Highbrow input-type selector (highbrow-lowbrow only) */}
       {isHighbrowLowbrow && (
         <div>
-          <label className="text-sm font-body text-muted-foreground mb-1 block">🎩 Highbrow Input Type</label>
+          <label className="text-sm font-body text-muted-foreground mb-1 block">Highbrow input type</label>
           <Select value={form.highbrowInputType} onValueChange={(v) => update('highbrowInputType', v as 'multiple-choice' | 'free-text')}>
             <SelectTrigger className="bg-muted border-border">
               <SelectValue />
@@ -284,7 +284,7 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
               {needsCorrectAnswers
                 ? 'All Options (mix of correct and wrong)'
                 : isHighbrowLowbrow
-                  ? '🎩 Highbrow Options (include the correct answer)'
+                   ? 'Highbrow options (include the correct answer)'
                   : 'Answer Options (include the correct answer)'}
             </label>
 
@@ -354,9 +354,9 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
 
       {/* Lowbrow section (highbrow-lowbrow only) */}
       {isHighbrowLowbrow && (
-        <div className="border-2 border-quiz-orange/40 rounded-2xl p-4 space-y-4 bg-quiz-orange/5">
+        <div className="border border-quiz-orange/40 rounded-lg p-4 space-y-4 bg-quiz-orange/5">
           <p className="text-xs font-display font-bold text-quiz-orange uppercase tracking-wide">
-            🎈 Lowbrow Prompt (100 pts) — same correct answer, easier framing
+            Lowbrow prompt · 100 pts — same correct answer, easier framing
           </p>
           <div>
             <label className="text-sm font-body text-muted-foreground mb-1 block">Lowbrow Question *</label>
@@ -521,9 +521,9 @@ export default function QuestionEditor({ initialData, questionNumber, onSave, on
                     : !form.correctAnswer.trim())
           }
 
-          className="flex-1 h-12 font-display font-bold rounded-xl gradient-fun text-foreground border-none hover:opacity-90"
+          className="flex-1 h-12"
         >
-          ✅ Save Question
+          Save question
         </Button>
         <Button onClick={onCancel} variant="outline" className="h-12 font-display rounded-xl border-border">
           Cancel

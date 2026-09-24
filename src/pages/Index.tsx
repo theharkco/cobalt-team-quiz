@@ -6,6 +6,7 @@ import QuizPicker from '@/components/quiz/QuizPicker';
 import { useQuizSession } from '@/hooks/useQuizSession';
 import { supabase } from '@/integrations/supabase/client';
 import type { QuizQuestion } from '@/data/questionTypes';
+import { ArrowLeft, ArrowRight, Gamepad2, PenTool, Radio, Sparkles } from 'lucide-react';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -53,70 +54,68 @@ const Index = () => {
     return <QuizPicker onSelect={handleHost} onBack={() => setShowPicker(false)} />;
   }
 
-  const inputCls =
-    'w-full min-w-0 bg-background/60 border border-input rounded-2xl px-5 py-4 text-2xl font-display font-bold focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20 transition placeholder:text-muted-foreground/40';
-  const goCls =
-    'tactile bg-primary text-primary-foreground font-display font-bold px-7 rounded-2xl text-lg disabled:opacity-40 disabled:shadow-none';
+  const inputCls = 'w-full min-w-0 border-0 bg-transparent px-0 py-3 font-display text-3xl font-bold text-foreground outline-none placeholder:text-muted-foreground/35';
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6">
-      <div className="max-w-md w-full space-y-10">
+    <main className="quiz-screen flex min-h-screen items-center px-5 py-20 md:px-10">
+      <div className="stage-grid" aria-hidden="true" />
+      <div className="relative z-10 mx-auto grid w-full max-w-6xl gap-14 lg:grid-cols-[1.05fr_.95fr] lg:items-end">
         <motion.header
           initial={{ y: -16, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ type: 'spring', bounce: 0.4 }}
-          className="text-center space-y-3"
+          className="space-y-6"
         >
-          <p className="inline-flex items-center gap-2 rounded-full border border-border bg-card/70 px-3 py-1 text-xs font-semibold text-muted-foreground">
-            <span className="h-2 w-2 rounded-full bg-secondary animate-pulse" /> Live team quiz
+          <p className="stage-kicker flex items-center gap-3">
+            <span className="status-dot" /> Live team quiz
           </p>
-          <h1 className="text-7xl md:text-8xl font-display font-extrabold leading-[0.85] tracking-tighter">
-            Quiz<span className="text-primary">clash</span>
+          <h1 className="max-w-3xl font-display text-[clamp(4.5rem,11vw,9rem)] font-bold leading-[0.78]">
+            QUIZ<br/><span className="text-primary">CLASH</span>
           </h1>
-          <p className="text-muted-foreground">One screen hosts. Every phone plays.</p>
+          <p className="max-w-md text-lg leading-relaxed text-muted-foreground">The room is the arena. One screen hosts, every phone plays.</p>
+          <div className="hidden items-center gap-8 border-t border-border pt-6 text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground lg:flex"><span>01 Join</span><span>02 Play</span><span>03 Claim glory</span></div>
         </motion.header>
-
+        <div className="space-y-4">
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.08, type: 'spring', bounce: 0.3 }}
-          className="paper-card p-6 md:p-7 space-y-4"
+          className="stage-panel overflow-hidden rounded-lg"
         >
+          <div className="flex items-center justify-between border-b border-border px-5 py-4"><span className="stage-kicker">Player entry</span><span className="flex items-center gap-2 text-xs font-bold text-secondary"><Radio className="h-4 w-4"/> LIVE</span></div>
+          <div className="p-5 md:p-7">
           {!codeOk ? (
             <>
-              <label htmlFor="pin" className="block text-sm font-semibold text-muted-foreground">
-                Game pin
-              </label>
-              <div className="flex gap-3">
+              <p className="mb-6 font-display text-2xl font-bold">Enter the four-digit game code</p>
+              <div className="flex items-end gap-4 border-b-2 border-input focus-within:border-primary">
                 <input
                   id="pin"
                   value={joinCode}
                   onChange={(e) => { setJoinCode(e.target.value.replace(/\D/g, '').slice(0, 4)); setError(null); }}
-                  placeholder="0000"
+                  placeholder="••••"
                   inputMode="numeric"
                   maxLength={4}
                   onKeyDown={(e) => e.key === 'Enter' && handleCheckCode()}
-                  className={`${inputCls} tracking-[0.4em] text-center`}
+                  className={`${inputCls} tracking-[0.32em]`}
                 />
-                <button onClick={handleCheckCode} disabled={loading || joinCode.length !== 4} className={goCls}>
-                  {loading ? '…' : 'Join'}
-                </button>
+                <Button onClick={handleCheckCode} disabled={loading || joinCode.length !== 4} size="icon" className="mb-3 h-12 w-12 shrink-0"><ArrowRight /></Button>
               </div>
             </>
           ) : (
             <>
               <div className="flex items-center justify-between">
-                <label htmlFor="name" className="text-sm font-semibold text-muted-foreground">
-                  Joining game <span className="text-foreground font-bold">{joinCode}</span>
+                <label htmlFor="name" className="stage-kicker">
+                  Game <span className="text-primary">{joinCode}</span> found
                 </label>
-                <button
+                <Button variant="ghost" size="sm"
                   onClick={() => { setCodeOk(false); setError(null); }}
-                  className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
+                  className="gap-1"
                 >
-                  ← Change pin
-                </button>
+                  <ArrowLeft /> Change
+                </Button>
               </div>
-              <div className="flex gap-3">
+              <p className="mb-4 mt-5 font-display text-2xl font-bold">What should we call your team?</p>
+              <div className="flex items-end gap-4 border-b-2 border-input focus-within:border-primary">
                 <input
                   id="name"
                   value={playerName}
@@ -125,16 +124,15 @@ const Index = () => {
                   autoFocus
                   maxLength={24}
                   onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
-                  className={`${inputCls} text-xl`}
+                  className={`${inputCls} text-2xl`}
                 />
-                <button onClick={handleJoin} disabled={loading || !playerName.trim()} className={goCls}>
-                  {loading ? '…' : 'Go'}
-                </button>
+                <Button onClick={handleJoin} disabled={loading || !playerName.trim()} size="icon" className="mb-3 h-12 w-12 shrink-0"><ArrowRight /></Button>
               </div>
             </>
           )}
 
-          {error && <p className="text-destructive font-semibold text-sm animate-shake">{error}</p>}
+          {error && <p className="mt-4 text-destructive font-semibold text-sm animate-shake">{error}</p>}
+          </div>
         </motion.div>
 
         <motion.div
@@ -143,26 +141,13 @@ const Index = () => {
           transition={{ delay: 0.16, type: 'spring', bounce: 0.3 }}
           className="grid grid-cols-2 gap-3"
         >
-          <button
-            onClick={() => setShowPicker(true)}
-            disabled={loading}
-            className="group text-left rounded-2xl border border-border bg-card/70 p-5 hover:border-accent/60 hover:bg-card transition disabled:opacity-50"
-          >
-            <span className="block h-2 w-8 rounded-full bg-accent mb-4 transition-all group-hover:w-12" />
-            <span className="block font-display font-bold text-lg">Host a game</span>
-            <span className="block text-sm text-muted-foreground">Put it on the big screen</span>
-          </button>
-          <button
-            onClick={() => navigate('/create')}
-            className="group text-left rounded-2xl border border-border bg-card/70 p-5 hover:border-secondary/60 hover:bg-card transition"
-          >
-            <span className="block h-2 w-8 rounded-full bg-secondary mb-4 transition-all group-hover:w-12" />
-            <span className="block font-display font-bold text-lg">Make a quiz</span>
-            <span className="block text-sm text-muted-foreground">Write your own questions</span>
-          </button>
+          <Button onClick={() => setShowPicker(true)} disabled={loading} variant="outline" className="h-auto justify-start gap-3 p-4 text-left"><Gamepad2 className="h-5 w-5 text-accent"/><span><b className="block">Host a game</b><small className="font-normal text-muted-foreground">Big screen mode</small></span></Button>
+          <Button onClick={() => navigate('/create')} variant="outline" className="h-auto justify-start gap-3 p-4 text-left"><PenTool className="h-5 w-5 text-secondary"/><span><b className="block">Make a quiz</b><small className="font-normal text-muted-foreground">Build your own</small></span></Button>
         </motion.div>
+        <p className="flex items-center justify-center gap-2 text-xs text-muted-foreground"><Sparkles className="h-3.5 w-3.5"/> Fast, live and built for teams</p>
+        </div>
       </div>
-    </div>
+    </main>
   );
 };
 

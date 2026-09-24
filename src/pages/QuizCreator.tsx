@@ -7,11 +7,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import FloatingShapes from '@/components/quiz/FloatingShapes';
 import QuestionEditor, { type QuestionFormData, createEmptyQuestion } from '@/components/quiz/QuestionEditor';
 import SortableQuestionCard from '@/components/quiz/SortableQuestionCard';
 import { toast } from '@/hooks/use-toast';
 import type { QuestionType, Difficulty } from '@/data/questionTypes';
+import QuizScreen from '@/components/quiz/QuizScreen';
+import { ArrowLeft, Plus, Save } from 'lucide-react';
 
 interface SavedQuestion {
   id?: string;
@@ -189,27 +190,24 @@ export default function QuizCreator() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <p className="text-muted-foreground font-body text-lg">Loading quiz...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      <FloatingShapes />
-      <div className="relative z-10 max-w-3xl mx-auto px-4 py-8">
+    <QuizScreen eyebrow="Quiz studio" corner={<span className="text-xs font-bold text-muted-foreground">{questions.length} questions</span>} contentClassName="max-w-6xl px-4 py-8 md:px-8">
+      <div className="grid gap-6 lg:grid-cols-[20rem_1fr]">
         {/* Header */}
-        <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="mb-8">
-          <Button variant="ghost" onClick={() => navigate('/')} className="text-muted-foreground font-body mb-4">
-            ← Back
+        <aside className="lg:sticky lg:top-20 lg:self-start"><motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="mb-6">
+          <Button variant="ghost" onClick={() => navigate('/')} className="mb-5 -ml-3">
+            <ArrowLeft /> Back
           </Button>
-          <h1 className="text-4xl md:text-5xl font-display font-bold text-gradient mb-2">
+          <p className="stage-kicker">{isEditing ? 'Editing set' : 'New set'}</p><h1 className="mt-2 text-4xl font-display font-bold mb-2">
             {isEditing ? 'Edit Quiz' : 'Create Quiz'}
           </h1>
-          <p className="text-muted-foreground font-body">
-            Build your custom quiz with multiple question types
-          </p>
+          <p className="text-muted-foreground font-body">Shape the questions, then bring the set to the main stage.</p>
         </motion.div>
 
         {/* Quiz Details */}
@@ -217,7 +215,7 @@ export default function QuizCreator() {
           initial={{ y: 10, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.1 }}
-          className="bg-card border-2 border-border rounded-2xl p-6 mb-6 space-y-4"
+          className="stage-panel rounded-lg p-5 mb-5 space-y-4"
         >
           <div>
             <label className="text-sm font-body text-muted-foreground mb-1 block">Quiz Title *</label>
@@ -238,12 +236,12 @@ export default function QuizCreator() {
             />
           </div>
         </motion.div>
+        <Button onClick={handleSaveQuiz} disabled={saving || !title.trim() || questions.length === 0} className="hidden h-12 w-full lg:flex"><Save />{saving ? 'Saving…' : `Save quiz · ${questions.length}`}</Button>
+        </aside>
 
         {/* Questions List */}
-        <div className="space-y-4 mb-6">
-          <h2 className="text-xl font-display font-bold text-foreground">
-            Questions ({questions.length})
-          </h2>
+        <section className="space-y-4 mb-6">
+          <div className="flex items-end justify-between border-b border-border pb-4"><div><p className="stage-kicker">Run of show</p><h2 className="mt-1 text-2xl font-display font-bold">Questions</h2></div><span className="font-display text-3xl font-bold text-primary tabular-nums">{String(questions.length).padStart(2,'0')}</span></div>
 
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext items={questions.map((_, i) => `q-${i}`)} strategy={verticalListSortingStrategy}>
@@ -281,24 +279,24 @@ export default function QuizCreator() {
             <Button
               onClick={() => setIsAddingNew(true)}
               variant="outline"
-              className="w-full h-14 text-lg font-display font-bold rounded-xl border-2 border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all"
+              className="w-full h-14 border-dashed"
             >
-              ➕ Add Question
+              <Plus /> Add question
             </Button>
           )}
-        </div>
+        </section>
 
         {/* Save Quiz */}
-        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
+        <motion.div className="lg:hidden" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
           <Button
             onClick={handleSaveQuiz}
             disabled={saving || !title.trim() || questions.length === 0}
-            className="w-full h-16 text-xl font-display font-bold rounded-2xl gradient-fun text-foreground border-none hover:opacity-90 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="w-full h-14"
           >
-            {saving ? '⏳ Saving...' : `💾 Save Quiz (${questions.length} questions)`}
+            <Save />{saving ? 'Saving…' : `Save quiz · ${questions.length}`}
           </Button>
         </motion.div>
       </div>
-    </div>
+    </QuizScreen>
   );
 }

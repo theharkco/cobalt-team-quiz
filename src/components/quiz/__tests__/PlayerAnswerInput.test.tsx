@@ -21,7 +21,7 @@ const freeTextQuestion: QuizQuestion = {
 describe('PlayerAnswerInput', () => {
   it('shows submitted state when disabled', () => {
     render(<PlayerAnswerInput question={mcQuestion} onSubmit={vi.fn()} disabled />);
-    expect(screen.getByText('Answer submitted!')).toBeInTheDocument();
+    expect(screen.getByText('Answer locked')).toBeInTheDocument();
   });
 
   it('renders multiple choice options', () => {
@@ -40,12 +40,12 @@ describe('PlayerAnswerInput', () => {
   it('renders text input for free-text questions', () => {
     render(<PlayerAnswerInput question={freeTextQuestion} onSubmit={vi.fn()} disabled={false} />);
     expect(screen.getByPlaceholderText('Type your answer...')).toBeInTheDocument();
-    expect(screen.getByText('Submit Answer 🚀')).toBeInTheDocument();
+    expect(screen.getByText('Submit answer')).toBeInTheDocument();
   });
 
   it('submit button disabled when text is empty', () => {
     render(<PlayerAnswerInput question={freeTextQuestion} onSubmit={vi.fn()} disabled={false} />);
-    const btn = screen.getByText('Submit Answer 🚀');
+    const btn = screen.getByText('Submit answer');
     expect(btn).toBeDisabled();
   });
 
@@ -54,7 +54,7 @@ describe('PlayerAnswerInput', () => {
     render(<PlayerAnswerInput question={freeTextQuestion} onSubmit={onSubmit} disabled={false} />);
     const input = screen.getByPlaceholderText('Type your answer...');
     fireEvent.change(input, { target: { value: '  hello  ' } });
-    fireEvent.click(screen.getByText('Submit Answer 🚀'));
+    fireEvent.click(screen.getByText('Submit answer'));
     expect(onSubmit).toHaveBeenCalledWith('hello');
   });
 
