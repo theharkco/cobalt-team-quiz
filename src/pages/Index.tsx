@@ -53,35 +53,39 @@ const Index = () => {
     return <QuizPicker onSelect={handleHost} onBack={() => setShowPicker(false)} />;
   }
 
-  const tile =
-    'tactile flex flex-col items-center justify-center p-6 rounded-2xl text-accent-foreground disabled:opacity-50';
+  const inputCls =
+    'w-full min-w-0 bg-background/60 border border-input rounded-2xl px-5 py-4 text-2xl font-display font-bold focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20 transition placeholder:text-muted-foreground/40';
+  const goCls =
+    'tactile bg-primary text-primary-foreground font-display font-bold px-7 rounded-2xl text-lg disabled:opacity-40 disabled:shadow-none';
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6">
-      <div className="max-w-md w-full space-y-8">
-        <motion.div
-          initial={{ y: -20, opacity: 0 }}
+    <div className="min-h-screen flex flex-col items-center justify-center p-6">
+      <div className="max-w-md w-full space-y-10">
+        <motion.header
+          initial={{ y: -16, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ type: 'spring', bounce: 0.45 }}
-          className="text-center"
+          transition={{ type: 'spring', bounce: 0.4 }}
+          className="text-center space-y-3"
         >
-          <h1 className="text-6xl md:text-7xl font-display font-bold tracking-tight italic -rotate-2 leading-[0.95] text-foreground [text-shadow:4px_4px_0_hsl(var(--ink))]">
-            QUIZ
-            <br />
-            <span className="text-gradient">CLASH</span>
+          <p className="inline-flex items-center gap-2 rounded-full border border-border bg-card/70 px-3 py-1 text-xs font-semibold text-muted-foreground">
+            <span className="h-2 w-2 rounded-full bg-secondary animate-pulse" /> Live team quiz
+          </p>
+          <h1 className="text-7xl md:text-8xl font-display font-extrabold leading-[0.85] tracking-tighter">
+            Quiz<span className="text-primary">clash</span>
           </h1>
-        </motion.div>
+          <p className="text-muted-foreground">One screen hosts. Every phone plays.</p>
+        </motion.header>
 
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.1, type: 'spring', bounce: 0.35 }}
-          className="paper-card p-8 space-y-6 transition-transform hover:-translate-y-1"
+          transition={{ delay: 0.08, type: 'spring', bounce: 0.3 }}
+          className="paper-card p-6 md:p-7 space-y-4"
         >
           {!codeOk ? (
-            <div className="space-y-3">
-              <label htmlFor="pin" className="text-sm font-display font-semibold uppercase tracking-wider text-muted-foreground ml-1">
-                Enter game pin
+            <>
+              <label htmlFor="pin" className="block text-sm font-semibold text-muted-foreground">
+                Game pin
               </label>
               <div className="flex gap-3">
                 <input
@@ -92,28 +96,24 @@ const Index = () => {
                   inputMode="numeric"
                   maxLength={4}
                   onKeyDown={(e) => e.key === 'Enter' && handleCheckCode()}
-                  className="w-full min-w-0 bg-muted border-[3px] border-foreground rounded-2xl px-5 py-4 text-2xl font-display font-bold tracking-[0.3em] focus:outline-none focus:bg-card placeholder:text-foreground/20"
+                  className={`${inputCls} tracking-[0.4em] text-center`}
                 />
-                <button
-                  onClick={handleCheckCode}
-                  disabled={loading || joinCode.length !== 4}
-                  className="tactile bg-secondary text-secondary-foreground font-display font-bold px-7 rounded-2xl uppercase disabled:opacity-50"
-                >
+                <button onClick={handleCheckCode} disabled={loading || joinCode.length !== 4} className={goCls}>
                   {loading ? '…' : 'Join'}
                 </button>
               </div>
-            </div>
+            </>
           ) : (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between ml-1">
-                <label htmlFor="name" className="text-sm font-display font-semibold uppercase tracking-wider text-muted-foreground">
-                  Game {joinCode} — your name
+            <>
+              <div className="flex items-center justify-between">
+                <label htmlFor="name" className="text-sm font-semibold text-muted-foreground">
+                  Joining game <span className="text-foreground font-bold">{joinCode}</span>
                 </label>
                 <button
                   onClick={() => { setCodeOk(false); setError(null); }}
-                  className="text-sm font-semibold text-muted-foreground underline underline-offset-4 hover:text-foreground"
+                  className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Change pin
+                  ← Change pin
                 </button>
               </div>
               <div className="flex gap-3">
@@ -121,54 +121,46 @@ const Index = () => {
                   id="name"
                   value={playerName}
                   onChange={(e) => { setPlayerName(e.target.value); setError(null); }}
-                  placeholder="e.g. Quizzly Bear"
+                  placeholder="Your team name"
                   autoFocus
                   maxLength={24}
                   onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
-                  className="w-full min-w-0 bg-muted border-[3px] border-foreground rounded-2xl px-5 py-4 text-xl font-display font-semibold focus:outline-none focus:bg-card placeholder:text-foreground/25"
+                  className={`${inputCls} text-xl`}
                 />
-                <button
-                  onClick={handleJoin}
-                  disabled={loading || !playerName.trim()}
-                  className="tactile bg-secondary text-secondary-foreground font-display font-bold px-7 rounded-2xl uppercase disabled:opacity-50"
-                >
+                <button onClick={handleJoin} disabled={loading || !playerName.trim()} className={goCls}>
                   {loading ? '…' : 'Go'}
                 </button>
               </div>
-            </div>
+            </>
           )}
 
-          {error && (
-            <p className="text-destructive font-semibold text-sm ml-1 animate-shake">{error}</p>
-          )}
-
-          <div className="flex items-center">
-            <div className="flex-grow border-t-2 border-[hsl(var(--rule))]" />
-            <span className="mx-4 text-muted-foreground/60 font-display font-semibold text-sm uppercase">Or</span>
-            <div className="flex-grow border-t-2 border-[hsl(var(--rule))]" />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <button onClick={() => setShowPicker(true)} disabled={loading} className={`${tile} bg-accent`}>
-              <span className="relative w-12 h-12 mb-3 bg-card border-2 border-foreground rounded-lg flex items-center justify-center">
-                <span className="absolute w-5 h-5 border-[3px] border-foreground rounded-full" />
-                <span className="absolute w-1.5 h-1.5 bg-foreground rounded-full" />
-              </span>
-              <span className="font-display font-bold uppercase text-sm">Host quiz</span>
-            </button>
-            <button onClick={() => navigate('/create')} className={`${tile} bg-quiz-orange`}>
-              <span className="relative w-12 h-12 mb-3 bg-card border-2 border-foreground rounded-lg flex items-center justify-center">
-                <span className="absolute w-1.5 h-6 bg-foreground rounded-full" />
-                <span className="absolute w-6 h-1.5 bg-foreground rounded-full" />
-              </span>
-              <span className="font-display font-bold uppercase text-sm">Create</span>
-            </button>
-          </div>
+          {error && <p className="text-destructive font-semibold text-sm animate-shake">{error}</p>}
         </motion.div>
 
-        <p className="text-center font-display font-semibold text-xs uppercase tracking-wider text-muted-foreground/70">
-          Grab a screen, share the pin, play together
-        </p>
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.16, type: 'spring', bounce: 0.3 }}
+          className="grid grid-cols-2 gap-3"
+        >
+          <button
+            onClick={() => setShowPicker(true)}
+            disabled={loading}
+            className="group text-left rounded-2xl border border-border bg-card/70 p-5 hover:border-accent/60 hover:bg-card transition disabled:opacity-50"
+          >
+            <span className="block h-2 w-8 rounded-full bg-accent mb-4 transition-all group-hover:w-12" />
+            <span className="block font-display font-bold text-lg">Host a game</span>
+            <span className="block text-sm text-muted-foreground">Put it on the big screen</span>
+          </button>
+          <button
+            onClick={() => navigate('/create')}
+            className="group text-left rounded-2xl border border-border bg-card/70 p-5 hover:border-secondary/60 hover:bg-card transition"
+          >
+            <span className="block h-2 w-8 rounded-full bg-secondary mb-4 transition-all group-hover:w-12" />
+            <span className="block font-display font-bold text-lg">Make a quiz</span>
+            <span className="block text-sm text-muted-foreground">Write your own questions</span>
+          </button>
+        </motion.div>
       </div>
     </div>
   );
