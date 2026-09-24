@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import QuizPicker from '@/components/quiz/QuizPicker';
 import { useQuizSession } from '@/hooks/useQuizSession';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,7 +10,6 @@ import type { QuizQuestion } from '@/data/questionTypes';
 const Index = () => {
   const navigate = useNavigate();
   const { createSession, joinSession, findSession, error, setError } = useQuizSession();
-  const [showJoin, setShowJoin] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
   const [joinCode, setJoinCode] = useState('');
   const [codeOk, setCodeOk] = useState(false);
