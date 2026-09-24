@@ -535,7 +535,7 @@ export default function PlayerView() {
                                     <span className="text-xs text-quiz-green/80 truncate">→ {correct}</span>
                                   )}
                                 </span>
-                                <span className={`text-xs font-display font-bold ${isRight ? 'text-quiz-green' : 'text-muted-foreground/60'}`}>
+                                <span className={`text-xs font-display font-bold ${isRight ? 'text-quiz-green' : 'text-muted-foreground'}`}>
                                   {isRight ? '✓ +200' : '✗ +0'}
                                 </span>
                               </li>
