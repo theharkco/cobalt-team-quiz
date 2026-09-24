@@ -11,10 +11,11 @@ import type { QuizQuestion } from '@/data/questionTypes';
 
 const Index = () => {
   const navigate = useNavigate();
-  const { createSession, joinSession, error, setError } = useQuizSession();
+  const { createSession, joinSession, findSession, error, setError } = useQuizSession();
   const [showJoin, setShowJoin] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
   const [joinCode, setJoinCode] = useState('');
+  const [codeOk, setCodeOk] = useState(false);
   const [playerName, setPlayerName] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -22,9 +23,7 @@ const Index = () => {
     setLoading(true);
     const session = await createSession();
     if (session) {
-      // Store selected questions in sessionStorage for the host
       sessionStorage.setItem(`quiz-questions-${session.id}`, JSON.stringify(questions));
-      // Update session with quiz_id if custom
       if (quizId) {
         await supabase.from('quiz_sessions').update({ quiz_id: quizId }).eq('id', session.id);
       }
@@ -33,11 +32,20 @@ const Index = () => {
     setLoading(false);
   };
 
-  const handleJoin = async () => {
-    if (!joinCode.trim() || !playerName.trim()) return;
+  const handleCheckCode = async () => {
+    if (joinCode.length !== 4) return;
     setLoading(true);
     setError(null);
-    const player = await joinSession(joinCode.trim(), playerName.trim());
+    const s = await findSession(joinCode);
+    if (s) setCodeOk(true);
+    setLoading(false);
+  };
+
+  const handleJoin = async () => {
+    if (!playerName.trim()) return;
+    setLoading(true);
+    setError(null);
+    const player = await joinSession(joinCode, playerName);
     if (player) {
       navigate(`/play/${player.session_id}/${player.id}`);
     }
@@ -98,37 +106,63 @@ const Index = () => {
           </motion.div>
         ) : (
           <motion.div
+            key={codeOk ? 'name' : 'code'}
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="flex flex-col gap-4 w-full"
           >
-            <Input
-              value={playerName}
-              onChange={(e) => setPlayerName(e.target.value)}
-              placeholder="Your name"
-              className="h-14 text-center text-lg font-body bg-card border-2 border-border text-foreground placeholder:text-muted-foreground rounded-xl"
-              autoFocus
-            />
-            <Input
-              value={joinCode}
-              onChange={(e) => setJoinCode(e.target.value.replace(/\D/g, '').slice(0, 4))}
-              placeholder="4-digit code"
-              className="h-14 text-center text-3xl font-display tracking-[0.5em] bg-card border-2 border-border text-foreground placeholder:text-muted-foreground placeholder:text-lg placeholder:tracking-normal rounded-xl"
-              maxLength={4}
-              onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
-            />
+            {!codeOk ? (
+              <Input
+                value={joinCode}
+                onChange={(e) => setJoinCode(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                placeholder="4-digit code"
+                inputMode="numeric"
+                className="h-14 text-center text-3xl font-display tracking-[0.5em] bg-card border-2 border-border text-foreground placeholder:text-muted-foreground placeholder:text-lg placeholder:tracking-normal rounded-xl"
+                maxLength={4}
+                autoFocus
+                onKeyDown={(e) => e.key === 'Enter' && handleCheckCode()}
+              />
+            ) : (
+              <>
+                <p className="text-center font-body text-muted-foreground">
+                  Joining quiz <span className="font-display font-bold text-foreground">{joinCode}</span>
+                </p>
+                <Input
+                  value={playerName}
+                  onChange={(e) => setPlayerName(e.target.value)}
+                  placeholder="Your name"
+                  className="h-14 text-center text-lg font-body bg-card border-2 border-border text-foreground placeholder:text-muted-foreground rounded-xl"
+                  autoFocus
+                  onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
+                />
+              </>
+            )}
             {error && (
               <p className="text-destructive text-center font-body font-bold animate-shake">{error}</p>
             )}
+            {!codeOk ? (
+              <Button
+                onClick={handleCheckCode}
+                disabled={loading || joinCode.length !== 4}
+                className="h-14 text-lg font-display font-bold rounded-xl gradient-fun text-foreground border-none hover:opacity-90"
+              >
+                {loading ? '⏳ Checking...' : 'Next →'}
+              </Button>
+            ) : (
+              <Button
+                onClick={handleJoin}
+                disabled={loading || !playerName.trim()}
+                className="h-14 text-lg font-display font-bold rounded-xl gradient-fun text-foreground border-none hover:opacity-90"
+              >
+                {loading ? '⏳ Joining...' : '🚀 Join Game'}
+              </Button>
+            )}
             <Button
-              onClick={handleJoin}
-              disabled={loading || joinCode.length !== 4 || !playerName.trim()}
-              className="h-14 text-lg font-display font-bold rounded-xl gradient-fun text-foreground border-none hover:opacity-90"
-            >
-              {loading ? '⏳ Joining...' : '🚀 Join Game'}
-            </Button>
-            <Button
-              onClick={() => { setShowJoin(false); setError(null); }}
+              onClick={() => {
+                setError(null);
+                if (codeOk) setCodeOk(false);
+                else setShowJoin(false);
+              }}
               variant="ghost"
               className="text-muted-foreground font-body"
             >
