@@ -14,8 +14,10 @@ import CountdownTimer from '@/components/quiz/CountdownTimer';
 import QuestionDisplay from '@/components/quiz/QuestionDisplay';
 import PreCountdownOverlay from '@/components/quiz/PreCountdownOverlay';
 import Leaderboard from '@/components/quiz/Leaderboard';
-import FloatingShapes from '@/components/quiz/FloatingShapes';
 import { Button } from '@/components/ui/button';
+import QuizScreen from '@/components/quiz/QuizScreen';
+import QuestionTransitionOverlay from '@/components/quiz/QuestionTransitionOverlay';
+import { ArrowRight, BarChart3, FastForward, Play, Radio, Users } from 'lucide-react';
 
 export default function HostView() {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -350,13 +352,12 @@ export default function HostView() {
   // LOBBY
   if (!session || session.status === 'lobby') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4">
-        <FloatingShapes />
-        <div className="relative z-10 flex flex-col items-center gap-6 max-w-lg w-full">
+      <QuizScreen eyebrow="Host lobby" corner={<span className="flex items-center gap-2 text-xs font-bold text-secondary"><Radio className="h-4 w-4" /> LIVE</span>} contentClassName="max-w-6xl px-4 py-10 md:px-8 md:py-16">
+        <div className="grid gap-8 lg:grid-cols-[1.15fr_.85fr] lg:items-stretch">
           <motion.h1
             initial={{ y: -30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="text-5xl md:text-7xl font-display font-bold text-gradient"
+            className="sr-only"
           >
             Quiz Clash
           </motion.h1>
@@ -365,23 +366,16 @@ export default function HostView() {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: 'spring', bounce: 0.5 }}
-            className="bg-card border-2 border-border rounded-2xl p-6 text-center w-full"
+            className="stage-panel flex min-h-[440px] flex-col justify-between rounded-lg p-7 md:p-10"
           >
-            <p className="text-muted-foreground font-body mb-1 text-sm">Go to</p>
-            <p className="text-lg md:text-2xl font-display font-bold text-foreground mb-3 select-all">
-              {window.location.origin}
-            </p>
-            <p className="text-muted-foreground font-body mb-2">Enter code:</p>
-            <p className="text-6xl md:text-8xl font-display font-bold text-primary tracking-[0.3em]">
-              {session?.join_code || '----'}
-            </p>
+            <div><p className="stage-kicker">Join the game</p><p className="mt-3 select-all break-all text-lg font-semibold text-muted-foreground md:text-2xl">{window.location.origin}</p></div>
+            <div><p className="stage-kicker mb-3">Game code</p><p className="font-display text-[clamp(4.5rem,12vw,9rem)] font-bold leading-none tracking-[0.12em] text-primary tabular-nums">{session?.join_code || '----'}</p></div>
+            <div className="flex items-center gap-3 border-t border-border pt-5 text-sm text-muted-foreground"><span className="status-dot"/> Waiting for teams to check in</div>
           </motion.div>
 
-          <div className="w-full">
-            <p className="text-muted-foreground font-body text-center mb-3">
-              👥 {players.length} player{players.length !== 1 ? 's' : ''} joined
-            </p>
-            <div className="flex flex-wrap gap-2 justify-center">
+          <div className="stage-panel flex min-h-[440px] flex-col rounded-lg">
+            <div className="flex items-center justify-between border-b border-border p-5"><p className="font-display text-xl font-bold">Teams in the room</p><span className="flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-sm font-bold"><Users className="h-4 w-4 text-secondary"/>{players.length}</span></div>
+            <div className="flex flex-1 flex-wrap content-start gap-2 p-5">
               <AnimatePresence>
                 {players.map((p) => (
                   <motion.div
@@ -390,10 +384,10 @@ export default function HostView() {
                     animate={{ scale: 1 }}
                     exit={{ scale: 0 }}
                     transition={{ type: 'spring', bounce: 0.6 }}
-                    className="flex items-center gap-2 bg-card border border-border rounded-full px-4 py-2"
+                    className="flex h-11 items-center gap-2 rounded-md border border-border bg-muted/50 px-3"
                   >
                     <div
-                      className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs"
+                      className="w-7 h-7 rounded flex items-center justify-center font-bold text-xs text-primary-foreground"
                       style={{ backgroundColor: p.color }}
                     >
                       {p.name.charAt(0).toUpperCase()}
@@ -403,20 +397,21 @@ export default function HostView() {
                 ))}
               </AnimatePresence>
             </div>
-          </div>
-
-          {players.length >= 1 && (
+            <div className="border-t border-border p-5">
+          {players.length >= 1 ? (
             <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
               <Button
                 onClick={startQuiz}
-                className="h-16 px-12 text-xl font-display font-bold rounded-2xl gradient-fun text-foreground border-none hover:opacity-90 hover:scale-105 active:scale-95 transition-all"
+                className="h-14 w-full text-base"
               >
-                🚀 Start Quiz!
+                <Play /> Start the showdown
               </Button>
             </motion.div>
-          )}
+          ) : <p className="text-center text-sm text-muted-foreground">The start control unlocks when the first team arrives.</p>}
+            </div>
+          </div>
         </div>
-      </div>
+      </QuizScreen>
     );
   }
 
@@ -425,31 +420,13 @@ export default function HostView() {
     const isPreCountdown = preCountdown > 0;
     const questionTimeLimit = currentQ.timeLimitSeconds ?? 15;
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4 py-8">
+      <QuizScreen eyebrow={`Question ${session.current_question + 1} / ${quizQuestions.length}`} corner={!isPreCountdown ? <CountdownTimer duration={questionTimeLimit} timeElapsed={timer.timeElapsed} onComplete={onTimerComplete} isRunning={timer.isRunning} size={46} /> : undefined} contentClassName="max-w-6xl px-4 py-8 md:px-8">
         <AnimatePresence>
           {isTransitioning && (
-            <motion.div
-              key="question-transition"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center gap-2"
-            >
-              <p className="text-muted-foreground font-body text-sm uppercase tracking-widest">Get ready</p>
-              <p className="text-4xl md:text-5xl font-display font-bold text-gradient animate-pulse">
-                Question {session.current_question + 1}
-              </p>
-            </motion.div>
+            <QuestionTransitionOverlay questionNumber={session.current_question + 1} />
           )}
         </AnimatePresence>
-        {!isPreCountdown && (
-          <div className="absolute top-6 right-6">
-            <CountdownTimer duration={questionTimeLimit} timeElapsed={timer.timeElapsed} onComplete={onTimerComplete} isRunning={timer.isRunning} size={100} />
-          </div>
-        )}
-
-        <div className="relative z-10 flex flex-col items-center gap-6 w-full max-w-4xl">
+        <div className="flex min-h-[calc(100vh-7rem)] w-full flex-col items-center justify-center gap-6">
           <QuestionDisplay
             question={currentQ}
             questionNumber={session.current_question + 1}
@@ -463,24 +440,23 @@ export default function HostView() {
 
           {isPreCountdown && <PreCountdownOverlay countdown={preCountdown} question={currentQ} />}
 
-          {!isPreCountdown && !showAnswer && (
-            <Button
+          {!isPreCountdown && !showAnswer && <div className="fixed bottom-5 left-1/2 z-30 flex -translate-x-1/2 items-center gap-4 rounded-lg border border-border bg-card/95 p-2 pl-4 shadow-[var(--shadow-ink)] backdrop-blur"><span className="whitespace-nowrap text-sm font-bold text-muted-foreground"><span className="text-foreground">{answerCount}</span> / {players.length} answered</span><Button
               onClick={onTimerComplete}
               variant="outline"
-              className="h-10 px-6 text-sm font-display font-bold rounded-xl border-muted-foreground/30 text-muted-foreground hover:text-foreground hover:border-foreground/50 transition-all"
+              className="h-10"
             >
-              ⏭️ Skip Question
+              <FastForward /> End question
             </Button>
-          )}
+          </div>}
 
           {showAnswer && (
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: 'spring', bounce: 0.5 }}
-              className="text-center mt-4"
+              className="w-full max-w-3xl text-center mt-2"
             >
-              <div className="bg-card border-2 border-quiz-green rounded-2xl p-6 inline-block max-w-lg w-full">
+              <div className="stage-panel border-t-4 border-t-secondary rounded-lg p-6 md:p-8 inline-block w-full">
                 {currentQ.type === 'closest-without-going-over' ? (
                   <>
                     <p className="text-muted-foreground font-body mb-1">🎯 The correct number:</p>
@@ -549,61 +525,59 @@ export default function HostView() {
                   <p className="text-sm font-body text-muted-foreground mt-3 leading-relaxed">{currentQ.explanation}</p>
                 )}
               </div>
-              <div className="mt-6 flex flex-wrap gap-3 justify-center">
+              <div className="mt-5 flex flex-wrap gap-3 justify-center">
                 <Button
                   onClick={showLeaderboard}
-                  className="h-14 px-10 text-lg font-display font-bold rounded-xl gradient-fun text-foreground border-none hover:opacity-90"
+                  className="h-12 px-7"
                 >
-                  📊 Show Leaderboard
+                  <BarChart3 /> Show standings
                 </Button>
                 <Button
                   onClick={nextQuestion}
                   variant="outline"
-                  className="h-14 px-10 text-lg font-display font-bold rounded-xl border-border hover:bg-accent"
+                  className="h-12 px-7"
                 >
-                  {session.current_question + 1 >= quizQuestions.length ? '🏆 Final Results' : '➡️ Next Question'}
+                  {session.current_question + 1 >= quizQuestions.length ? 'Final results' : 'Next question'} <ArrowRight />
                 </Button>
               </div>
             </motion.div>
           )}
         </div>
-      </div>
+      </QuizScreen>
     );
   }
 
   // LEADERBOARD
   if (session.status === 'leaderboard') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4 py-8">
-        <FloatingShapes />
-        <div className="relative z-10 w-full max-w-2xl flex flex-col items-center gap-8">
+      <QuizScreen eyebrow="Round standings" contentClassName="max-w-3xl px-4 py-10 md:px-8">
+        <div className="flex min-h-[calc(100vh-9rem)] w-full flex-col items-center justify-center gap-8">
           <Leaderboard players={players} previousScores={previousScores} />
           <Button
             onClick={nextQuestion}
-            className="h-14 px-10 text-lg font-display font-bold rounded-xl gradient-fun text-foreground border-none hover:opacity-90 hover:scale-105 active:scale-95 transition-all"
+            className="h-12 px-8"
           >
-            {session.current_question + 1 >= quizQuestions.length ? '🏆 Final Results' : '➡️ Next Question'}
+            {session.current_question + 1 >= quizQuestions.length ? 'Final results' : 'Next question'} <ArrowRight />
           </Button>
         </div>
-      </div>
+      </QuizScreen>
     );
   }
 
   // FINISHED
   if (session.status === 'finished') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4 py-8">
-        <FloatingShapes />
-        <div className="relative z-10 w-full max-w-2xl flex flex-col items-center gap-6">
+      <QuizScreen eyebrow="Final results" contentClassName="max-w-4xl px-4 py-10 md:px-8">
+        <div className="flex min-h-[calc(100vh-9rem)] w-full flex-col items-center justify-center gap-8">
           <Leaderboard players={players} isFinal />
           <Button
             onClick={() => navigate('/')}
-            className="h-14 px-10 text-lg font-display font-bold rounded-xl bg-primary text-primary-foreground hover:opacity-90 hover:scale-105 active:scale-95 transition-all"
+            className="h-12 px-8"
           >
-            🎮 New Quiz
+            New game <ArrowRight />
           </Button>
         </div>
-      </div>
+      </QuizScreen>
     );
   }
 
