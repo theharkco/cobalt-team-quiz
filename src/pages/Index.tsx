@@ -54,7 +54,7 @@ const Index = () => {
   }
 
   const tile =
-    'tactile flex flex-col items-center justify-center p-6 rounded-2xl text-foreground disabled:opacity-50';
+    'tactile flex flex-col items-center justify-center p-6 rounded-2xl text-accent-foreground disabled:opacity-50';
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
@@ -65,7 +65,7 @@ const Index = () => {
           transition={{ type: 'spring', bounce: 0.45 }}
           className="text-center"
         >
-          <h1 className="text-6xl md:text-7xl font-display font-bold tracking-tight italic -rotate-2 leading-[0.95] text-foreground">
+          <h1 className="text-6xl md:text-7xl font-display font-bold tracking-tight italic -rotate-2 leading-[0.95] text-foreground [text-shadow:4px_4px_0_hsl(var(--ink))]">
             QUIZ
             <br />
             <span className="text-gradient">CLASH</span>
