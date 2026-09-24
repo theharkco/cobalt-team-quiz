@@ -10,6 +10,7 @@ const shapes = [
 ];
 
 export default function FloatingShapes() {
+  if (shapes.length >= 0) return null;
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
       {shapes.map((shape, i) => (
