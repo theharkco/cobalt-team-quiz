@@ -76,30 +76,50 @@ export function useQuizSession() {
     return s;
   }, [subscribeToSession, refreshPlayers]);
 
-  const joinSession = useCallback(async (joinCode: string, playerName: string) => {
-    // Find session
-    const { data: sessionData, error: sessionErr } = await supabase
+  const findSession = useCallback(async (joinCode: string) => {
+    const { data } = await supabase
       .from('quiz_sessions')
       .select('*')
       .eq('join_code', joinCode)
-      .single();
-
-    if (sessionErr || !sessionData) {
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (!data) {
       setError('Quiz not found! Check the code.');
       return null;
     }
-
-    const s = sessionData as QuizSession;
+    const s = data as QuizSession;
     if (s.status !== 'lobby') {
       setError('This quiz has already started!');
       return null;
     }
+    return s;
+  }, []);
 
-    // Get current player count for color
+  const joinSession = useCallback(async (joinCode: string, rawName: string) => {
+    const playerName = rawName.trim().replace(/\s+/g, ' ');
+    if (!playerName) {
+      setError('Please enter a name.');
+      return null;
+    }
+    if (/^\d{4}$/.test(playerName.replace(/\s/g, ''))) {
+      setError("Your name can't be a 4-digit number.");
+      return null;
+    }
+
+    const s = await findSession(joinCode);
+    if (!s) return null;
+
     const { data: existingPlayers } = await supabase
       .from('players')
-      .select('id')
+      .select('id, name')
       .eq('session_id', s.id);
+
+    const norm = (n: string) => n.trim().replace(/\s+/g, ' ').toLowerCase();
+    if (existingPlayers?.some((p) => norm(p.name) === norm(playerName))) {
+      setError('That name is already taken — pick another!');
+      return null;
+    }
 
     const colorIndex = (existingPlayers?.length || 0) % PLAYER_COLORS.length;
 
@@ -125,7 +145,7 @@ export function useQuizSession() {
     subscribeToSession(s.id);
     refreshPlayers(s.id);
     return player;
-  }, [subscribeToSession, refreshPlayers]);
+  }, [subscribeToSession, refreshPlayers, findSession]);
 
   const updateSessionStatus = useCallback(async (status: SessionStatus, questionIndex?: number) => {
     if (!session) return;
@@ -150,6 +170,7 @@ export function useQuizSession() {
     setError,
     createSession,
     joinSession,
+    findSession,
     updateSessionStatus,
     refreshPlayers,
   };
