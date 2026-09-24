@@ -2,7 +2,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import type { Player } from '@/hooks/useQuizSession';
-import Emoji from '@/components/quiz/Emoji';
 import { Crown, Medal } from 'lucide-react';
 
 interface LeaderboardProps {
