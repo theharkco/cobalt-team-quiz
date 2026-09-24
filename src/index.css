@@ -28,6 +28,7 @@
     --radius: 1rem;
     --rule: 200 8% 26%;
     --ink: 200 20% 4%;
+    --shadow-color: 200 30% 32%;
 
     --quiz-green: 150 55% 45%;
     --quiz-blue: 176 56% 45%;
@@ -36,8 +37,8 @@
     --quiz-pink: 0 100% 71%;
     --quiz-yellow: 51 100% 65%;
 
-    --shadow-ink: 6px 6px 0 0 hsl(var(--ink));
-    --shadow-ink-sm: 4px 4px 0 0 hsl(var(--ink));
+    --shadow-ink: 6px 6px 0 0 hsl(var(--shadow-color));
+    --shadow-ink-sm: 4px 4px 0 0 hsl(var(--shadow-color));
     --gradient-fun: hsl(var(--primary));
     --gradient-correct: hsl(150 55% 45%);
     --gradient-wrong: hsl(0 72% 55%);
