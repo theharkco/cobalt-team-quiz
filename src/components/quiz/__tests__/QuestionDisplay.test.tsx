@@ -45,7 +45,7 @@ describe('QuestionDisplay', () => {
   it('renders question text and header', () => {
     render(<QuestionDisplay question={mcQuestion} questionNumber={1} totalQuestions={15} />);
     expect(screen.getByText('🌍 Which country?')).toBeInTheDocument();
-    expect(screen.getByText('Question 1 of 15')).toBeInTheDocument();
+    expect(screen.getByText('Question 01 of 15')).toBeInTheDocument();
     expect(screen.getByText('Geography')).toBeInTheDocument();
   });
 
