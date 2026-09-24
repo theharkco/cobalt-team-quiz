@@ -1,79 +1,48 @@
+# Quizclash full experience redesign
 
-# Highbrow/Lowbrow Question Type
+## Direction
+Replace the black-and-orange look with a distinctive **live game-show control room** aesthetic: deep graphite surfaces, warm off-white text, electric cyan as the main action color, raspberry for urgency, and acid-lime for wins and score gains. Typography will feel bold and broadcast-led without oversized novelty branding, while subtle grids, rails, number blocks, and stage-light accents create energy without generic gradients or decorative blobs.
 
-A new question type where each card has two prompts targeting the **same correct answer**. Players start on the harder "Highbrow" prompt (worth up to 200 pts). They can tap a button to reveal the easier "Lowbrow" prompt, which locks the highbrow out and caps the answer at 100 pts.
+The redesign will change the composition and pacing of the quiz—not merely recolor the existing cards—while preserving all current quiz rules, scoring, synchronization, audio, and question types.
 
-## Behavior summary
+## Full quiz journey
 
-- **Same answer, two prompts.** Authors enter one correct answer (+ optional acceptable answers) and two question texts.
-- **Per-prompt input types.** Each prompt can independently be `multiple-choice` or `free-text`. Multiple choice gets its own option set per side.
-- **One shared timer.** Revealing Lowbrow does NOT reset the clock — discourages instant reveal.
-- **Player-side reveal only.** The host screen shows only the Highbrow prompt during play; both prompts (and the correct answer) appear during the reveal/leaderboard phase.
-- **Scoring.** Highbrow correct = 200 pts. Lowbrow correct = 100 pts. Wrong/timeout = 0. No speed bonus, no partial credit — keeps the high/low tradeoff clean.
+### Join and quiz selection
+- Rebuild the opening screen as a focused two-step game-pin console with clear progress between code and team name.
+- Give hosting and quiz creation visually distinct entry points without repeating the same card treatment.
+- Redesign quiz selection as a compact library with strong quiz metadata, clear primary actions, and polished empty/loading states.
 
-## Files to change
+### Host experience
+- Turn the lobby into a big-screen waiting room: dominant join code and URL, lively player arrival roster, player count, and a persistent start control.
+- Give pre-question countdowns a full-stage category reveal rather than layering a number over the normal question layout.
+- Recompose active questions into a broadcast layout with a top progress rail, timer/status cluster, central prompt/media stage, answer grid, live response count, and a dedicated host control dock.
+- Make answer reveal a distinct scene with the correct answer, explanation, special-question breakdowns, and clearly separated leaderboard/next actions.
+- Give leaderboard and final results different visual treatments: animated rank movement between rounds, then a celebratory final podium and complete standings.
 
-### 1. `src/data/questionTypes.ts`
-- Add `'highbrow-lowbrow'` to the `QuestionType` union.
-- Extend `QuizQuestion` with optional fields:
-  - `lowbrowQuestion?: string` — the easier prompt text
-  - `highbrowInputType?: 'multiple-choice' | 'free-text'`
-  - `lowbrowInputType?: 'multiple-choice' | 'free-text'`
-  - `lowbrowOptions?: string[]` — options for the lowbrow side when MC. (Highbrow reuses existing `options`.)
-  - The shared answer continues to live in `correctAnswer` + `acceptableAnswers`.
+### Player experience
+- Create a phone-first play surface with persistent score/question status, thumb-friendly answer controls, and clear selected/submitted states.
+- Give each question type a purposeful interaction layout: answer tiles, numeric lock-in, sortable ranking, Select Wrong multi-select, Highbrow/Lowbrow decision, image, and music.
+- Replace the repeated centered-card flow with distinct waiting, countdown, answering, locked-in, result, round-rank, and final-result scenes.
+- Keep autoplay recovery prominent and easy to activate without overpowering the question.
 
-### 2. `src/data/scoring.ts`
-- Add `calculateHighbrowLowbrowScore(isCorrect: boolean, side: 'highbrow' | 'lowbrow'): number` returning 200 / 100 / 0. No time component.
+### Quiz builder
+- Redesign the builder as a creator workspace: clear top command bar, separated quiz details, scannable sortable question outline, and a focused editing area.
+- Standardize labels, inputs, selectors, option rows, validation, destructive actions, music search, and save states.
+- Improve hierarchy and density on desktop while retaining a comfortable single-column phone layout.
 
-### 3. `src/data/questions.ts`
-- Re-export the new scoring helper.
+## Shared visual system
+- Replace the current orange-led tokens, glow, rounded-card repetition, and emoji-heavy controls with a cohesive semantic palette and restrained iconography.
+- Establish reusable stage, panel, toolbar, status-chip, answer-tile, and result-state patterns.
+- Use consistent focus rings, disabled states, contrast, spacing, corners, and shadows across all screens.
+- Add purposeful transitions for question entrances, answer lock-in, reveals, rank changes, and final celebration; respect reduced-motion preferences.
+- Preserve the custom Emoji renderer where emojis remain and use the existing button system for controls.
 
-### 4. `src/components/quiz/PlayerAnswerInput.tsx`
-- New branch for `question.type === 'highbrow-lowbrow'` rendering a `HighbrowLowbrowInput` subcomponent:
-  - Local state `side: 'highbrow' | 'lowbrow'`.
-  - **Highbrow view:** prominent `200 PTS` badge, the highbrow prompt, the appropriate input (MC grid or free-text input), plus a secondary button **"Reveal Lowbrow Question (for 100 points)"**.
-  - **Lowbrow view (after reveal):** the highbrow card is replaced (not just dimmed — simpler and avoids accidental taps); shows a smaller "Highbrow locked" chip, the new `100 PTS` badge, the lowbrow prompt and its input. No way to go back.
-  - On submit, encode answer as JSON `{ side, answer }` so PlayerView can score correctly.
-- Reuse existing `optionColors` / `optionIcons` for MC rendering on both sides.
+## Validation
+- Verify every screen and quiz state at desktop host and mobile player sizes, checking overlap, truncation, touch targets, and contrast.
+- Exercise all question types through countdown, answer, timeout, reveal, leaderboard, and next-question transitions.
+- Run the existing typecheck and full automated test suite, then add or adjust presentation tests only where the new state structure requires them.
 
-### 5. `src/pages/PlayerView.tsx`
-- In `handleSubmitAnswer`, when `question.type === 'highbrow-lowbrow'`:
-  - Parse `{ side, answer }`.
-  - Use `checkAnswer` against the question (it already matches `correctAnswer` + `acceptableAnswers`).
-  - Score via `calculateHighbrowLowbrowScore(isCorrect, side)`.
-  - `kind = isCorrect ? 'exact' : 'wrong'` (no `close` tier).
-  - Persist the submitted answer string as JSON so it can be displayed later if needed.
-
-### 6. `src/components/quiz/QuestionDisplay.tsx`
-- New host branch for `highbrow-lowbrow`:
-  - During play (`!revealAnswer`): show only the Highbrow card with `200 PTS` badge and a muted note like "Players may reveal the Lowbrow (100 pts)".
-  - On reveal: show both Highbrow and Lowbrow cards stacked, with the shared correct answer highlighted (quiz-green) under both. If MC, mark the correct option per side.
-
-### 7. `src/components/quiz/QuestionEditor.tsx` + `src/pages/QuizCreator.tsx`
-- When type is `highbrow-lowbrow`, the editor shows:
-  - One **Correct answer** field (+ acceptable answers).
-  - **Highbrow** section: prompt textarea, input type selector, options inputs if MC.
-  - **Lowbrow** section: prompt textarea, input type selector, options inputs if MC.
-- Persist new fields to `custom_quiz_questions`. The shared correct answer stays in `correct_answer`.
-
-### 8. Database — `custom_quiz_questions`
-- Add nullable columns via a migration:
-  - `lowbrow_question text`
-  - `highbrow_input_type text`
-  - `lowbrow_input_type text`
-  - `lowbrow_options jsonb`
-- Update the question-loading mapper in `PlayerView.tsx` and `HostView.tsx` to hydrate these into `QuizQuestion`.
-- No RLS/GRANT changes (columns added to existing table).
-
-### 9. Sample data (`src/data/questionData.ts`)
-- Add one example highbrow/lowbrow question so the built-in quiz can demo it.
-
-### 10. Tests
-- Add `calculateHighbrowLowbrowScore` unit tests in the scoring test file (200 / 100 / 0 cases).
-- Add a `QuestionDisplay` test asserting only Highbrow shows during play and both show on reveal.
-
-## Out of scope
-
-- No partial credit, no speed bonus, no time reset.
-- No "switch back to Highbrow" once Lowbrow is revealed.
-- No host-side aggregation of who chose which side (could be a later enhancement).
+## Technical notes
+- Primary areas: global design tokens and typography; home/join, picker, host, player, creator; question display/input/editor; countdown, music, and leaderboard components.
+- Keep the existing database schema and multiplayer/scoring logic unchanged.
+- Replace the remote CSS font import with document-head font loading while updating the app-specific page metadata.
