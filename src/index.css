@@ -6,28 +6,28 @@
 
 @layer base {
   :root {
-    --background: 216 20% 95%;
-    --foreground: 195 8% 19%;
-    --card: 0 0% 100%;
-    --card-foreground: 195 8% 19%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 195 8% 19%;
+    --background: 200 12% 10%;
+    --foreground: 40 30% 92%;
+    --card: 200 10% 15%;
+    --card-foreground: 40 30% 92%;
+    --popover: 200 10% 15%;
+    --popover-foreground: 40 30% 92%;
     --primary: 0 100% 71%;
     --primary-foreground: 195 8% 19%;
     --secondary: 176 56% 55%;
     --secondary-foreground: 195 8% 19%;
-    --muted: 210 17% 95%;
-    --muted-foreground: 195 5% 41%;
+    --muted: 200 9% 20%;
+    --muted-foreground: 40 10% 68%;
     --accent: 51 100% 71%;
     --accent-foreground: 195 8% 19%;
     --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
-    --border: 195 8% 19%;
-    --input: 195 8% 19%;
-    --ring: 195 8% 19%;
+    --border: 40 15% 70%;
+    --input: 40 15% 70%;
+    --ring: 40 30% 92%;
     --radius: 1rem;
-    --rule: 200 15% 88%;
-    --ink: 195 8% 19%;
+    --rule: 200 8% 26%;
+    --ink: 200 20% 4%;
 
     --quiz-green: 150 55% 45%;
     --quiz-blue: 176 56% 45%;
@@ -42,7 +42,7 @@
     --gradient-correct: hsl(150 55% 45%);
     --gradient-wrong: hsl(0 72% 55%);
 
-    --sidebar-background: 0 0% 100%;
+    --sidebar-background: 200 10% 15%;
     --sidebar-foreground: 195 8% 19%;
     --sidebar-primary: 0 100% 71%;
     --sidebar-primary-foreground: 195 8% 19%;
@@ -61,7 +61,7 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Nunito', sans-serif;
-    background-image: radial-gradient(hsl(var(--ink) / 0.07) 1px, transparent 1px);
+    background-image: radial-gradient(hsl(var(--foreground) / 0.06) 1px, transparent 1px);
     background-size: 22px 22px;
   }
 
@@ -75,6 +75,7 @@
     background: hsl(var(--primary));
     color: hsl(var(--ink));
     border: 3px solid hsl(var(--ink)) !important;
+    color: hsl(var(--primary-foreground)) !important;
     box-shadow: var(--shadow-ink-sm);
     transition: transform .12s ease, box-shadow .12s ease;
   }
