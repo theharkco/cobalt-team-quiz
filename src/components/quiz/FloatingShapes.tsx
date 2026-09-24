@@ -15,7 +15,7 @@ export default function FloatingShapes() {
       {shapes.map((shape, i) => (
         <div
           key={i}
-          className={`absolute ${shape.pos} ${shape.size} animate-float ${shape.delay} opacity-30`}
+          className={`absolute ${shape.pos} ${shape.size} animate-float ${shape.delay} opacity-[0.12] grayscale`}
         >
           {shape.emoji}
         </div>
