@@ -24,7 +24,7 @@ export default function SortableQuestionCard({ id, index, data, onClick }: Sorta
     <div
       ref={setNodeRef}
       style={style}
-      className={`bg-card border border-border rounded-xl p-4 flex items-center gap-4 cursor-pointer hover:border-primary/50 transition-colors ${isDragging ? 'shadow-lg ring-2 ring-primary/30' : ''}`}
+      className={`bg-card border border-border rounded-md p-4 flex items-center gap-4 cursor-pointer hover:border-primary/50 transition-colors ${isDragging ? 'shadow-lg ring-2 ring-primary/30' : ''}`}
       onClick={onClick}
     >
       <button
@@ -36,7 +36,7 @@ export default function SortableQuestionCard({ id, index, data, onClick }: Sorta
       >
         <GripVertical className="w-5 h-5" />
       </button>
-      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-display font-bold text-foreground text-sm shrink-0">
+      <div className="w-10 h-10 rounded bg-muted flex items-center justify-center font-display font-bold text-primary text-sm shrink-0 tabular-nums">
         {index + 1}
       </div>
       <div className="flex-1 min-w-0">
@@ -58,7 +58,7 @@ export default function SortableQuestionCard({ id, index, data, onClick }: Sorta
           </span>
         </div>
       </div>
-      <span className="text-muted-foreground text-sm">✏️</span>
+      <span className="text-muted-foreground text-sm">Edit</span>
     </div>
   );
 }
