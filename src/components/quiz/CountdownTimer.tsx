@@ -10,7 +10,7 @@ interface CountdownTimerProps {
 
 export default function CountdownTimer({ duration, timeElapsed, onComplete, isRunning, size = 120 }: CountdownTimerProps) {
   const completedRef = useRef(false);
-  const radius = (size - 12) / 2;
+  const radius = (size - 8) / 2;
   const circumference = 2 * Math.PI * radius;
 
   const timeLeft = Math.max(0, duration - timeElapsed / 1000);
@@ -44,7 +44,7 @@ export default function CountdownTimer({ duration, timeElapsed, onComplete, isRu
           r={radius}
           fill="none"
           stroke="hsl(var(--muted))"
-          strokeWidth="8"
+          strokeWidth="5"
         />
         <circle
           cx={size / 2}
@@ -52,7 +52,7 @@ export default function CountdownTimer({ duration, timeElapsed, onComplete, isRu
           r={radius}
           fill="none"
           stroke={color}
-          strokeWidth="8"
+          strokeWidth="5"
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={dashOffset}
