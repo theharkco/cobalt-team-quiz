@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import FloatingShapes from '@/components/quiz/FloatingShapes';
 import type { QuizQuestion } from '@/data/questionTypes';
 import { QUIZ_QUESTIONS } from '@/data/questionData';
+import { ArrowLeft, ArrowRight, Clock3, Pencil, Plus, Trash2 } from 'lucide-react';
+import QuizScreen from './QuizScreen';
 
 interface CustomQuiz {
   id: string;
@@ -97,31 +98,29 @@ export default function QuizPicker({ onSelect, onBack }: Props) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4">
-      <FloatingShapes />
-      <div className="relative z-10 flex flex-col items-center gap-6 max-w-lg w-full">
+    <QuizScreen eyebrow="Host setup" contentClassName="max-w-5xl px-4 py-10 md:px-8 md:py-16">
+      <div className="w-full">
         <motion.h1
           initial={{ y: -30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="text-4xl md:text-5xl font-display font-bold text-gradient"
+          className="text-4xl md:text-6xl font-display font-bold"
         >
-          Pick a Quiz
+          Choose the next showdown.
         </motion.h1>
+        <p className="mt-3 max-w-xl text-muted-foreground">Pick a set, put it on the big screen, and bring everyone into the lobby.</p>
+        <div className="mt-10 grid gap-4 md:grid-cols-2">
 
         {/* Default quiz */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="w-full bg-card border-2 border-primary/30 rounded-2xl p-5 cursor-pointer hover:border-primary/60 transition-all hover:scale-[1.02]"
+          className="stage-panel group min-h-56 cursor-pointer rounded-lg p-6 transition hover:border-primary/70"
           onClick={() => onSelect(QUIZ_QUESTIONS)}
         >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-display font-bold text-foreground text-lg">⚡ Default Quiz</p>
-              <p className="text-sm text-muted-foreground font-body">{QUIZ_QUESTIONS.length} questions • PE, AI, Music & more</p>
-            </div>
-            <span className="text-2xl">→</span>
+          <div className="flex h-full flex-col justify-between">
+            <div><span className="stage-kicker text-primary">Featured set</span><p className="mt-4 font-display text-3xl font-bold">The Main Event</p><p className="mt-2 text-sm text-muted-foreground">PE, AI, music and curveballs.</p></div>
+            <div className="mt-10 flex items-center justify-between border-t border-border pt-4"><span className="text-sm font-bold">{QUIZ_QUESTIONS.length} questions</span><ArrowRight className="text-primary transition-transform group-hover:translate-x-1" /></div>
           </div>
         </motion.div>
 
@@ -137,55 +136,48 @@ export default function QuizPicker({ onSelect, onBack }: Props) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ delay: 0.15 + i * 0.05 }}
-                className="w-full bg-card border border-border rounded-2xl p-5 cursor-pointer hover:border-primary/40 transition-all hover:scale-[1.02]"
+                className="stage-panel group min-h-56 cursor-pointer rounded-lg p-6 transition hover:border-primary/60"
                 onClick={() => handleSelectCustom(quiz)}
               >
-                <div className="flex items-center justify-between">
-                  <div className="min-w-0 flex-1">
-                    <p className="font-display font-bold text-foreground text-lg truncate">🎯 {quiz.title}</p>
-                    <p className="text-sm text-muted-foreground font-body">
-                      {quiz.question_count} questions
-                      {quiz.description && ` • ${quiz.description}`}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0 ml-3">
+                <div className="flex h-full flex-col justify-between">
+                  <div><span className="stage-kicker">Custom set</span><p className="mt-4 truncate font-display text-2xl font-bold">{quiz.title}</p><p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{quiz.description || 'Ready to play.'}</p></div>
+                  <div className="mt-8 flex items-center justify-between border-t border-border pt-4"><span className="flex items-center gap-2 text-sm font-bold"><Clock3 className="h-4 w-4 text-secondary"/>{quiz.question_count} questions</span><div className="flex items-center gap-1 shrink-0 ml-3">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={(e) => { e.stopPropagation(); navigate(`/create/${quiz.id}`); }}
-                      className="text-muted-foreground hover:text-foreground"
+                      aria-label={`Edit ${quiz.title}`}
                     >
-                      ✏️
+                      <Pencil />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={(e) => handleDeleteQuiz(e, quiz.id)}
-                      className="text-muted-foreground hover:text-destructive"
+                      className="hover:text-destructive" aria-label={`Delete ${quiz.title}`}
                     >
-                      🗑️
+                      <Trash2 />
                     </Button>
-                    <span className="text-2xl text-muted-foreground">→</span>
+                    <ArrowRight className="ml-2 text-primary transition-transform group-hover:translate-x-1" />
                   </div>
+                </div>
                 </div>
               </motion.div>
             ))}
           </AnimatePresence>
         )}
+        </div>
 
         {/* Create new quiz */}
-        <Button
+        <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between"><Button onClick={onBack} variant="ghost"><ArrowLeft /> Back</Button><Button
           onClick={() => navigate('/create')}
           variant="outline"
-          className="w-full h-14 text-lg font-display font-bold rounded-2xl border-2 border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all"
+          className="h-12"
         >
-          ➕ Create New Quiz
+          <Plus /> Create new quiz
         </Button>
-
-        <Button onClick={onBack} variant="ghost" className="text-muted-foreground font-body">
-          ← Back
-        </Button>
+        </div>
       </div>
-    </div>
+    </QuizScreen>
   );
 }
