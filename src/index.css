@@ -75,7 +75,7 @@
     background: hsl(var(--primary));
     color: hsl(var(--ink));
     border: 3px solid hsl(var(--ink)) !important;
-    color: hsl(var(--primary-foreground));
+    color: hsl(var(--primary-foreground)) !important;
     box-shadow: var(--shadow-ink-sm);
     transition: transform .12s ease, box-shadow .12s ease;
   }
