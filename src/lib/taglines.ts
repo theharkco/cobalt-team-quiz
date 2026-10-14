@@ -93,7 +93,7 @@ export const TAGLINES = [
   "We answer questions, draw pictures, and never once sit in the same room.",
   "It runs on four digits, a team name, and a shared inability to draw a helicopter.",
   "You join with a code, pick a team name, and immediately regret your drawing.",
-  "Team names take five minutes, the drawing takes thirty seconds, and the arguing takes the rest of the evening.",
+  "The drawing takes thirty seconds, and the arguing about it takes the rest of the evening.",
   "Every Thursday, someone is briefly the best in the world at guessing a song.",
   "Thirty seconds of a song, and everyone typing a different title.",
   "We guess songs, put things in order, and draw things we have never drawn before.",
