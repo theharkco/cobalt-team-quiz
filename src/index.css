@@ -4,39 +4,39 @@
 
 @layer base {
   :root {
-    --background: 222 24% 7%;
-    --foreground: 48 22% 92%;
-    --card: 222 20% 11%;
-    --card-foreground: 48 22% 92%;
-    --popover: 222 20% 12%;
-    --popover-foreground: 48 22% 92%;
-    --primary: 187 92% 56%;
-    --primary-foreground: 222 30% 7%;
-    --secondary: 78 90% 58%;
-    --secondary-foreground: 222 30% 7%;
-    --muted: 222 15% 17%;
-    --muted-foreground: 215 13% 69%;
-    --accent: 332 84% 62%;
-    --accent-foreground: 222 30% 7%;
+    --background: 228 64% 11%;
+    --foreground: 45 60% 96%;
+    --card: 228 56% 17%;
+    --card-foreground: 45 60% 96%;
+    --popover: 228 56% 17%;
+    --popover-foreground: 45 60% 96%;
+    --primary: 46 100% 58%;
+    --primary-foreground: 228 70% 10%;
+    --secondary: 158 82% 55%;
+    --secondary-foreground: 228 70% 10%;
+    --muted: 228 44% 22%;
+    --muted-foreground: 226 40% 80%;
+    --accent: 4 96% 66%;
+    --accent-foreground: 228 70% 10%;
     --destructive: 353 82% 62%;
     --destructive-foreground: 0 0% 100%;
-    --border: 218 14% 25%;
-    --input: 218 14% 30%;
-    --ring: 187 92% 56%;
-    --radius: 0.625rem;
+    --border: 228 40% 34%;
+    --input: 228 40% 40%;
+    --ring: 46 100% 58%;
+    --radius: 1rem;
     --rule: 218 14% 19%;
     --ink: 222 34% 4%;
-    --shadow-color: 222 42% 2%;
+    --shadow-color: 230 80% 4%;
 
-    --quiz-green: 78 90% 58%;
-    --quiz-blue: 187 92% 56%;
+    --quiz-green: 158 82% 55%;
+    --quiz-blue: 205 100% 64%;
     --quiz-orange: 38 96% 61%;
     --quiz-purple: 269 84% 72%;
-    --quiz-pink: 332 84% 62%;
-    --quiz-yellow: 53 94% 62%;
+    --quiz-pink: 4 96% 66%;
+    --quiz-yellow: 46 100% 58%;
 
-    --shadow-ink: 0 1px 0 hsl(var(--foreground) / 0.06) inset, 0 28px 70px -34px hsl(var(--shadow-color));
-    --shadow-ink-sm: 0 1px 0 hsl(var(--foreground) / 0.08) inset, 0 10px 24px -16px hsl(var(--shadow-color));
+    --shadow-ink: 6px 6px 0 0 hsl(var(--shadow-color));
+    --shadow-ink-sm: 4px 4px 0 0 hsl(var(--shadow-color));
     --gradient-fun: hsl(var(--primary));
     --gradient-correct: hsl(152 60% 42%);
     --gradient-wrong: hsl(356 80% 56%);
@@ -59,15 +59,15 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Manrope', sans-serif;
+    font-family: 'Figtree', sans-serif;
     min-width: 320px;
-    background-image: linear-gradient(hsl(var(--foreground) / 0.025) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground) / 0.025) 1px, transparent 1px);
-    background-size: 42px 42px;
+    background-image: radial-gradient(hsl(var(--foreground) / 0.07) 1.5px, transparent 1.5px);
+    background-size: 26px 26px;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Space Grotesk', sans-serif;
-    letter-spacing: 0;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    letter-spacing: -0.02em;
   }
 }
 
@@ -99,7 +99,8 @@
     transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
   }
   .tactile:hover { filter: brightness(1.06); }
-  .tactile:active { transform: translateY(3px); box-shadow: 0 1px 0 0 hsl(var(--shadow-color) / 0.55); }
+  .tactile:hover { transform: translate(-2px,-2px) rotate(-1deg); box-shadow: 6px 6px 0 0 hsl(var(--shadow-color)); }
+  .tactile:active { transform: translate(4px,4px); box-shadow: 0 0 0 0 hsl(var(--shadow-color)); }
 
   .animate-float {
     animation: float 6s ease-in-out infinite;
@@ -143,17 +144,23 @@
 
   .stage-grid {
     @apply pointer-events-none absolute inset-0;
-    background-image: linear-gradient(hsl(var(--primary) / 0.035) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary) / 0.035) 1px, transparent 1px);
-    background-size: 48px 48px;
-    mask-image: linear-gradient(to bottom, black, transparent 88%);
+    background-image: radial-gradient(hsl(var(--primary) / 0.12) 1.5px, transparent 1.5px);
+    background-size: 26px 26px;
+    mask-image: radial-gradient(ellipse at top, black, transparent 75%);
   }
+  .sticker {
+    @apply rounded-2xl border-[3px] border-[hsl(var(--shadow-color))];
+    box-shadow: var(--shadow-ink);
+  }
+  .wobble-hover { transition: transform .25s cubic-bezier(.34,1.8,.5,1); }
+  .wobble-hover:hover { transform: rotate(-2deg) scale(1.03); }
 
   .stage-chrome {
-    @apply relative z-20 flex h-14 items-center border-b border-border bg-background/85 px-4 backdrop-blur md:px-8;
+    @apply relative z-20 flex h-16 items-center border-b-[3px] border-[hsl(var(--shadow-color))] bg-card/90 px-4 backdrop-blur md:px-8;
   }
 
   .stage-brand {
-    @apply font-display text-xs font-bold tracking-[0.18em] text-primary;
+    @apply inline-flex font-display text-xl font-extrabold tracking-tight text-primary;
   }
 
   .stage-eyebrow {
@@ -162,8 +169,8 @@
 
   .stage-corner { @apply ml-auto; }
   .stage-content { @apply relative z-10 mx-auto w-full; }
-  .stage-kicker { @apply text-xs font-bold uppercase tracking-[0.22em] text-muted-foreground; }
-  .stage-panel { @apply border border-border bg-card/90 shadow-[var(--shadow-ink)]; }
+  .stage-kicker { @apply text-sm font-bold text-muted-foreground; }
+  .stage-panel { @apply border-[3px] border-[hsl(var(--shadow-color))] bg-card shadow-[var(--shadow-ink)]; }
   .stage-rule { @apply h-px bg-border; }
   .status-dot { @apply inline-block h-2 w-2 rounded-full bg-secondary shadow-[0_0_12px_hsl(var(--secondary)/0.7)]; }
 
