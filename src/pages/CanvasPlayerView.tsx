@@ -3,6 +3,7 @@ import ContestantStage from '@/components/canvas/ContestantStage';
 import CanvasGuessFeed from '@/components/canvas/CanvasGuessFeed';
 import CanvasLeaderboard from '@/components/canvas/CanvasLeaderboard';
 import CorrectBurst from '@/components/canvas/CorrectBurst';
+import GuessWordStatus from '@/components/canvas/GuessWordStatus';
 import { useParams } from 'react-router-dom';
 import { Check, Eye, LockKeyhole, Send, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -121,6 +122,7 @@ export default function CanvasPlayerView() {
         <div className="border-b border-border/60 pb-4">
         <CanvasStats game={game} now={now} compact />
         </div>
+        {!isArtist && !knowsWord && <GuessWordStatus game={game} now={now} />}
         {isArtist
           ? <ArtistBanner turn={game.addition_index} word={prompt?.prompt} />
           : <ArtistHandoff artist={artist} />}
