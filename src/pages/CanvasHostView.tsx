@@ -6,7 +6,7 @@ import QuizScreen from '@/components/quiz/QuizScreen';
 import { Button } from '@/components/ui/button';
 import DrawingCanvas, { type DrawingCanvasHandle } from '@/components/canvas/DrawingCanvas';
 import CanvasResults from '@/components/canvas/CanvasResults';
-import { AdditionTimer, ArtistHandoff, CanvasStats, PassBanner, RevealBanner, TurnPips } from '@/components/canvas/CanvasHud';
+import { AdditionTimer, ArtistBanner, ArtistFrame, CanvasStats, PassBanner, RevealBanner, TurnPips } from '@/components/canvas/CanvasHud';
 import { canvasDb, useCanvasGame, useNow } from '@/hooks/useCanvasGame';
 import { EXTRA_GUESS_WINDOW_MS, MAX_ARTISTS, TURN_SECONDS, individualAwards, isCorrectGuess, pickArtist, teamPointsForTurn } from '@/data/canvas/canvasScoring';
 import { pickPrompt, type CanvasPrompt } from '@/data/canvas/promptBanks';
@@ -264,24 +264,23 @@ export default function CanvasHostView() {
 
   return (
     <QuizScreen eyebrow={`${TITLE} · Word ${game.masterpiece_index}`} corner={<span className="font-display text-xl font-bold tracking-widest text-primary">{joinCode}</span>}>
-      <div className="mx-auto w-full max-w-7xl space-y-5">
+      <div className="mx-auto w-full max-w-[1700px] space-y-4">
         <CanvasStats game={game} now={now} record={record} />
-        <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
+        <div className="grid gap-5 xl:grid-cols-[1fr_300px]">
           <div className="space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <ArtistHandoff artist={artist} />
-              <TurnPips game={game} />
-            </div>
+            <ArtistBanner artist={artist} turn={game.addition_index} large />
+            <div className="flex items-center gap-4"><TurnPips game={game} /><div className="flex-1"><AdditionTimer game={game} now={now} /></div></div>
             {game.phase === 'grace' && <p className="text-sm font-bold text-secondary">{correctNow.length} got it! 2 seconds for anyone else…</p>}
             {timeUp && game.phase === 'drawing' && <p className="text-sm font-bold text-accent">Time's up — last turn!</p>}
-            <AdditionTimer game={game} now={now} />
-            <div className="relative">
-              <DrawingCanvas ref={canvasRef} strokes={strokes} live={live} />
+            <div className="mx-auto w-full max-w-[calc(72vh*4/3)]">
+            <ArtistFrame artist={artist}>
+              <DrawingCanvas ref={canvasRef} strokes={strokes} live={live} className="rounded-md border-0" />
               <PassBanner game={game} artist={artist} now={now} />
               <RevealBanner game={game} />
               {game.phase === 'idle' && (
                 <div className="absolute inset-0 flex items-center justify-center bg-background/70"><p className="font-semibold">Waiting for at least 2 players…</p></div>
               )}
+            </ArtistFrame>
             </div>
           </div>
           <aside className="space-y-5">
