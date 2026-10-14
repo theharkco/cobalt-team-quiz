@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import DrawingCanvas, { type DrawingCanvasHandle } from '@/components/canvas/DrawingCanvas';
 import ContestantStage from '@/components/canvas/ContestantStage';
+import CanvasGuessFeed from '@/components/canvas/CanvasGuessFeed';
+import CanvasLeaderboard from '@/components/canvas/CanvasLeaderboard';
 import CanvasResults from '@/components/canvas/CanvasResults';
 import { AdditionTimer, ArtistHandoff, CanvasStats, NewWordBanner, PassBanner, RevealBanner, TurnPips } from '@/components/canvas/CanvasHud';
 import { canvasDb, useCanvasGame, useNow } from '@/hooks/useCanvasGame';
@@ -292,6 +294,7 @@ export default function CanvasHostView() {
             </div>
           </section>
         </div>
+        <div className="mx-auto mt-8 w-full max-w-6xl"><CanvasLeaderboard game={game} players={players} /></div>
       </QuizScreen>
     );
   }
@@ -324,7 +327,10 @@ export default function CanvasHostView() {
               )}
             </div>
           </div>
-          <ContestantStage game={game} players={players} guesses={guesses} now={now} />
+          <aside className="pencil-rail">
+            <CanvasGuessFeed game={game} players={players} guesses={guesses} />
+            <ContestantStage game={game} players={players} guesses={guesses} now={now} />
+          </aside>
         </div>
         <div className="flex flex-wrap items-start justify-between gap-5 border-t border-border/60 pt-4">
             <div className="min-w-0 flex-1">
@@ -347,6 +353,7 @@ export default function CanvasHostView() {
             <Button variant="ghost" onClick={finishGame}>End game now</Button>
           </div>
         </div>
+        <CanvasLeaderboard game={game} players={players} />
       </div>
     </QuizScreen>
   );

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Crown, Medal, Trophy } from 'lucide-react';
 import { canvasDb } from '@/hooks/useCanvasGame';
 import type { CanvasGame, CanvasMasterpiece, CanvasPlayer } from '@/types/canvas';
+import CanvasLeaderboard from './CanvasLeaderboard';
 
 interface Props { game: CanvasGame; players: CanvasPlayer[]; compact?: boolean }
 
@@ -43,7 +44,7 @@ export default function CanvasResults({ game, players, compact }: Props) {
           <p className="mt-2 font-display text-4xl font-bold text-primary">{mvp?.name ?? '—'}</p>
           <p className="text-muted-foreground tabular-nums">{mvp?.canvas_score ?? 0} points</p>
           <ol className="mt-6 space-y-2">
-            {ranked.slice(0, compact ? 3 : 10).map((p, i) => (
+            {ranked.slice(0, 10).map((p, i) => (
               <li key={p.id} className="flex items-center gap-3 border-b border-border pb-2 last:border-0">
                 <span className="w-6 font-display font-bold text-muted-foreground tabular-nums">{i < 3 ? <Medal className="h-4 w-4 text-primary" /> : i + 1}</span>
                 <span className="flex-1 truncate font-semibold">{p.name}</span>
@@ -68,6 +69,7 @@ export default function CanvasResults({ game, players, compact }: Props) {
           </div>
         </div>
       </section>
+      <CanvasLeaderboard game={game} players={players} />
     </div>
   );
 }

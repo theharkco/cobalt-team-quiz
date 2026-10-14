@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ContestantStage from '@/components/canvas/ContestantStage';
+import CanvasGuessFeed from '@/components/canvas/CanvasGuessFeed';
+import CanvasLeaderboard from '@/components/canvas/CanvasLeaderboard';
 import CorrectBurst from '@/components/canvas/CorrectBurst';
 import { useParams } from 'react-router-dom';
 import { Check, Eye, LockKeyhole, Send, X } from 'lucide-react';
@@ -88,6 +90,7 @@ export default function CanvasPlayerView() {
           <p className="text-sm text-muted-foreground">Correct guesses earn 100–20 points: faster earns more. Guess as often as you like.</p>
           <p className="text-sm text-muted-foreground">{players.length} players waiting for the host…</p>
         </div>
+        <div className="mx-auto mt-8 w-full max-w-4xl"><CanvasLeaderboard game={game} players={players} /></div>
       </QuizScreen>
     );
   }
@@ -187,8 +190,12 @@ export default function CanvasPlayerView() {
             <RevealBanner game={game} />
           </ArtistFrame>
           </div>
-          <ContestantStage game={game} players={players} guesses={guesses} now={now} meId={me.id} compact />
+          <aside className="pencil-rail">
+            <CanvasGuessFeed game={game} players={players} guesses={guesses} />
+            <ContestantStage game={game} players={players} guesses={guesses} now={now} meId={me.id} compact />
+          </aside>
         </div>
+        <CanvasLeaderboard game={game} players={players} />
         <CorrectBurst show={burst} points={myPoints} onDone={endBurst} />
       </div>
     </QuizScreen>
