@@ -18,7 +18,7 @@ function Character({ player, index, position, reduced }: { player: StageCharacte
   const object = useMemo(() => {
     const copy = clone(scene);
     const box = new Box3().setFromObject(copy);
-    copy.scale.setScalar(2.65 / (box.getSize(new Vector3()).y || 1));
+    copy.scale.setScalar(2.3 / (box.getSize(new Vector3()).y || 1));
     const bounds = new Box3().setFromObject(copy);
     const center = bounds.getCenter(new Vector3());
     copy.position.set(-center.x, -bounds.min.y, -center.z);
@@ -68,7 +68,7 @@ export default function CharacterStage({ players, columns, reduced }: { players:
       </Environment>
       <Suspense fallback={null}>
         {players.map((player, i) => <Character key={player.id} player={player} index={i} reduced={reduced}
-          position={[(i % columns - (columns - 1) / 2) * 3.1, (rows / 2 - Math.floor(i / columns)) * 4.8 - 3.9, 0]} />)}
+          position={[(i % columns - (columns - 1) / 2) * 3.1, (rows / 2 - Math.floor(i / columns)) * 4.8 - 3.55, 0]} />)}
       </Suspense>
     </Canvas>
   );
