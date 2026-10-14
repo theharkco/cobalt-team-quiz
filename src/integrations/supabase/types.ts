@@ -80,12 +80,16 @@ export type Database = {
           last_result: string | null
           masterpiece_index: number
           phase: string
+          rescue_count: number
           revealed_answer: string | null
+          round_artist_ids: string[]
           scene: Json
           session_id: string
           status: string
           team_score: number
           total_additions: number
+          used_answers: string[]
+          words_attempted: number
         }
         Insert: {
           addition_index?: number
@@ -101,12 +105,16 @@ export type Database = {
           last_result?: string | null
           masterpiece_index?: number
           phase?: string
+          rescue_count?: number
           revealed_answer?: string | null
+          round_artist_ids?: string[]
           scene?: Json
           session_id: string
           status?: string
           team_score?: number
           total_additions?: number
+          used_answers?: string[]
+          words_attempted?: number
         }
         Update: {
           addition_index?: number
@@ -122,12 +130,16 @@ export type Database = {
           last_result?: string | null
           masterpiece_index?: number
           phase?: string
+          rescue_count?: number
           revealed_answer?: string | null
+          round_artist_ids?: string[]
           scene?: Json
           session_id?: string
           status?: string
           team_score?: number
           total_additions?: number
+          used_answers?: string[]
+          words_attempted?: number
         }
         Relationships: [
           {

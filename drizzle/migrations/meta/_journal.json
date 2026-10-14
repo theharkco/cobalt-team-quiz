@@ -15,6 +15,13 @@
       "when": 1792010169486,
       "tag": "0001_infinite_canvas",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792011247708,
+      "tag": "0002_pass_the_pencil",
+      "breakpoints": true
     }
   ]
 }
