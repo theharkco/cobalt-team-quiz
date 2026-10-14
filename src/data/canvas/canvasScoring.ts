@@ -4,17 +4,37 @@ export const PEN_WIDTHS = [{ label: 'Thin', value: 0.004 }, { label: 'Medium', v
 export const MAX_ARTISTS = 3;
 export const EXTRA_GUESS_WINDOW_MS = 2000;
 
-/** Team points for a word guessed during artist turn 1, 2 or 3. */
-export const teamPointsForTurn = (turn: number) => 100 * Math.min(MAX_ARTISTS, Math.max(1, turn));
+/** Later artists earn more; shorter turns increase difficulty. Round to whole points. */
+export const teamPointsForTurn = (turn: number, seconds = TURN_SECONDS) => {
+  const artist = Number.isFinite(turn) ? Math.min(MAX_ARTISTS, Math.max(1, Math.floor(turn))) : 1;
+  const duration = Number.isFinite(seconds) && seconds > 0 ? seconds : TURN_SECONDS;
+  return Math.round(100 * artist * TURN_SECONDS / duration);
+};
 
 export interface IndividualAward { playerId: string; points: number }
+
+/** 100 at word start, falling linearly to 20 across the three artist turns. */
+export function guesserPointsForTime(elapsedSeconds: number, turnSeconds = TURN_SECONDS): number {
+  const seconds = Number.isFinite(turnSeconds) && turnSeconds > 0 ? turnSeconds : TURN_SECONDS;
+  const elapsed = Number.isFinite(elapsedSeconds) ? Math.max(0, elapsedSeconds) : 0;
+  const progress = Math.min(1, elapsed / (MAX_ARTISTS * seconds));
+  return Math.round(100 - 80 * progress);
+}
+
+/** Count earlier artist turns too; the pencil handoff never resets guesser points. */
+export function guesserPointsForGuess(turn: number, turnSeconds: number, turnStartedAt: string | null, guessedAt: string): number {
+  const start = turnStartedAt ? Date.parse(turnStartedAt) : NaN;
+  const guessed = Date.parse(guessedAt);
+  const currentElapsed = Number.isFinite(start) && Number.isFinite(guessed) ? Math.max(0, (guessed - start) / 1000) : 0;
+  return guesserPointsForTime((Math.max(1, turn) - 1) * turnSeconds + currentElapsed, turnSeconds);
+}
 
 /**
  * Individual points for a guessed word.
  * roundArtists: artists in drawing order (last = active when guessed).
  * correctGuessers: ordered by guess time (first = fastest).
  */
-export function individualAwards(roundArtists: string[], correctGuessers: string[]): IndividualAward[] {
+export function individualAwards(roundArtists: string[], correctGuessers: string[], guesserPoints: Record<string, number> = {}): IndividualAward[] {
   if (correctGuessers.length === 0 || roundArtists.length === 0) return [];
   const totals = new Map<string, number>();
   const add = (id: string, pts: number) => totals.set(id, (totals.get(id) ?? 0) + pts);
@@ -25,7 +45,7 @@ export function individualAwards(roundArtists: string[], correctGuessers: string
   const seen = new Set<string>();
   correctGuessers.forEach((id) => {
     if (seen.has(id) || artists.has(id)) return;
-    add(id, seen.size === 0 ? 100 : 40);
+    add(id, guesserPoints[id] ?? 100);
     seen.add(id);
   });
   return [...totals].map(([playerId, points]) => ({ playerId, points }));

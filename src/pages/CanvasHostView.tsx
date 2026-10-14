@@ -4,17 +4,17 @@ import { Paintbrush, Play, SkipForward, TrendingUp, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
 import QuizScreen from '@/components/quiz/QuizScreen';
 import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
 import DrawingCanvas, { type DrawingCanvasHandle } from '@/components/canvas/DrawingCanvas';
 import ContestantStage from '@/components/canvas/ContestantStage';
 import CanvasResults from '@/components/canvas/CanvasResults';
 import { AdditionTimer, ArtistHandoff, CanvasStats, NewWordBanner, PassBanner, RevealBanner, TurnPips } from '@/components/canvas/CanvasHud';
 import { canvasDb, useCanvasGame, useNow } from '@/hooks/useCanvasGame';
-import { EXTRA_GUESS_WINDOW_MS, MAX_ARTISTS, TURN_SECONDS, individualAwards, isCorrectGuess, pickArtist, teamPointsForTurn } from '@/data/canvas/canvasScoring';
+import { EXTRA_GUESS_WINDOW_MS, MAX_ARTISTS, TURN_SECONDS, guesserPointsForGuess, individualAwards, isCorrectGuess, pickArtist, teamPointsForTurn } from '@/data/canvas/canvasScoring';
 import { pickPrompt, type CanvasPrompt } from '@/data/canvas/promptBanks';
 import type { CanvasGame, CanvasPlayer } from '@/types/canvas';
 import { cn } from '@/lib/utils';
 
-const DURATIONS = [5, 8, 10, 12, 15];
 const REVEAL_MS = 3000;
 const TITLE = 'Pass the Pencil';
 
@@ -26,6 +26,8 @@ export default function CanvasHostView() {
   const now = useNow();
   const canvasRef = useRef<DrawingCanvasHandle>(null);
   const [duration, setDuration] = useState(12);
+  const [artistSeconds, setArtistSeconds] = useState(TURN_SECONDS);
+  const settingsGameId = useRef<string | null>(null);
   const [record, setRecord] = useState<number | null>(null);
   const [gains, setGains] = useState<Gain[]>([]);
 
@@ -34,12 +36,19 @@ export default function CanvasHostView() {
   gameRef.current = game;
   const promptRef = useRef<CanvasPrompt | null>(null);
   const processedRef = useRef<Set<string>>(new Set());
-  const correctRef = useRef<{ playerId: string; at: number }[]>([]);
+  const correctRef = useRef<{ playerId: string; at: number; points: number }[]>([]);
   const graceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const busyRef = useRef(false);
   const waitingRef = useRef(false);
   const guessesRef = useRef(guesses);
   guessesRef.current = guesses;
+
+  useEffect(() => {
+    if (!game || settingsGameId.current === game.id) return;
+    settingsGameId.current = game.id;
+    setDuration(game.duration_seconds / 60);
+    setArtistSeconds(game.addition_seconds);
+  }, [game]);
 
   useEffect(() => {
     canvasDb.from('canvas_games').select('team_score').eq('status', 'finished').order('team_score', { ascending: false }).limit(1)
@@ -96,7 +105,7 @@ export default function CanvasHostView() {
     await canvasDb.rpc('set_canvas_prompt', { _game_id: g.id, _host_token: token, _prompt: prompt.text, _answer: prompt.answer, _alternates: prompt.alternates ?? [] });
     await patch({
       masterpiece_index: first ? g.masterpiece_index : g.masterpiece_index + 1,
-      addition_index: 1, addition_seconds: TURN_SECONDS, round_artist_ids: [artistId], current_artist_id: artistId,
+      addition_index: 1, round_artist_ids: [artistId], current_artist_id: artistId,
       phase: 'drawing', addition_started_at: new Date().toISOString(), revealed_answer: null, last_result: null, last_points: 0,
       words_attempted: g.words_attempted + 1, used_answers: [...(g.used_answers ?? []), prompt.answer], scene: [prompt.text],
     });
@@ -129,13 +138,13 @@ export default function CanvasHostView() {
     if (!g || !prompt || g.phase !== 'grace') return;
     busyRef.current = true;
     const ordered = [...correctRef.current].sort((a, b) => a.at - b.at);
-    const awards = individualAwards(g.round_artist_ids, ordered.map((c) => c.playerId));
+    const awards = individualAwards(g.round_artist_ids, ordered.map((c) => c.playerId), Object.fromEntries(ordered.map((c) => [c.playerId, c.points])));
     const { data } = await canvasDb.from('players').select('id, canvas_score').in('id', awards.map((a) => a.playerId));
     await Promise.all(awards.map((a) => {
       const cur = (data as { id: string; canvas_score: number }[] | null)?.find((d) => d.id === a.playerId)?.canvas_score ?? 0;
       return canvasDb.from('players').update({ canvas_score: cur + a.points }).eq('id', a.playerId);
     }));
-    const teamPts = teamPointsForTurn(g.addition_index);
+    const teamPts = teamPointsForTurn(g.addition_index, g.addition_seconds);
     await saveDrawing(teamPts);
     setGains((prev) => [{ word: prompt.text, points: teamPts, artists: g.round_artist_ids.length }, ...prev].slice(0, 6));
     await patch({
@@ -183,8 +192,9 @@ export default function CanvasHostView() {
       if (g.round_artist_ids.includes(guess.player_id) || g.current_artist_id === guess.player_id) continue;
       if (correctRef.current.some((c) => c.playerId === guess.player_id)) continue;
       if (!isCorrectGuess(guess.guess, prompt.answer, prompt.alternates)) continue;
-      correctRef.current.push({ playerId: guess.player_id, at: new Date(guess.created_at).getTime() });
-      markCorrect(guess.id, correctRef.current.length === 1 ? 100 : 40);
+      const points = guesserPointsForGuess(g.addition_index, g.addition_seconds, g.addition_started_at, guess.created_at);
+      correctRef.current.push({ playerId: guess.player_id, at: new Date(guess.created_at).getTime(), points });
+      markCorrect(guess.id, points);
       if (!graceTimer.current && g.phase === 'drawing') {
         patch({ phase: 'grace' });
         graceTimer.current = setTimeout(() => { graceTimer.current = null; resolveSuccess(); }, EXTRA_GUESS_WINDOW_MS);
@@ -206,7 +216,7 @@ export default function CanvasHostView() {
     if (!game) return;
     busyRef.current = true;
     await patch({
-      status: 'playing', duration_seconds: duration * 60, team_score: 0, used_answers: [], words_attempted: 0, rescue_count: 0, total_additions: 0,
+      status: 'playing', duration_seconds: duration * 60, addition_seconds: artistSeconds, team_score: 0, used_answers: [], words_attempted: 0, rescue_count: 0, total_additions: 0,
       game_ends_at: new Date(Date.now() + duration * 60_000).toISOString(),
     });
     await startRound(true);
@@ -228,7 +238,13 @@ export default function CanvasHostView() {
           <section className="space-y-6">
             <p className="stage-kicker flex items-center gap-2"><Paintbrush className="h-4 w-4 text-primary" /> Co-op Pictionary relay</p>
             <h1 className="font-display text-5xl font-bold leading-tight md:text-6xl">One word.<br />Three artists.<br /><span className="text-primary">One team.</span></h1>
-            <p className="max-w-lg text-lg text-muted-foreground">An artist gets 30 seconds to draw a secret word. If nobody guesses it, the pencil passes to the next artist, who keeps drawing on the same picture. Words guessed later are worth more: 100, 200 or 300 team points.</p>
+            <p className="max-w-lg text-lg text-muted-foreground">Each artist gets {artistSeconds} seconds to draw a secret word. If nobody guesses it, the pencil passes to the next artist, who keeps drawing on the same picture.</p>
+            <div className="space-y-2">
+              <p className="stage-kicker">Team points per word</p>
+              <div className="grid grid-cols-3 gap-4">
+                {[1, 2, 3].map((turn) => <div key={turn}><p className="text-sm text-muted-foreground">Artist {turn}</p><motion.p key={artistSeconds} initial={{ y: 5, opacity: 0.5 }} animate={{ y: 0, opacity: 1 }} className="font-display text-3xl font-bold tabular-nums text-secondary">+{teamPointsForTurn(turn, artistSeconds)}</motion.p></div>)}
+              </div>
+            </div>
             <div className="stage-panel rounded-lg p-6">
               <p className="stage-kicker">Join at {url.replace(/^https?:\/\//, '')}</p>
               <p className="font-display text-8xl font-bold tracking-[0.15em] text-primary tabular-nums">{joinCode}</p>
@@ -244,11 +260,17 @@ export default function CanvasHostView() {
               {players.length === 0 && <li className="text-muted-foreground">Waiting for players…</li>}
             </ul>
             <div className="mt-6 border-t border-border pt-5">
-              <p className="stage-kicker mb-3">Game length</p>
-              <div className="flex flex-wrap gap-2">
-                {DURATIONS.map((d) => (
-                  <Button key={d} size="sm" variant={duration === d ? 'default' : 'outline'} onClick={() => setDuration(d)}>{d} min</Button>
-                ))}
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-3"><label id="artist-time-label" className="stage-kicker">Time per artist</label><output className="font-display text-2xl font-bold tabular-nums text-primary">{artistSeconds} sec</output></div>
+                  <Slider aria-labelledby="artist-time-label" min={10} max={90} step={5} value={[artistSeconds]} onValueChange={([value]) => setArtistSeconds(value)} onValueCommit={([value]) => patch({ addition_seconds: value })} />
+                  <div className="flex justify-between text-xs text-muted-foreground"><span>10 sec</span><span>90 sec</span></div>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-3"><label id="game-time-label" className="stage-kicker">Total game length</label><output className="font-display text-2xl font-bold tabular-nums text-primary">{duration} min</output></div>
+                  <Slider aria-labelledby="game-time-label" min={3} max={30} step={1} value={[duration]} onValueChange={([value]) => setDuration(value)} onValueCommit={([value]) => patch({ duration_seconds: value * 60 })} />
+                  <div className="flex justify-between text-xs text-muted-foreground"><span>3 min</span><span>30 min</span></div>
+                </div>
               </div>
               <Button className="mt-5 w-full" size="lg" disabled={players.length < 2} onClick={startGame}>
                 <Play /> {players.length < 2 ? 'Need at least 2 players' : 'Start drawing'}

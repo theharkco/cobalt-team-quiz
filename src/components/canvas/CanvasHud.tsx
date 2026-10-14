@@ -23,7 +23,7 @@ export function CanvasStats({ game, now, record, compact }: { game: CanvasGame; 
       </div>
       <div>
         <p className="stage-kicker">Artist {turn} of {MAX_ARTISTS}</p>
-        <p className={cn('font-display font-bold tabular-nums text-primary', compact ? 'text-xl' : 'text-3xl')}>+{teamPointsForTurn(turn)}</p>
+        <p className={cn('font-display font-bold tabular-nums text-primary', compact ? 'text-xl' : 'text-3xl')}>+{teamPointsForTurn(turn, game.addition_seconds)}</p>
       </div>
       {!compact && (
         <>
@@ -107,7 +107,7 @@ export function PassBanner({ game, artist, now, isMe }: { game: CanvasGame; arti
           <motion.p initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.45, type: 'spring', bounce: 0.6 }}
             className="mt-2 font-display text-2xl font-bold md:text-4xl">{isMe ? "You're up!" : `${artist!.name}, you're up!`}</motion.p>
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="mt-1 font-semibold">
-            Artist {game.addition_index} of {MAX_ARTISTS} · now worth +{teamPointsForTurn(game.addition_index)}
+            Artist {game.addition_index} of {MAX_ARTISTS} · now worth +{teamPointsForTurn(game.addition_index, game.addition_seconds)}
           </motion.p>
         </motion.div>
       )}
