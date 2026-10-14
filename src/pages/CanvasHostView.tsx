@@ -22,7 +22,7 @@ interface Gain { word: string; points: number; artists: number }
 
 export default function CanvasHostView() {
   const { sessionId } = useParams<{ sessionId: string }>();
-  const { game, setGame, joinCode, players, strokes, guesses, live, loaded, refreshPlayers, markCorrect } = useCanvasGame(sessionId);
+  const { game, setGame, joinCode, players, strokes, guesses, live, loaded, refreshPlayers, markCorrect, markIncorrect } = useCanvasGame(sessionId);
   const now = useNow();
   const canvasRef = useRef<DrawingCanvasHandle>(null);
   const [duration, setDuration] = useState(12);
@@ -191,7 +191,10 @@ export default function CanvasHostView() {
       if (guess.masterpiece_index !== g.masterpiece_index) continue;
       if (g.round_artist_ids.includes(guess.player_id) || g.current_artist_id === guess.player_id) continue;
       if (correctRef.current.some((c) => c.playerId === guess.player_id)) continue;
-      if (!isCorrectGuess(guess.guess, prompt.answer, prompt.alternates)) continue;
+      if (!isCorrectGuess(guess.guess, prompt.answer, prompt.alternates)) {
+        markIncorrect(guess.id);
+        continue;
+      }
       const points = guesserPointsForGuess(g.addition_index, g.addition_seconds, g.addition_started_at, guess.created_at);
       correctRef.current.push({ playerId: guess.player_id, at: new Date(guess.created_at).getTime(), points });
       markCorrect(guess.id, points);
@@ -200,7 +203,7 @@ export default function CanvasHostView() {
         graceTimer.current = setTimeout(() => { graceTimer.current = null; resolveSuccess(); }, EXTRA_GUESS_WINDOW_MS);
       }
     }
-  }, [guesses, resolveSuccess, patch, markCorrect]);
+  }, [guesses, resolveSuccess, patch, markCorrect, markIncorrect]);
 
   // Turn timeout + idle restart when players arrive
   useEffect(() => {
