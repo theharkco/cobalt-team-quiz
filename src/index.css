@@ -35,6 +35,15 @@
     --quiz-pink: 4 96% 66%;
     --quiz-yellow: 46 100% 58%;
 
+    --world-ground: 166 20% 42%;
+    --world-grass: 166 23% 45%;
+    --world-tile: 190 22% 72%;
+    --world-edge: 178 27% 21%;
+    --world-zone: 148 60% 35%;
+    --world-zone-light: 148 88% 73%;
+    --world-deck: 43 70% 68%;
+    --world-ink: 174 30% 15%;
+
     --shadow-ink: 6px 6px 0 0 hsl(var(--shadow-color));
     --shadow-ink-sm: 4px 4px 0 0 hsl(var(--shadow-color));
     --gradient-fun: hsl(var(--primary));
@@ -173,6 +182,19 @@
   .stage-panel { @apply border-[3px] border-[hsl(var(--shadow-color))] bg-card shadow-[var(--shadow-ink)]; }
   .stage-rule { @apply h-px bg-border; }
   .status-dot { @apply inline-block h-2 w-2 rounded-full bg-secondary shadow-[0_0_12px_hsl(var(--secondary)/0.7)]; }
+
+  .contestant-world { background: hsl(var(--world-ink)); }
+  .world-nameplate { position: relative; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
+  .world-player-name { display: block; max-width: 82px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-radius: 4px; background: hsl(var(--background) / .88); color: hsl(var(--foreground)); padding: 2px 5px; font-size: 10px; font-weight: 700; }
+  .world-player-me { color: hsl(var(--primary)); }
+  .world-bubble { position: absolute; bottom: calc(100% + 6px); display: flex; align-items: center; justify-content: center; width: max-content; max-width: 112px; overflow-wrap: anywhere; border-radius: 7px; padding: 5px 8px; background: hsl(var(--foreground)); color: hsl(var(--background)); font-size: 11px; line-height: 1.25; font-weight: 700; box-shadow: 0 3px 0 hsl(var(--world-ink) / .3); }
+  .world-bubble::after { content: ''; position: absolute; top: 100%; left: calc(50% - 4px); border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid hsl(var(--foreground)); }
+  .world-bubble-correct { background: hsl(var(--world-zone-light)); color: hsl(var(--world-ink)); }
+  .world-bubble-correct::after { border-top-color: hsl(var(--world-zone-light)); }
+  .world-bubble-drawing { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
+  .world-bubble-drawing::after { border-top-color: hsl(var(--primary)); }
+  .world-zone-label, .world-deck-label { display: flex; align-items: center; gap: 4px; white-space: nowrap; font-size: 9px; font-weight: 800; color: hsl(var(--world-ink)); background: hsl(var(--world-zone-light)); padding: 3px 5px; border-radius: 4px; }
+  .world-deck-label { background: hsl(var(--world-deck)); }
 
   /* Blinking caret for the front-page one-liner that types itself out. */
   /* Keeps the page from jumping as sentences of different lengths rotate in:
