@@ -49,7 +49,7 @@ export default function ContestantStage({ game, players, guesses, now, meId, com
           const age = last ? now - new Date(last.created_at).getTime() : Infinity;
           const bubble = st === 'guessing' && last && !last.is_correct && age > BUBBLE_DELAY_MS && age < BUBBLE_MS + BUBBLE_DELAY_MS;
           return (
-            <motion.li layout key={p.id} className="relative flex w-16 flex-col items-center gap-1.5">
+            <motion.li layout key={p.id} className="relative flex w-16 flex-col items-center gap-2.5">
               <AnimatePresence>
                 {bubble && (
                   <motion.span key={last!.id} initial={{ y: 10, scale: 0.4, opacity: 0 }} animate={{ y: 0, scale: 1, opacity: 1 }} exit={{ y: -12, opacity: 0 }}
