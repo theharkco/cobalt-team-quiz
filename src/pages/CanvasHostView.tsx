@@ -11,7 +11,8 @@ import CanvasGuessFeed from '@/components/canvas/CanvasGuessFeed';
 import CanvasLeaderboard from '@/components/canvas/CanvasLeaderboard';
 import CanvasResults from '@/components/canvas/CanvasResults';
 import { AdditionTimer, ArtistHandoff, CanvasStats, NewWordBanner, PassBanner, RevealBanner, TurnPips } from '@/components/canvas/CanvasHud';
-import { canvasDb, useCanvasGame, useNow } from '@/hooks/useCanvasGame';
+import { canvasDb, useCanvasGame } from '@/hooks/useCanvasGame';
+import { useCanvasHostClock } from '@/hooks/useCanvasHostClock';
 import { MAX_ARTISTS, TURN_SECONDS, guesserPointsForGuess, individualAwards, isCorrectGuess, pickArtist, teamPointsForTurn } from '@/data/canvas/canvasScoring';
 import { roundAction } from '@/data/canvas/canvasRound';
 import { pickPrompt, type CanvasPrompt } from '@/data/canvas/promptBanks';
@@ -26,7 +27,7 @@ interface Gain { word: string; points: number; artists: number }
 export default function CanvasHostView() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const { game, setGame, joinCode, players, strokes, guesses, live, loaded, refreshPlayers, markCorrect, markIncorrect } = useCanvasGame(sessionId);
-  const now = useNow();
+  const now = useCanvasHostClock();
   const canvasRef = useRef<DrawingCanvasHandle>(null);
   const [duration, setDuration] = useState(12);
   const [artistSeconds, setArtistSeconds] = useState(TURN_SECONDS);
@@ -42,6 +43,7 @@ export default function CanvasHostView() {
   const correctRef = useRef<{ playerId: string; at: number; points: number }[]>([]);
   const busyRef = useRef(false);
   const waitingRef = useRef(false);
+  const revealEndsAtRef = useRef<number | null>(null);
   const guessesRef = useRef(guesses);
   guessesRef.current = guesses;
 
@@ -129,11 +131,9 @@ export default function CanvasHostView() {
   }, [patch]);
 
   const afterReveal = useCallback(() => {
-    setTimeout(async () => {
-      if (timeIsUp()) { await finishGame(); return; }
-      await startRound();
-    }, REVEAL_MS);
-  }, [finishGame, startRound]);
+    revealEndsAtRef.current = Date.now() + REVEAL_MS;
+    busyRef.current = false;
+  }, []);
 
   const resolveSuccess = useCallback(async () => {
     const g = gameRef.current;
@@ -218,6 +218,20 @@ export default function CanvasHostView() {
   // Turn timeout + idle restart when players arrive
   useEffect(() => {
     if (!game || game.status !== 'playing' || busyRef.current) return;
+    // Reveal transitions use the same background-capable wall clock as turns,
+    // rather than a window timeout which can stall for a minute in hidden tabs.
+    if (game.phase === 'reveal') {
+      // Also recover a reveal after refreshing the host screen.
+      revealEndsAtRef.current ??= now + REVEAL_MS;
+      if (now >= revealEndsAtRef.current) {
+        revealEndsAtRef.current = null;
+        busyRef.current = true;
+        if (timeIsUp()) finishGame();
+        else startRound();
+      }
+      return;
+    }
+    revealEndsAtRef.current = null;
     if ((game.phase === 'drawing' || game.phase === 'grace') && game.addition_started_at) {
       const end = new Date(game.addition_started_at).getTime() + game.addition_seconds * 1000;
       if (now >= end || timeIsUp()) {
@@ -226,7 +240,7 @@ export default function CanvasHostView() {
       }
     }
     if (game.phase === 'idle' && waitingRef.current && players.length > 1) { busyRef.current = true; startRound(); }
-  }, [now, game, players.length, passPencil, startRound, resolveSuccess]);
+  }, [now, game, players.length, passPencil, startRound, resolveSuccess, finishGame]);
 
   const startGame = async () => {
     if (!game) return;
