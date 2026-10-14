@@ -122,21 +122,21 @@ export function ArtistBanner({ artist, isMe, turn, word, passed, large }: {
   if (!artist) return null;
   return (
     <motion.div key={artist.id} initial={{ y: -10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: 'spring', bounce: 0.35 }}
-      className="flex items-center gap-3 rounded-lg border-2 p-3"
+      className="flex flex-wrap items-center gap-3 rounded-lg border-2 p-3"
       style={{ borderColor: artist.color, background: `color-mix(in srgb, ${artist.color} 14%, transparent)` }}>
       <span className={cn('flex shrink-0 items-center justify-center rounded-full text-background', large ? 'h-14 w-14' : 'h-11 w-11')} style={{ background: artist.color }}>
         <Pencil className={large ? 'h-7 w-7' : 'h-5 w-5'} />
       </span>
       <div className="min-w-0 flex-1">
         <p className="stage-kicker">Artist {turn} of {MAX_ARTISTS} {passed && '· you passed the pencil'}</p>
-        <p className={cn('truncate font-display font-bold leading-tight', large ? 'text-4xl' : 'text-2xl')} style={{ color: artist.color }}>
+        <p className={cn('font-display font-bold leading-tight', large ? 'text-4xl' : 'text-2xl')} style={{ color: artist.color }}>
           {isMe ? "You're drawing!" : `${artist.name} is drawing`}
         </p>
       </div>
       {word && (
-        <div className="text-right">
+        <div className="w-full border-t border-border pt-2 sm:w-auto sm:border-0 sm:pt-0 sm:text-right">
           <p className="stage-kicker">Secret word</p>
-          <p className="font-display text-2xl font-bold">{word}</p>
+          <p className="font-display text-3xl font-bold">{word}</p>
         </div>
       )}
     </motion.div>

@@ -98,7 +98,7 @@ export default function CanvasPlayerView() {
 
   return (
     <QuizScreen eyebrow={`Word ${game.masterpiece_index}`} corner={<span className="text-sm font-bold tabular-nums" style={{ color: me.color }}>{me.canvas_score} pts</span>}>
-      <div className="mx-auto w-full max-w-5xl space-y-3">
+      <div className="mx-auto w-full max-w-5xl space-y-3 px-3">
         <CanvasStats game={game} now={now} compact />
         <ArtistBanner artist={artist} isMe={isArtist} turn={game.addition_index} word={knowsWord ? prompt?.prompt : undefined} passed={knowsWord && !isArtist} />
         <div className="flex items-center gap-3"><TurnPips game={game} /><div className="flex-1"><AdditionTimer game={game} now={now} /></div></div>
