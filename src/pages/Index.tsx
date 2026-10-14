@@ -102,7 +102,7 @@ const Index = () => {
             <BouncyWord text="Cobalt!" className="block text-primary [text-shadow:6px_6px_0_hsl(var(--shadow-color))]" />
           </h1>
           <motion.p initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }} className="max-w-md text-xl font-semibold text-muted-foreground">
-            Different desks. Same games. One loud cheer.
+            Quizzes and drawing games, played from our own desks every Thursday.
           </motion.p>
         </header>
 
