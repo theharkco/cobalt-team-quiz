@@ -98,7 +98,7 @@ export default function QuizPicker({ onSelect, onBack }: Props) {
   };
 
   return (
-    <QuizScreen eyebrow="Host setup" contentClassName="max-w-5xl px-4 py-10 md:px-8 md:py-16">
+    <QuizScreen onBack={onBack} eyebrow="Host setup" contentClassName="max-w-5xl px-4 py-10 md:px-8 md:py-16">
       <div className="w-full">
         <motion.h1
           initial={{ y: -30, opacity: 0 }}
