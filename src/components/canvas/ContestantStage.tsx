@@ -17,7 +17,7 @@ export default function ContestantStage({ game, players, guesses, now, meId }: P
         <p className="stage-kicker flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> The team</p>
         <span className="text-xs font-bold tabular-nums text-muted-foreground">{done}/{players.length} done</span>
       </div>
-      <div className="contestant-world relative aspect-square w-full overflow-hidden rounded-lg" aria-label="Contestant world">
+      <div className="contestant-world relative aspect-[4/3] w-full overflow-hidden rounded-lg" aria-label="Contestant world">
         <Suspense fallback={<p className="p-4 text-center text-xs text-muted-foreground">Getting the team ready…</p>}>
           <CharacterStage players={roster} reduced={reduced} />
         </Suspense>

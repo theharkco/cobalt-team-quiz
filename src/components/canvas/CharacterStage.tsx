@@ -66,7 +66,7 @@ function Character({ player, index, slot, count, reduced, palette }: { player: W
   const object = useMemo(() => {
     const copy = clone(scene);
     const box = new Box3().setFromObject(copy);
-    copy.scale.setScalar(1.05 / (box.getSize(new Vector3()).y || 1));
+    copy.scale.setScalar(1.55 / (box.getSize(new Vector3()).y || 1));
     const bounds = new Box3().setFromObject(copy); const center = bounds.getCenter(new Vector3());
     copy.position.set(-center.x, -bounds.min.y, -center.z);
     copy.traverse((node) => { if (node instanceof Mesh) { node.castShadow = true; node.receiveShadow = true; } });
@@ -98,7 +98,7 @@ function Character({ player, index, slot, count, reduced, palette }: { player: W
   return <group ref={root} position={initial}>
     <mesh rotation-x={-Math.PI / 2} position-y={0.025}><ringGeometry args={[0.34, 0.43, 32]} /><meshBasicMaterial color={player.status === 'correct' ? palette.zoneLight : player.status === 'drawing' ? palette.deck : palette.tile} transparent opacity={0.85} /></mesh>
     <group ref={rig}><primitive object={object} /></group>
-    <Html position={[0, 1.6, 0]} center zIndexRange={[12, 6]}>
+    <Html position={[0, 2.1, 0]} center zIndexRange={[12, 6]}>
       <div ref={(el) => { if (root.current) root.current.userData.label = el; }} data-player={player.id} data-status={player.status} className="world-nameplate">
         <AnimatePresence mode="wait">
           {player.status === 'correct' ? <motion.span key="solved" initial={{ scale: 0, y: 8 }} animate={{ scale: 1, y: 0 }} transition={{ type: 'spring', bounce: 0.55 }} className="world-bubble world-bubble-correct" aria-label={`${player.name} guessed correctly`}><Check size={18} strokeWidth={3} /></motion.span>
