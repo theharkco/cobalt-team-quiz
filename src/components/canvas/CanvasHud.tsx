@@ -155,21 +155,23 @@ export function RevealBanner({ game }: { game: CanvasGame }) {
 export function ArtistBanner({ turn, word }: { turn: number; word?: string }) {
   return (
     <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', bounce: 0.5 }}
-      className="flex flex-wrap items-center gap-3 rounded-lg border-2 border-primary bg-primary/10 p-3">
-      <motion.span animate={{ rotate: [0, -15, 10, 0] }} transition={{ repeat: Infinity, duration: 1.4, repeatDelay: 0.8 }}
-        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
-        <Pencil className="h-5 w-5" />
-      </motion.span>
-      <div className="min-w-0 flex-1">
-        <p className="stage-kicker">Artist {turn} of {MAX_ARTISTS}</p>
-        <p className="font-display text-2xl font-bold text-primary">You're drawing!</p>
+      className="relative overflow-hidden rounded-xl border-2 border-primary bg-primary/10 p-4 text-center">
+      <motion.div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent"
+        animate={{ x: ['-100%', '100%'] }} transition={{ repeat: Infinity, duration: 2.4, ease: 'easeInOut' }} />
+      <div className="relative flex items-center justify-center gap-2">
+        <motion.span animate={{ rotate: [0, -15, 10, 0] }} transition={{ repeat: Infinity, duration: 1.4, repeatDelay: 0.8 }}
+          className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
+          <Pencil className="h-4 w-4" />
+        </motion.span>
+        <p className="stage-kicker">You're drawing · Artist {turn} of {MAX_ARTISTS} · Secret word</p>
       </div>
-      <div className="w-full border-t border-border pt-2 sm:w-auto sm:border-0 sm:pt-0 sm:text-right">
-        <p className="stage-kicker">Secret word</p>
-        <AnimatePresence mode="wait">
-          <motion.p key={word ?? '…'} initial={{ rotateX: 90, opacity: 0 }} animate={{ rotateX: 0, opacity: 1 }} className="font-display text-3xl font-bold">{word ?? '…'}</motion.p>
-        </AnimatePresence>
-      </div>
+      <AnimatePresence mode="wait">
+        <motion.p key={word ?? '…'} initial={{ rotateX: 90, opacity: 0, scale: 0.7 }} animate={{ rotateX: 0, opacity: 1, scale: [0.7, 1.12, 1] }}
+          transition={{ duration: 0.6 }}
+          className="relative mt-1 break-words font-display text-5xl font-bold uppercase tracking-wide text-primary drop-shadow-[0_0_18px_hsl(var(--primary)/0.6)] sm:text-6xl">
+          {word ?? '…'}
+        </motion.p>
+      </AnimatePresence>
     </motion.div>
   );
 }
