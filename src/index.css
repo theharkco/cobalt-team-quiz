@@ -174,6 +174,17 @@
   .stage-rule { @apply h-px bg-border; }
   .status-dot { @apply inline-block h-2 w-2 rounded-full bg-secondary shadow-[0_0_12px_hsl(var(--secondary)/0.7)]; }
 
+  /* Blinking caret for the front-page one-liner that types itself out. */
+  .tagline-caret {
+    display: inline-block;
+    width: 3px;
+    height: 1.05em;
+    margin-left: 4px;
+    vertical-align: -0.18em;
+    background: hsl(var(--primary));
+    animation: tagline-blink 1.1s steps(1, end) infinite;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
   }
