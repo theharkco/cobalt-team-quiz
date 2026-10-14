@@ -10,7 +10,7 @@ import ContestantStage from '@/components/canvas/ContestantStage';
 import CanvasResults from '@/components/canvas/CanvasResults';
 import { AdditionTimer, ArtistHandoff, CanvasStats, NewWordBanner, PassBanner, RevealBanner, TurnPips } from '@/components/canvas/CanvasHud';
 import { canvasDb, useCanvasGame, useNow } from '@/hooks/useCanvasGame';
-import { EXTRA_GUESS_WINDOW_MS, MAX_ARTISTS, TURN_SECONDS, individualAwards, isCorrectGuess, pickArtist, teamPointsForTurn } from '@/data/canvas/canvasScoring';
+import { EXTRA_GUESS_WINDOW_MS, MAX_ARTISTS, TURN_SECONDS, guesserPointsForGuess, individualAwards, isCorrectGuess, pickArtist, teamPointsForTurn } from '@/data/canvas/canvasScoring';
 import { pickPrompt, type CanvasPrompt } from '@/data/canvas/promptBanks';
 import type { CanvasGame, CanvasPlayer } from '@/types/canvas';
 import { cn } from '@/lib/utils';
@@ -36,7 +36,7 @@ export default function CanvasHostView() {
   gameRef.current = game;
   const promptRef = useRef<CanvasPrompt | null>(null);
   const processedRef = useRef<Set<string>>(new Set());
-  const correctRef = useRef<{ playerId: string; at: number }[]>([]);
+  const correctRef = useRef<{ playerId: string; at: number; points: number }[]>([]);
   const graceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const busyRef = useRef(false);
   const waitingRef = useRef(false);
@@ -138,7 +138,7 @@ export default function CanvasHostView() {
     if (!g || !prompt || g.phase !== 'grace') return;
     busyRef.current = true;
     const ordered = [...correctRef.current].sort((a, b) => a.at - b.at);
-    const awards = individualAwards(g.round_artist_ids, ordered.map((c) => c.playerId));
+    const awards = individualAwards(g.round_artist_ids, ordered.map((c) => c.playerId), Object.fromEntries(ordered.map((c) => [c.playerId, c.points])));
     const { data } = await canvasDb.from('players').select('id, canvas_score').in('id', awards.map((a) => a.playerId));
     await Promise.all(awards.map((a) => {
       const cur = (data as { id: string; canvas_score: number }[] | null)?.find((d) => d.id === a.playerId)?.canvas_score ?? 0;
@@ -192,8 +192,9 @@ export default function CanvasHostView() {
       if (g.round_artist_ids.includes(guess.player_id) || g.current_artist_id === guess.player_id) continue;
       if (correctRef.current.some((c) => c.playerId === guess.player_id)) continue;
       if (!isCorrectGuess(guess.guess, prompt.answer, prompt.alternates)) continue;
-      correctRef.current.push({ playerId: guess.player_id, at: new Date(guess.created_at).getTime() });
-      markCorrect(guess.id, correctRef.current.length === 1 ? 100 : 40);
+      const points = guesserPointsForGuess(g.addition_index, g.addition_seconds, g.addition_started_at, guess.created_at);
+      correctRef.current.push({ playerId: guess.player_id, at: new Date(guess.created_at).getTime(), points });
+      markCorrect(guess.id, points);
       if (!graceTimer.current && g.phase === 'drawing') {
         patch({ phase: 'grace' });
         graceTimer.current = setTimeout(() => { graceTimer.current = null; resolveSuccess(); }, EXTRA_GUESS_WINDOW_MS);
