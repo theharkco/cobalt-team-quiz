@@ -13,3 +13,5 @@
 - Both drawing screens use the shared pencil workspace grid with the contestant rail always on the right; confirmed verdicts drive bubbles and character expressions. Why: stable spatial hierarchy and no answer leakage through pending guesses.
 - Canvas rounds keep the current artist drawing after a solve until all eligible guessers solve or that artist's timer ends; award the word once on resolution. Why: everyone keeps a full remaining guessing window without inflated later-turn team scores.
 - Vite proxies Lovable asset paths through the hosted preview in development. Why: local Vite otherwise returns SPA HTML for CDN model requests; deployed assets remain same-origin.
+- Canvas guess history renders pending guesses without text, confirmed rejections with text, and solves without the answer. Why: shared chat must not reveal unverified correct answers.
+- Pencil all-time records reuse completed canvas games and their session players, with one personal best per normalized name; live standings remain separate. Why: no accounts or extra score writers are needed.
