@@ -1,5 +1,5 @@
 ## Suggested build phases
-1. **Playable core.** Game mode choice, a 12-minute game clock, fair artist rotation, curated prompt banks (subject, action, object, location, twist), drawing with pen/eraser/undo limited to the artist's own strokes, a unique color per artist, guessing that tolerates spelling mistakes, team and individual scoring, and fail-and-restart.
+1. **Playable core.** Game mode choice, a game clock the host sets in the lobby (default 12 minutes), fair artist rotation, curated prompt banks (subject, action, object, location, twist), drawing with pen/eraser/undo limited to the artist's own strokes, a unique color per artist, guessing that tolerates spelling mistakes, team and individual scoring, and fail-and-restart.
 2. **Polish.** Handoff animation, a 2-3 second window for extra correct guesses, "recent correct guesses" feed, "+N" scene sentence above the canvas, late joiners added to the rotation, a "Start new masterpiece" button.
 3. **Results.** Team total, record status, longest masterpiece, MVP of the Week, top 3, and a gallery of saved masterpieces with their sentences.
 4. **Later / optional.** An all-time team high score (needs a stable "team" identity across weeks), synonyms using AI, extra awards.
