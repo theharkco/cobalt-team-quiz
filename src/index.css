@@ -193,26 +193,26 @@
   .pencil-character-space { position: relative; width: 100%; height: 60px; }
   .pencil-character { margin: auto; width: 54px; }
   .pencil-mascot { width: 100%; overflow: visible; }
-  .mascot-color-0 { --mascot-tone: 4 90% 70%; }
-  .mascot-color-1 { --mascot-tone: 25 96% 67%; }
-  .mascot-color-2 { --mascot-tone: 43 95% 63%; }
-  .mascot-color-3 { --mascot-tone: 65 74% 65%; }
-  .mascot-color-4 { --mascot-tone: 88 65% 65%; }
-  .mascot-color-5 { --mascot-tone: 116 56% 65%; }
-  .mascot-color-6 { --mascot-tone: 144 62% 68%; }
-  .mascot-color-7 { --mascot-tone: 164 66% 57%; }
-  .mascot-color-8 { --mascot-tone: 182 76% 65%; }
-  .mascot-color-9 { --mascot-tone: 198 90% 69%; }
-  .mascot-color-10 { --mascot-tone: 216 91% 73%; }
-  .mascot-color-11 { --mascot-tone: 235 81% 77%; }
-  .mascot-color-12 { --mascot-tone: 253 83% 78%; }
-  .mascot-color-13 { --mascot-tone: 275 83% 77%; }
-  .mascot-color-14 { --mascot-tone: 295 66% 73%; }
-  .mascot-color-15 { --mascot-tone: 317 82% 75%; }
-  .mascot-color-16 { --mascot-tone: 338 88% 73%; }
-  .mascot-color-17 { --mascot-tone: 18 55% 83%; }
-  .mascot-color-18 { --mascot-tone: 172 38% 82%; }
-  .mascot-color-19 { --mascot-tone: 222 30% 86%; }
+  .pencil-cloud-player[data-color="0"] { --mascot-tone: 4 90% 70%; }
+  .pencil-cloud-player[data-color="1"] { --mascot-tone: 25 96% 67%; }
+  .pencil-cloud-player[data-color="2"] { --mascot-tone: 43 95% 63%; }
+  .pencil-cloud-player[data-color="3"] { --mascot-tone: 65 74% 65%; }
+  .pencil-cloud-player[data-color="4"] { --mascot-tone: 88 65% 65%; }
+  .pencil-cloud-player[data-color="5"] { --mascot-tone: 116 56% 65%; }
+  .pencil-cloud-player[data-color="6"] { --mascot-tone: 144 62% 68%; }
+  .pencil-cloud-player[data-color="7"] { --mascot-tone: 164 66% 57%; }
+  .pencil-cloud-player[data-color="8"] { --mascot-tone: 182 76% 65%; }
+  .pencil-cloud-player[data-color="9"] { --mascot-tone: 198 90% 69%; }
+  .pencil-cloud-player[data-color="10"] { --mascot-tone: 216 91% 73%; }
+  .pencil-cloud-player[data-color="11"] { --mascot-tone: 235 81% 77%; }
+  .pencil-cloud-player[data-color="12"] { --mascot-tone: 253 83% 78%; }
+  .pencil-cloud-player[data-color="13"] { --mascot-tone: 275 83% 77%; }
+  .pencil-cloud-player[data-color="14"] { --mascot-tone: 295 66% 73%; }
+  .pencil-cloud-player[data-color="15"] { --mascot-tone: 317 82% 75%; }
+  .pencil-cloud-player[data-color="16"] { --mascot-tone: 338 88% 73%; }
+  .pencil-cloud-player[data-color="17"] { --mascot-tone: 18 55% 83%; }
+  .pencil-cloud-player[data-color="18"] { --mascot-tone: 172 38% 82%; }
+  .pencil-cloud-player[data-color="19"] { --mascot-tone: 222 30% 86%; }
   .mascot-body, .mascot-limbs { fill: hsl(var(--mascot-tone, var(--muted-foreground))); stroke: hsl(var(--background)); stroke-width: 2; stroke-linejoin: round; }
   .mascot-shadow { fill: hsl(var(--foreground) / .08); }
   .mascot-shine { fill: none; stroke: hsl(var(--foreground) / .65); stroke-width: 5; stroke-linecap: round; }
@@ -223,8 +223,8 @@
   [data-status="drawing"] .mascot-body { stroke: hsl(var(--primary)); stroke-width: 3; }
   [data-status="correct"] .mascot-body { stroke: hsl(var(--secondary)); stroke-width: 3; }
   .pencil-player-rank { position: absolute; left: 0; top: 4px; color: hsl(var(--muted-foreground)); font-size: 10px; font-weight: 700; font-variant-numeric: tabular-nums; }
-  .pencil-speech-wrong { display: flex; align-items: center; gap: 3px; background: hsl(var(--destructive)); color: hsl(var(--destructive-foreground)); box-shadow: 0 3px 0 hsl(var(--shadow-color)), 0 0 12px hsl(var(--destructive) / .2); }
-  .pencil-speech-wrong::after { border-top-color: hsl(var(--destructive)); }
+  .pencil-speech.pencil-speech-wrong { display: flex; align-items: center; gap: 3px; background: hsl(var(--destructive)); color: hsl(var(--destructive-foreground)); box-shadow: 0 3px 0 hsl(var(--shadow-color)), 0 0 12px hsl(var(--destructive) / .2); }
+  .pencil-speech.pencil-speech-wrong::after { border-top-color: hsl(var(--destructive)); }
   .pencil-speech-wrong::before { content: ''; position: absolute; inset: -4px; border: 1px solid hsl(var(--destructive)); border-radius: 10px; animation: guess-ripple .65s ease-out both; pointer-events: none; }
   .pencil-speech { position: absolute; bottom: calc(100% - 10px); left: 50%; translate: -50% 0; width: max-content; max-width: 88px; overflow-wrap: anywhere; background: hsl(var(--foreground)); color: hsl(var(--background)); border-radius: 8px; padding: 5px 8px; font-size: 11px; font-weight: 700; line-height: 1.25; z-index: 2; }
   .pencil-speech::after { content: ''; position: absolute; top: 100%; left: calc(50% - 4px); border: 4px solid transparent; border-top-color: hsl(var(--foreground)); }
