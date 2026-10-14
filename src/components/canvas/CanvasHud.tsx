@@ -108,7 +108,7 @@ export function PassBanner({ game, artist, now, isMe }: { game: CanvasGame; arti
           <motion.p initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.45, type: 'spring', bounce: 0.6 }}
             className="mt-2 px-2 text-center font-display text-sm font-bold sm:text-2xl lg:text-4xl">{isMe ? "You're up!" : `${artist?.name}, you're up!`}</motion.p>
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="mt-1 px-2 text-center text-xs font-semibold sm:text-base">
-            Artist {game.addition_index} of {MAX_ARTISTS} · now worth +{teamPointsForTurn(game.addition_index, game.addition_seconds)}
+            Same word · same drawing · keep guessing!
           </motion.p>
         </motion.div>
       )}
@@ -126,11 +126,11 @@ export function NewWordBanner({ game, now, isMe }: { game: CanvasGame; now: numb
         <motion.div key={`word-${game.masterpiece_index}`} initial={{ clipPath: 'circle(0% at 50% 50%)' }} animate={{ clipPath: 'circle(150% at 50% 50%)' }}
           exit={{ opacity: 0, y: -40 }} transition={{ duration: 0.5, ease: 'easeOut' }}
           className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center bg-secondary text-secondary-foreground">
-          <motion.p initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="stage-kicker text-secondary-foreground/80">Fresh canvas</motion.p>
+          <motion.p initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="font-display text-xl font-black sm:text-3xl">NEW WORD!</motion.p>
           <motion.p initial={{ scale: 0 }} animate={{ scale: [0, 1.3, 1] }} transition={{ delay: 0.25, duration: 0.6 }}
             className="font-display text-3xl font-black sm:text-6xl lg:text-8xl">Word {game.masterpiece_index}</motion.p>
           <motion.p initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.6, type: 'spring' }}
-            className="mt-2 px-2 text-center font-display text-sm font-bold sm:text-2xl">{isMe ? 'You start — get drawing!' : 'Get ready to guess!'}</motion.p>
+            className="mt-2 px-2 text-center font-display text-sm font-bold sm:text-2xl">{isMe ? 'You start — get drawing!' : 'New answer. Fresh drawing. Go!'}</motion.p>
         </motion.div>
       )}
     </AnimatePresence>
