@@ -114,3 +114,46 @@ export function RevealBanner({ game }: { game: CanvasGame }) {
     </motion.div>
   );
 }
+
+/** Big, unmistakable "who is drawing" strip in the artist's color. */
+export function ArtistBanner({ artist, isMe, turn, word, passed, large }: {
+  artist?: CanvasPlayer; isMe?: boolean; turn: number; word?: string; passed?: boolean; large?: boolean;
+}) {
+  if (!artist) return null;
+  return (
+    <motion.div key={artist.id} initial={{ y: -10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: 'spring', bounce: 0.35 }}
+      className="flex items-center gap-3 rounded-lg border-2 p-3"
+      style={{ borderColor: artist.color, background: `color-mix(in srgb, ${artist.color} 14%, transparent)` }}>
+      <span className={cn('flex shrink-0 items-center justify-center rounded-full text-background', large ? 'h-14 w-14' : 'h-11 w-11')} style={{ background: artist.color }}>
+        <Pencil className={large ? 'h-7 w-7' : 'h-5 w-5'} />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="stage-kicker">Artist {turn} of {MAX_ARTISTS} {passed && '· you passed the pencil'}</p>
+        <p className={cn('truncate font-display font-bold leading-tight', large ? 'text-4xl' : 'text-2xl')} style={{ color: artist.color }}>
+          {isMe ? "You're drawing!" : `${artist.name} is drawing`}
+        </p>
+      </div>
+      {word && (
+        <div className="text-right">
+          <p className="stage-kicker">Secret word</p>
+          <p className="font-display text-2xl font-bold">{word}</p>
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
+/** Canvas wrapper outlined in the current artist's color. */
+export function ArtistFrame({ artist, children }: { artist?: CanvasPlayer; children: React.ReactNode }) {
+  return (
+    <div className="relative rounded-lg border-4 p-0.5 transition-colors" style={{ borderColor: artist?.color ?? 'hsl(var(--border))' }}>
+      {children}
+      {artist && (
+        <span className="pointer-events-none absolute bottom-2 left-2 z-[5] flex items-center gap-1.5 rounded-md px-2 py-1 text-sm font-bold text-background"
+          style={{ background: artist.color }}>
+          <Pencil className="h-3.5 w-3.5" /> {artist.name}
+        </span>
+      )}
+    </div>
+  );
+}
