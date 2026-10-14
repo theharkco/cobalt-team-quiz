@@ -98,8 +98,8 @@ const Index = () => {
             <Sparkles className="h-4 w-4" /> Thursday game night
           </motion.p>
           <h1 className="font-display text-[clamp(4.5rem,13vw,10rem)] font-extrabold leading-[0.82] tracking-tight">
-            <BouncyWord text="Quiz" className="block" />
-            <BouncyWord text="clash!" className="block text-primary [text-shadow:6px_6px_0_hsl(var(--shadow-color))]" />
+            <BouncyWord text="Go" className="block" />
+            <BouncyWord text="Cobalt" className="block text-primary [text-shadow:6px_6px_0_hsl(var(--shadow-color))]" />
           </h1>
           <motion.p initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }} className="max-w-md text-xl font-semibold text-muted-foreground">
             Same Thursday. Different desks. One loud quiz.
