@@ -95,7 +95,7 @@ const Index = () => {
         <header className="space-y-6">
           <motion.p initial={{ scale: 0, rotate: -30 }} animate={{ scale: 1, rotate: -4 }} transition={{ type: 'spring', bounce: 0.7, delay: 0.5 }}
             className="inline-flex items-center gap-2 rounded-full border-[3px] border-[hsl(var(--shadow-color))] bg-primary px-4 py-1 font-extrabold text-primary-foreground shadow-[var(--shadow-ink-sm)]">
-            <Sparkles className="h-4 w-4" /> Team game night
+            <Sparkles className="h-4 w-4" /> Thursday game night
           </motion.p>
           <h1 className="font-display text-[clamp(4.5rem,13vw,10rem)] font-extrabold leading-[0.82] tracking-tight">
             <BouncyWord text="Quiz" className="block" />
