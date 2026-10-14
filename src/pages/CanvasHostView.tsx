@@ -324,8 +324,7 @@ export default function CanvasHostView() {
               )}
             </div>
           </div>
-          </div>
-              <ContestantStage game={game} players={players} guesses={guesses} now={now} />
+          <ContestantStage game={game} players={players} guesses={guesses} now={now} />
         </div>
         <div className="flex flex-wrap items-start justify-between gap-5 border-t border-border/60 pt-4">
             <div className="min-w-0 flex-1">

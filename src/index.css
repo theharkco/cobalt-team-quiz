@@ -203,7 +203,7 @@
   [data-status="drawing"] .mascot-body, [data-status="drawing"] .mascot-limbs { fill: hsl(var(--primary)); }
   [data-status="correct"] .mascot-body, [data-status="correct"] .mascot-limbs { fill: hsl(var(--secondary)); }
   [data-status="artist"] .mascot-body, [data-status="artist"] .mascot-limbs { fill: hsl(var(--muted-foreground) / .75); }
-  .pencil-speech { position: absolute; bottom: calc(100% - 10px); left: 50%; transform: translateX(-50%); width: max-content; max-width: 88px; overflow-wrap: anywhere; background: hsl(var(--foreground)); color: hsl(var(--background)); border-radius: 8px; padding: 5px 8px; font-size: 11px; font-weight: 700; line-height: 1.25; z-index: 2; }
+  .pencil-speech { position: absolute; bottom: calc(100% - 10px); left: 50%; translate: -50% 0; width: max-content; max-width: 88px; overflow-wrap: anywhere; background: hsl(var(--foreground)); color: hsl(var(--background)); border-radius: 8px; padding: 5px 8px; font-size: 11px; font-weight: 700; line-height: 1.25; z-index: 2; }
   .pencil-speech::after { content: ''; position: absolute; top: 100%; left: calc(50% - 4px); border: 4px solid transparent; border-top-color: hsl(var(--foreground)); }
   .pencil-speech-correct { background: hsl(var(--secondary)); color: hsl(var(--secondary-foreground)); }
   .pencil-speech-correct::after { border-top-color: hsl(var(--secondary)); }

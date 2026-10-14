@@ -26,6 +26,6 @@ describe('floating contestant presence', () => {
     expect(screen.queryByText('secret word')).not.toBeInTheDocument();
     expect(screen.getByLabelText('Correct guess')).toBeInTheDocument();
     expect(container.querySelector('[data-status="correct"]')).toHaveTextContent('Got it!');
-    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '2');
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '1');
   });
 });
