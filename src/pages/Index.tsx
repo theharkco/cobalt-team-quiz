@@ -82,7 +82,7 @@ const Index = () => {
 
   const inputCls = 'w-full min-w-0 border-0 bg-transparent px-0 py-2 font-display text-4xl font-extrabold text-foreground outline-none placeholder:text-muted-foreground/40';
   const modes = [
-    { label: 'Host a quiz', sub: 'Big screen, every phone plays', icon: Gamepad2, cls: 'bg-accent text-accent-foreground', tilt: -2, onClick: () => setShowPicker(true) },
+    { label: 'Host a quiz', sub: 'You host. Your team plays from anywhere', icon: Gamepad2, cls: 'bg-accent text-accent-foreground', tilt: -2, onClick: () => setShowPicker(true) },
     { label: 'Pass the Pencil', sub: 'Draw it together, guess it fast', icon: Paintbrush, cls: 'bg-secondary text-secondary-foreground', tilt: 1, onClick: handleHostCanvas },
     { label: 'Make a quiz', sub: 'Your questions, your rules', icon: PenTool, cls: 'bg-quiz-blue text-primary-foreground', tilt: -1, onClick: () => navigate('/create') },
   ];
@@ -102,7 +102,7 @@ const Index = () => {
             <BouncyWord text="clash!" className="block text-primary [text-shadow:6px_6px_0_hsl(var(--shadow-color))]" />
           </h1>
           <motion.p initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }} className="max-w-md text-xl font-semibold text-muted-foreground">
-            One screen hosts. Every phone plays. Everyone shouts.
+            Same Thursday. Different desks. One loud quiz.
           </motion.p>
         </header>
 
