@@ -8,7 +8,7 @@ const state = vi.hoisted(() => ({
   guesses: [] as Record<string, unknown>[], sendGuess: vi.fn(),
 }));
 vi.mock('react-router-dom', () => ({ useParams: () => ({ sessionId: 'session', playerId: 'me' }) }));
-vi.mock('@/hooks/useCanvasGame', () => ({ useCanvasGame: () => ({ ...state, loaded: true, strokes: [], live: [] }), useNow: () => 0, canvasDb: {} }));
+vi.mock('@/hooks/useCanvasGame', () => ({ useCanvasGame: () => ({ ...state, loaded: true, strokes: [], live: [] }), useNow: () => 0, canvasDb: { rpc: () => Promise.resolve({ data: [{ prompt: 'Pirate ship', answer: 'pirate ship' }] }) } }));
 vi.mock('@/components/canvas/ContestantStage', () => ({ default: () => <div>The team</div> }));
 vi.mock('@/components/canvas/CorrectBurst', () => ({ default: () => null }));
 vi.mock('@/components/quiz/QuizScreen', () => ({ default: ({ children }: { children: React.ReactNode }) => <div>{children}</div> }));
@@ -20,7 +20,19 @@ vi.mock('@/components/canvas/CanvasHud', () => ({
 }));
 
 describe('canvas wrong-guess feedback', () => {
-  beforeEach(() => { state.guesses = []; state.sendGuess.mockReset(); });
+  beforeEach(() => { state.guesses = []; state.game.round_artist_ids = ['artist']; state.sendGuess.mockReset(); });
+  it('clearly blocks guessing after drawing and restores it for the next word', async () => {
+    state.game.round_artist_ids = ['artist', 'me'];
+    const view = render(<CanvasPlayerView />);
+    expect(screen.getByRole('heading', { name: 'You passed the pencil' })).toBeInTheDocument();
+    expect(screen.getByText(/You’ve seen the word, so you can’t guess this round/)).toBeInTheDocument();
+    expect(screen.queryByRole('textbox', { name: 'Your guess' })).not.toBeInTheDocument();
+    await act(async () => {});
+    state.game.round_artist_ids = ['artist'];
+    view.rerender(<CanvasPlayerView />);
+    expect(screen.getByRole('textbox', { name: 'Your guess' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'You passed the pencil' })).not.toBeInTheDocument();
+  });
   it('reacts to host rejection without advancing a delay, keeps the input, and has no history', () => {
     const view = render(<CanvasPlayerView />);
     const input = screen.getByRole('textbox', { name: 'Your guess' });

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ContestantStage from '@/components/canvas/ContestantStage';
 import CorrectBurst from '@/components/canvas/CorrectBurst';
 import { useParams } from 'react-router-dom';
-import { Check, Send, X } from 'lucide-react';
+import { Check, Eye, LockKeyhole, Send, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import QuizScreen from '@/components/quiz/QuizScreen';
 import { Button } from '@/components/ui/button';
@@ -120,7 +120,19 @@ export default function CanvasPlayerView() {
         </div>
         {isArtist
           ? <ArtistBanner turn={game.addition_index} word={prompt?.prompt} />
-          : <div className="flex flex-wrap items-center justify-between gap-2"><ArtistHandoff artist={artist} />{knowsWord && prompt && <span className="text-sm text-muted-foreground">You passed the pencil · <b className="text-foreground">{prompt.prompt}</b></span>}</div>}
+          : <ArtistHandoff artist={artist} />}
+        {!isArtist && knowsWord && (game.phase === 'drawing' || game.phase === 'grace') && (
+          <motion.section key={`passed-${game.masterpiece_index}`} role="status" initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
+            className="flex items-start gap-3 rounded-lg border border-primary/50 bg-primary/10 p-4">
+            <LockKeyhole className="mt-1 h-6 w-6 shrink-0 text-primary" />
+            <div className="min-w-0">
+              <h2 className="font-display text-xl font-bold">You passed the pencil</h2>
+              <p className="mt-1 text-sm text-muted-foreground">You’ve seen the word, so you can’t guess this round. You can guess again on the next word.</p>
+              <p className="mt-2 flex items-center gap-2 text-sm font-semibold text-primary"><Eye className="h-4 w-4 shrink-0" /> Watching {artist?.name ?? 'the next artist'} draw</p>
+              {prompt && <p className="mt-2 break-words text-sm text-muted-foreground">Secret word: <b className="text-foreground">{prompt.prompt}</b></p>}
+            </div>
+          </motion.section>
+        )}
         <div className="flex items-center gap-3"><TurnPips game={game} /><div className="flex-1"><AdditionTimer game={game} now={now} /></div></div>
         {!isArtist && !knowsWord && (game.phase === 'drawing' || game.phase === 'grace') ? (
           solved ? (
