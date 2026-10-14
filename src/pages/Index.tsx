@@ -8,6 +8,7 @@ import { useQuizSession } from '@/hooks/useQuizSession';
 import { supabase } from '@/integrations/supabase/client';
 import type { QuizQuestion } from '@/data/questionTypes';
 import { canvasDb } from '@/hooks/useCanvasGame';
+import { pickTagline } from '@/lib/taglines';
 import { ArrowLeft, ArrowRight, Gamepad2, Paintbrush, PenTool, Sparkles } from 'lucide-react';
 
 // Hover/tap spring for the mode cards: no delay, so the card settles back the
@@ -25,6 +26,9 @@ const Index = () => {
   const [playerName, setPlayerName] = useState('');
   const [loading, setLoading] = useState(false);
   const [gameMode, setGameMode] = useState('quiz');
+  // Chosen once per page load, so re-renders (typing a code, an error) never
+  // swap the sentence out from under the reader.
+  const [tagline] = useState(pickTagline);
 
   const handleHost = async (questions: QuizQuestion[], quizId?: string) => {
     setLoading(true);
@@ -102,7 +106,7 @@ const Index = () => {
             <BouncyWord text="Cobalt!" className="block text-primary [text-shadow:6px_6px_0_hsl(var(--shadow-color))]" />
           </h1>
           <motion.p initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }} className="max-w-md text-xl font-semibold text-muted-foreground">
-            Quizzes and drawing games, played from our own desks every Thursday.
+            {tagline}
           </motion.p>
         </header>
 
