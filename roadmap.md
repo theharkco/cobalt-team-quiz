@@ -1,7 +1,7 @@
 # Quizclash roadmap
 
-- [ ] Pass the Pencil: roaming miniature top-down world, overhead verdict bubbles, and persistent green solved zone.
-- [ ] Pass the Pencil: keep the word open after correct guesses; verify multiple guessers and saved awards.
+- [x] Pass the Pencil: roaming miniature top-down world, overhead verdict bubbles, and persistent green solved zone.
+- [x] Pass the Pencil: keep the word open after correct guesses; verified four live players, all saved awards, mobile layout, and 24 regression tests.
 
 - [x] Pass the Pencil: immediate confirmed wrong-guess feedback, guessing above canvas, no personal guess history.
 - [x] Pass the Pencil: animated 3D contestant stage; verified host and player live flow and character motion.
