@@ -83,7 +83,7 @@ export function useCanvasGame(sessionId: string | undefined) {
     ch.on('broadcast', { event: 'live' }, ({ payload }) => {
       const s = payload as LiveStroke & { done?: boolean };
       setLive((prev) => ({ ...prev, [s.key]: s }));
-    }).subscribe();
+    }).on('broadcast', { event: 'strokes' }, () => refreshStrokes()).subscribe();
     channelRef.current = ch;
     return () => { canvasDb.removeChannel(ch); channelRef.current = null; };
   }, [sessionId, gameId, refreshPlayers, refreshStrokes, refreshGuesses]);
@@ -114,10 +114,21 @@ export function useCanvasGame(sessionId: string | undefined) {
       id, game_id: g.id, masterpiece_index: g.masterpiece_index, addition_index: g.addition_index,
       artist_id: artistId, color, width, points,
     });
+    channelRef.current?.send({ type: 'broadcast', event: 'strokes', payload: {} });
     await refreshStrokes();
   }, [sendLive, refreshStrokes]);
 
+  const removeStrokes = useCallback(async (ids: string[]) => {
+    if (!ids.length) return;
+    const drop = new Set(ids);
+    setStrokes((prev) => prev.filter((s) => !drop.has(s.id)));
+    await canvasDb.from('canvas_strokes').delete().in('id', ids);
+    channelRef.current?.send({ type: 'broadcast', event: 'strokes', payload: {} });
+    await refreshStrokes();
+  }, [refreshStrokes]);
+
   return {
+    removeStrokes,
     game, setGame, joinCode, players, strokes, guesses, loaded,
     live: Object.values(live),
     refreshGame, refreshPlayers, refreshStrokes, refreshGuesses, sendLive, commitStroke, setLive,
