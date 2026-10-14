@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import PartyBackdrop, { BouncyWord } from '@/components/quiz/PartyBackdrop';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,9 @@ import { ArrowLeft, ArrowRight, Gamepad2, Paintbrush, PenTool, Sparkles } from '
 const Index = () => {
   const navigate = useNavigate();
   const { createSession, joinSession, findSession, error, setError } = useQuizSession();
-  const [showPicker, setShowPicker] = useState(false);
+  const [params, setParams] = useSearchParams();
+  const showPicker = params.get('host') === 'quiz';
+  const setShowPicker = (v: boolean) => setParams(v ? { host: 'quiz' } : {});
   const [joinCode, setJoinCode] = useState('');
   const [codeOk, setCodeOk] = useState(false);
   const [playerName, setPlayerName] = useState('');
@@ -141,7 +143,8 @@ const Index = () => {
             {modes.map((m, i) => (
               <motion.button key={m.label} type="button" onClick={m.onClick} disabled={loading}
                 initial={{ y: 80, opacity: 0, rotate: 12 }} animate={{ y: 0, opacity: 1 }}
-                whileHover={{ y: -8, rotate: i % 2 ? 3 : -3, scale: 1.05 }} whileTap={{ scale: 0.92, rotate: 0 }}
+                whileHover={{ y: -8, rotate: i % 2 ? 3 : -3, scale: 1.05, transition: { type: 'spring', stiffness: 700, damping: 14 } }}
+                whileTap={{ scale: 0.92, rotate: 0, transition: { duration: 0.08 } }}
                 transition={{ type: 'spring', bounce: 0.55, delay: 0.4 + i * 0.1 }}
                 className={`sticker ${m.cls} ${m.rot} flex flex-col items-start gap-2 p-4 text-left focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring disabled:opacity-50`}>
                 <m.icon className="h-7 w-7" aria-hidden />
