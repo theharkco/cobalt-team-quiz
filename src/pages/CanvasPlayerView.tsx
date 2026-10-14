@@ -97,8 +97,8 @@ export default function CanvasPlayerView() {
               strokes={strokes}
               live={isArtist ? live : visibleLive}
               editable={isArtist}
-              color={me.color}
-              width={PEN_WIDTH}
+              color={penColor}
+              width={penWidth}
               onLive={onLive}
               onCommit={onCommit}
               className="rounded-md border-0"

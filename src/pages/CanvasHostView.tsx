@@ -238,7 +238,7 @@ export default function CanvasHostView() {
             <ul className="mt-4 flex flex-1 flex-wrap content-start gap-2">
               {players.map((p) => (
                 <motion.li key={p.id} initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-                  className="rounded-md border border-border px-3 py-1.5 font-semibold" style={{ color: p.color }}>{p.name}</motion.li>
+                  className="rounded-md border border-border px-3 py-1.5 font-semibold">{p.name}</motion.li>
               ))}
               {players.length === 0 && <li className="text-muted-foreground">Waiting for players…</li>}
             </ul>
@@ -306,7 +306,6 @@ export default function CanvasHostView() {
                 {ranked.map((p, i) => (
                   <li key={p.id} className={cn('flex items-center gap-2 text-sm', p.id === game.current_artist_id && 'font-bold')}>
                     <span className="w-5 text-muted-foreground tabular-nums">{i + 1}</span>
-                    <span className="h-2.5 w-2.5 rounded-full" style={{ background: p.color }} />
                     <span className="flex-1 truncate">{p.name}{p.id === game.current_artist_id && ' ✎'}</span>
                     <span className="tabular-nums text-muted-foreground">{p.canvas_score}</span>
                   </li>

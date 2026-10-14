@@ -40,13 +40,12 @@ export default function CanvasResults({ game, players, compact }: Props) {
       <section className="grid gap-6 md:grid-cols-[1fr_1.4fr]">
         <div className="stage-panel rounded-lg p-6">
           <p className="stage-kicker flex items-center gap-2"><Crown className="h-4 w-4 text-secondary" /> MVP of the Week</p>
-          <p className="mt-2 font-display text-4xl font-bold" style={{ color: mvp?.color }}>{mvp?.name ?? '—'}</p>
+          <p className="mt-2 font-display text-4xl font-bold" className="text-primary">{mvp?.name ?? '—'}</p>
           <p className="text-muted-foreground tabular-nums">{mvp?.canvas_score ?? 0} points</p>
           <ol className="mt-6 space-y-2">
             {ranked.slice(0, compact ? 3 : 10).map((p, i) => (
               <li key={p.id} className="flex items-center gap-3 border-b border-border pb-2 last:border-0">
                 <span className="w-6 font-display font-bold text-muted-foreground tabular-nums">{i < 3 ? <Medal className="h-4 w-4 text-primary" /> : i + 1}</span>
-                <span className="h-3 w-3 rounded-full" style={{ background: p.color }} />
                 <span className="flex-1 truncate font-semibold">{p.name}</span>
                 <span className="tabular-nums text-muted-foreground">{p.canvas_score}</span>
               </li>
