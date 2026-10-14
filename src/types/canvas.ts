@@ -1,5 +1,5 @@
 export type CanvasStatus = 'lobby' | 'playing' | 'finished';
-export type CanvasPhase = 'idle' | 'drawing' | 'reveal';
+export type CanvasPhase = 'idle' | 'drawing' | 'grace' | 'reveal';
 
 export interface CanvasGame {
   id: string;
@@ -20,6 +20,10 @@ export interface CanvasGame {
   last_points: number;
   scene: string[];
   total_additions: number;
+  round_artist_ids: string[];
+  used_answers: string[];
+  words_attempted: number;
+  rescue_count: number;
 }
 
 export interface CanvasPlayer {

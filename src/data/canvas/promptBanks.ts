@@ -1,81 +1,56 @@
+export type Difficulty = 'easy' | 'medium' | 'hard';
+
 export interface CanvasPrompt {
-  /** Phrase that joins the scene sentence, e.g. "riding a bicycle" */
+  /** Word shown to artists */
   text: string;
   /** The word guessers must find */
   answer: string;
   alternates?: string[];
+  difficulty?: Difficulty;
 }
 
-const p = (text: string, answer: string, ...alternates: string[]): CanvasPrompt => ({ text, answer, alternates });
+const make = (difficulty: Difficulty) => (list: (string | string[])[]): CanvasPrompt[] =>
+  list.map((e) => {
+    const [answer, ...alternates] = Array.isArray(e) ? e : [e];
+    return { text: answer[0].toUpperCase() + answer.slice(1), answer, alternates, difficulty };
+  });
 
-export const SUBJECTS: CanvasPrompt[] = [
-  p('A giraffe', 'giraffe'), p('A penguin', 'penguin'), p('A robot', 'robot', 'android', 'cyborg'),
-  p('A pirate', 'pirate'), p('An octopus', 'octopus', 'squid'), p('A snowman', 'snowman', 'snow man'),
-  p('A dinosaur', 'dinosaur', 't-rex', 'trex', 'dino'), p('A cat', 'cat', 'kitten', 'kitty'),
-  p('A wizard', 'wizard', 'witch', 'magician'), p('An astronaut', 'astronaut', 'spaceman', 'cosmonaut'),
-  p('A frog', 'frog', 'toad'), p('An elephant', 'elephant'), p('A ghost', 'ghost'), p('A cowboy', 'cowboy'),
-  p('A snail', 'snail'), p('A shark', 'shark'), p('A banana', 'banana'), p('A duck', 'duck'),
-];
+export const EASY = make('easy')([
+  'pizza', ['bicycle', 'bike'], 'elephant', 'umbrella', ['sunglasses', 'shades', 'glasses'], ['snowman', 'snow man'],
+  'rocket', 'banana', ['cat', 'kitten', 'kitty'], ['dog', 'puppy'], 'fish', 'house', 'tree', 'sun', ['moon', 'crescent'],
+  'star', 'flower', ['car', 'automobile'], 'boat', ['airplane', 'plane', 'aeroplane', 'jet'], 'apple', ['ice cream', 'icecream'],
+  'cake', 'balloon', 'snake', ['spider', 'tarantula'], 'ghost', 'robot', 'crown', 'hat', 'shoe', 'key', 'clock', 'book',
+  'chair', 'guitar', 'drum', 'heart', 'cloud', 'rainbow', ['duck', 'duckling'], 'frog', 'penguin', 'giraffe', 'mushroom',
+  'carrot', 'egg', 'burger', 'cookie', 'bed', 'lamp', 'kite', 'castle', 'football', 'phone', 'candle',
+]);
 
-export const ACTIONS: CanvasPrompt[] = [
-  p('on a skateboard', 'skateboard', 'skating', 'skate board'), p('riding a bicycle', 'bicycle', 'bike', 'cycling'),
-  p('juggling', 'juggling', 'juggle', 'juggler'), p('flying a kite', 'kite'), p('surfing', 'surfing', 'surf', 'surfboard'),
-  p('playing guitar', 'guitar'), p('lifting weights', 'weights', 'dumbbell', 'barbell', 'lifting'),
-  p('fishing', 'fishing', 'fish', 'fishing rod'), p('on roller skates', 'roller skates', 'rollerskates', 'skates'),
-  p('sleeping in a hammock', 'hammock'), p('driving a car', 'car', 'driving'), p('on a unicycle', 'unicycle'),
-];
+export const MEDIUM = make('medium')([
+  ['helicopter', 'chopper'], 'lighthouse', ['roller coaster', 'rollercoaster'], ['washing machine', 'washer'], 'skateboard',
+  'volcano', ['firefighter', 'fireman'], ['treasure chest', 'treasure'], 'astronaut', 'pirate', 'mermaid', 'dinosaur',
+  'octopus', 'campfire', 'snowboard', 'submarine', 'tractor', 'scarecrow', 'hot air balloon', 'ferris wheel', 'wizard',
+  'vampire', 'unicorn', 'dragon', 'cactus', 'igloo', 'tent', 'waterfall', 'island', 'bridge', 'windmill', 'microwave',
+  'toaster', 'vacuum cleaner', 'toothbrush', 'barbecue', 'trampoline', 'ladder', 'magnet', 'telescope', 'parachute',
+  'pyramid', 'tornado', 'sandcastle', 'snail', 'kangaroo', 'wheelchair', 'birthday party', 'cowboy', 'superhero',
+  ['detective', 'sherlock'], 'skeleton', 'zombie', 'juggler', 'yoga', 'bowling', 'fishing', 'surfing',
+]);
 
-export const OBJECTS: CanvasPrompt[] = [
-  p('eating pizza', 'pizza'), p('holding a birthday cake', 'cake', 'birthday cake'), p('wearing a crown', 'crown'),
-  p('with an umbrella', 'umbrella'), p('wearing sunglasses', 'sunglasses', 'glasses', 'shades'),
-  p('holding balloons', 'balloons', 'balloon'), p('with a top hat', 'top hat', 'hat'), p('eating ice cream', 'ice cream', 'icecream'),
-  p('holding a sword', 'sword'), p('with a backpack', 'backpack', 'bag', 'rucksack'), p('drinking coffee', 'coffee', 'mug', 'cup'),
-  p('holding a lollipop', 'lollipop', 'candy'),
-];
+export const HARD = make('hard')([
+  'time machine', 'traffic jam', 'escape room', ['alien invasion', 'aliens', 'ufo'], ['underwater city', 'atlantis'],
+  ['secret agent', 'spy'], 'space station', 'haunted house', 'black hole', 'global warming', 'job interview',
+  ['video call', 'zoom call', 'teams call'], 'monday morning', 'coffee break', 'speed dating', 'treasure hunt',
+  'shooting star', 'solar eclipse', 'zombie apocalypse', 'magic trick', 'first date', 'sleepwalking', 'jet lag',
+  'brain freeze', 'photobomb', 'road trip', 'pillow fight', 'bank robbery', 'wedding cake', 'sunburn', 'deadline',
+  'out of office', 'fire drill', 'karaoke', 'bad hair day',
+]);
 
-export const LOCATIONS: CanvasPrompt[] = [
-  p('in space', 'space', 'planets', 'stars', 'galaxy'), p('on the moon', 'moon'), p('underwater', 'underwater', 'ocean', 'sea', 'water'),
-  p('on a mountain', 'mountain', 'mountains'), p('in the desert', 'desert', 'cactus'), p('on an island', 'island', 'palm tree'),
-  p('in a volcano', 'volcano', 'lava'), p('on a rooftop', 'roof', 'rooftop'), p('in a castle', 'castle'),
-  p('at the beach', 'beach', 'sand'), p('in a jungle', 'jungle', 'forest', 'rainforest'), p('on a cloud', 'cloud', 'clouds'),
-];
+export const ALL_PROMPTS: CanvasPrompt[] = [...EASY, ...MEDIUM, ...HARD];
 
-export const TWISTS: CanvasPrompt[] = [
-  p('while being chased by a shark', 'shark'), p('surrounded by angry chickens', 'chickens', 'chicken', 'hens'),
-  p('during a thunderstorm', 'thunderstorm', 'lightning', 'storm', 'thunder'), p('with a flying toaster', 'toaster'),
-  p('under a rainbow', 'rainbow'), p('next to a UFO', 'ufo', 'spaceship', 'flying saucer', 'alien'),
-  p('with a tiny dragon', 'dragon'), p('in the rain', 'rain', 'raining'), p('with a giant snail', 'snail'),
-  p('during a fireworks show', 'fireworks', 'firework'), p('with bees everywhere', 'bees', 'bee'),
-];
-
-export const EXTRAS: CanvasPrompt[] = [
-  p('and a dancing bear', 'bear'), p('and a hot air balloon', 'hot air balloon', 'balloon'), p('and a pyramid', 'pyramid'),
-  p('and a snowstorm', 'snow', 'snowstorm', 'blizzard'), p('and a disco ball', 'disco ball', 'disco'), p('and a rocket', 'rocket'),
-  p('and a lighthouse', 'lighthouse'), p('and a tornado', 'tornado', 'twister'), p('and a sleeping dog', 'dog', 'puppy'),
-  p('and a treasure chest', 'treasure', 'chest', 'treasure chest'), p('and a waterfall', 'waterfall'), p('and a train', 'train'),
-  p('and a crocodile', 'crocodile', 'alligator', 'croc'), p('and a sun with sunglasses', 'sun'), p('and a ladder', 'ladder'),
-];
-
-export function bankForAddition(addition: number): CanvasPrompt[] {
-  switch (addition) {
-    case 1: return SUBJECTS;
-    case 2: return ACTIONS;
-    case 3: return OBJECTS;
-    case 4: return LOCATIONS;
-    case 5: return TWISTS;
-    default: return EXTRAS;
-  }
-}
-
-/** Pick a prompt for the given addition that isn't already in the scene. */
-export function pickPrompt(addition: number, usedAnswers: string[], rand: () => number = Math.random): CanvasPrompt {
-  const bank = bankForAddition(addition);
+/** Pick a word not yet used this session (easy-leaning mix). */
+export function pickPrompt(usedAnswers: string[], rand: () => number = Math.random): CanvasPrompt {
   const used = new Set(usedAnswers.map((a) => a.toLowerCase()));
-  const pool = bank.filter((b) => !used.has(b.answer.toLowerCase()));
-  const list = pool.length ? pool : bank;
-  return list[Math.floor(rand() * list.length)];
-}
-
-export function sceneSentence(scene: string[]): string {
-  return scene.join(' ');
+  const r = rand();
+  const bank = r < 0.45 ? EASY : r < 0.85 ? MEDIUM : HARD;
+  const fresh = (b: CanvasPrompt[]) => b.filter((p) => !used.has(p.answer.toLowerCase()));
+  const pool = fresh(bank).length ? fresh(bank) : fresh(ALL_PROMPTS).length ? fresh(ALL_PROMPTS) : ALL_PROMPTS;
+  return pool[Math.floor(rand() * pool.length)];
 }
