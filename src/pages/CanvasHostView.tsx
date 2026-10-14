@@ -6,7 +6,7 @@ import QuizScreen from '@/components/quiz/QuizScreen';
 import { Button } from '@/components/ui/button';
 import DrawingCanvas, { type DrawingCanvasHandle } from '@/components/canvas/DrawingCanvas';
 import CanvasResults from '@/components/canvas/CanvasResults';
-import { AdditionTimer, ArtistBanner, ArtistFrame, CanvasStats, PassBanner, RevealBanner, TurnPips } from '@/components/canvas/CanvasHud';
+import { AdditionTimer, ArtistHandoff, CanvasStats, NewWordBanner, PassBanner, RevealBanner, TurnPips } from '@/components/canvas/CanvasHud';
 import { canvasDb, useCanvasGame, useNow } from '@/hooks/useCanvasGame';
 import { EXTRA_GUESS_WINDOW_MS, MAX_ARTISTS, TURN_SECONDS, individualAwards, isCorrectGuess, pickArtist, teamPointsForTurn } from '@/data/canvas/canvasScoring';
 import { pickPrompt, type CanvasPrompt } from '@/data/canvas/promptBanks';
@@ -227,7 +227,7 @@ export default function CanvasHostView() {
           <section className="space-y-6">
             <p className="stage-kicker flex items-center gap-2"><Paintbrush className="h-4 w-4 text-primary" /> Co-op Pictionary relay</p>
             <h1 className="font-display text-5xl font-bold leading-tight md:text-6xl">One word.<br />Three artists.<br /><span className="text-primary">One team.</span></h1>
-            <p className="max-w-lg text-lg text-muted-foreground">An artist gets 15 seconds to draw a secret word. If nobody guesses it, the pencil passes to the next artist, who keeps drawing on the same picture. Words guessed later are worth more: 100, 200 or 300 team points.</p>
+            <p className="max-w-lg text-lg text-muted-foreground">An artist gets 30 seconds to draw a secret word. If nobody guesses it, the pencil passes to the next artist, who keeps drawing on the same picture. Words guessed later are worth more: 100, 200 or 300 team points.</p>
             <div className="stage-panel rounded-lg p-6">
               <p className="stage-kicker">Join at {url.replace(/^https?:\/\//, '')}</p>
               <p className="font-display text-8xl font-bold tracking-[0.15em] text-primary tabular-nums">{joinCode}</p>
@@ -270,19 +270,20 @@ export default function CanvasHostView() {
         <CanvasStats game={game} now={now} record={record} />
         <div className="grid gap-5 xl:grid-cols-[1fr_300px]">
           <div className="space-y-3">
-            <ArtistBanner artist={artist} turn={game.addition_index} large />
+            <ArtistHandoff artist={artist} />
             <div className="flex items-center gap-4"><TurnPips game={game} /><div className="flex-1"><AdditionTimer game={game} now={now} /></div></div>
             {game.phase === 'grace' && <p className="text-sm font-bold text-secondary">{correctNow.length} got it! 2 seconds for anyone else…</p>}
             {timeUp && game.phase === 'drawing' && <p className="text-sm font-bold text-accent">Time's up — last turn!</p>}
             <div className="mx-auto w-full max-w-[calc((100vh-320px)*4/3)] min-w-[min(100%,640px)]">
-            <ArtistFrame artist={artist}>
+            <div className="relative">
               <DrawingCanvas ref={canvasRef} strokes={strokes} live={live} className="rounded-md border-0" />
               <PassBanner game={game} artist={artist} now={now} />
+              <NewWordBanner game={game} now={now} />
               <RevealBanner game={game} />
               {game.phase === 'idle' && (
                 <div className="absolute inset-0 flex items-center justify-center bg-background/70"><p className="font-semibold">Waiting for at least 2 players…</p></div>
               )}
-            </ArtistFrame>
+            </div>
             </div>
           </div>
           <aside className="space-y-5">
