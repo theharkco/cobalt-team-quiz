@@ -183,6 +183,56 @@
   .stage-rule { @apply h-px bg-border; }
   .status-dot { @apply inline-block h-2 w-2 rounded-full bg-secondary shadow-[0_0_12px_hsl(var(--secondary)/0.7)]; }
 
+  /* Shared drawing workspace: presence stays alongside the canvas, even on phones. */
+  .pencil-workspace { display: grid; grid-template-columns: minmax(0, 1fr) 104px; gap: 12px; align-items: start; }
+  .pencil-main { min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+  .pencil-team { min-width: 0; border-left: 1px solid hsl(var(--border) / .6); padding-left: 10px; }
+  .pencil-team-heading { display: flex; flex-direction: column; gap: 4px; padding-bottom: 12px; }
+  .pencil-cloud { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; padding: 16px 0; }
+  .pencil-cloud-player { min-width: 0; text-align: center; position: relative; padding-bottom: 8px; }
+  .pencil-character-space { position: relative; width: 100%; height: 76px; }
+  .pencil-character { margin: auto; width: 70px; }
+  .pencil-mascot { width: 100%; overflow: visible; }
+  .mascot-body, .mascot-limbs { fill: hsl(var(--muted-foreground)); stroke: hsl(var(--background)); stroke-width: 2; stroke-linejoin: round; }
+  .mascot-shadow { fill: hsl(var(--foreground) / .08); }
+  .mascot-shine { fill: none; stroke: hsl(var(--foreground) / .65); stroke-width: 5; stroke-linecap: round; }
+  .mascot-belly { fill: hsl(var(--foreground) / .25); }
+  .mascot-face { fill: hsl(var(--background)); }
+  .mascot-expression { fill: none; stroke: hsl(var(--background)); stroke-width: 2.8; stroke-linecap: round; }
+  .mascot-cheek { fill: hsl(var(--accent) / .5); }
+  [data-status="drawing"] .mascot-body, [data-status="drawing"] .mascot-limbs { fill: hsl(var(--primary)); }
+  [data-status="correct"] .mascot-body, [data-status="correct"] .mascot-limbs { fill: hsl(var(--secondary)); }
+  [data-status="artist"] .mascot-body, [data-status="artist"] .mascot-limbs { fill: hsl(var(--muted-foreground) / .75); }
+  .pencil-speech { position: absolute; bottom: calc(100% - 10px); left: 50%; transform: translateX(-50%); width: max-content; max-width: 88px; overflow-wrap: anywhere; background: hsl(var(--foreground)); color: hsl(var(--background)); border-radius: 8px; padding: 5px 8px; font-size: 11px; font-weight: 700; line-height: 1.25; z-index: 2; }
+  .pencil-speech::after { content: ''; position: absolute; top: 100%; left: calc(50% - 4px); border: 4px solid transparent; border-top-color: hsl(var(--foreground)); }
+  .pencil-speech-correct { background: hsl(var(--secondary)); color: hsl(var(--secondary-foreground)); }
+  .pencil-speech-correct::after { border-top-color: hsl(var(--secondary)); }
+  .pencil-speech-drawing { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
+  .pencil-speech-drawing::after { border-top-color: hsl(var(--primary)); }
+  .pencil-name { font-size: 11px; font-weight: 700; line-height: 1.3; overflow-wrap: anywhere; }
+  .pencil-cloud-me .pencil-name { color: hsl(var(--primary)); }
+  .pencil-player-status { font-size: 10px; margin-top: 3px; font-weight: 600; }
+  .pencil-player-score { font-size: 10px; color: hsl(var(--muted-foreground)); font-variant-numeric: tabular-nums; }
+  @media (min-width: 640px) {
+    .pencil-workspace { grid-template-columns: minmax(0, 1fr) 220px; gap: 24px; }
+    .pencil-team { padding-left: 20px; }
+    .pencil-team-heading { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+    .pencil-cloud { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 8px; padding-top: 36px; }
+    .pencil-cloud-player:nth-child(even) { transform: translateY(22px); }
+    .pencil-character-space { height: 100px; }
+    .pencil-character { width: 92px; }
+    .pencil-name { font-size: 13px; }
+    .pencil-player-status, .pencil-player-score { font-size: 11px; }
+    .pencil-speech { max-width: 100px; }
+  }
+  @media (min-width: 1100px) {
+    .pencil-workspace { grid-template-columns: minmax(0, 1fr) 320px; gap: 32px; }
+    .pencil-cloud { gap: 32px 20px; }
+    .pencil-character { width: 112px; }
+    .pencil-character-space { height: 120px; }
+    .pencil-speech { max-width: 140px; font-size: 12px; }
+  }
+
   .contestant-world { background: hsl(var(--world-ink)); }
   .world-nameplate { position: relative; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
   .world-player-name { display: block; max-width: 82px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-radius: 4px; background: hsl(var(--background) / .88); color: hsl(var(--foreground)); padding: 2px 5px; font-size: 10px; font-weight: 700; }
