@@ -6,7 +6,8 @@ import QuizPicker from '@/components/quiz/QuizPicker';
 import { useQuizSession } from '@/hooks/useQuizSession';
 import { supabase } from '@/integrations/supabase/client';
 import type { QuizQuestion } from '@/data/questionTypes';
-import { ArrowLeft, ArrowRight, Gamepad2, PenTool, Radio, Sparkles } from 'lucide-react';
+import { canvasDb } from '@/hooks/useCanvasGame';
+import { ArrowLeft, ArrowRight, Gamepad2, Paintbrush, PenTool, Radio, Sparkles } from 'lucide-react';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const Index = () => {
   const [codeOk, setCodeOk] = useState(false);
   const [playerName, setPlayerName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [gameMode, setGameMode] = useState('quiz');
 
   const handleHost = async (questions: QuizQuestion[], quizId?: string) => {
     setLoading(true);
@@ -30,12 +32,29 @@ const Index = () => {
     setLoading(false);
   };
 
+  const handleHostCanvas = async () => {
+    setLoading(true);
+    const session = await createSession();
+    if (session) {
+      const token = crypto.randomUUID();
+      sessionStorage.setItem(`canvas-host-${session.id}`, token);
+      await canvasDb.from('quiz_sessions').update({ game_mode: 'canvas' }).eq('id', session.id);
+      const { data: g } = await canvasDb.from('canvas_games').insert({ session_id: session.id }).select('id').single();
+      if (g) await canvasDb.rpc('set_canvas_prompt', { _game_id: (g as { id: string }).id, _host_token: token, _prompt: null, _answer: null, _alternates: [] });
+      navigate(`/canvas-host/${session.id}`);
+    }
+    setLoading(false);
+  };
+
   const handleCheckCode = async () => {
     if (joinCode.length !== 4) return;
     setLoading(true);
     setError(null);
     const s = await findSession(joinCode);
-    if (s) setCodeOk(true);
+    if (s) {
+      setCodeOk(true);
+      setGameMode((s as { game_mode?: string }).game_mode ?? 'quiz');
+    }
     setLoading(false);
   };
 
@@ -45,7 +64,7 @@ const Index = () => {
     setError(null);
     const player = await joinSession(joinCode, playerName);
     if (player) {
-      navigate(`/play/${player.session_id}/${player.id}`);
+      navigate(gameMode === 'canvas' ? `/canvas/${player.session_id}/${player.id}` : `/play/${player.session_id}/${player.id}`);
     }
     setLoading(false);
   };
@@ -141,8 +160,9 @@ const Index = () => {
           transition={{ delay: 0.16, type: 'spring', bounce: 0.3 }}
           className="grid grid-cols-2 gap-3"
         >
-          <Button onClick={() => setShowPicker(true)} disabled={loading} variant="outline" className="h-auto justify-start gap-3 p-4 text-left"><Gamepad2 className="h-5 w-5 text-accent"/><span><b className="block">Host a game</b><small className="font-normal text-muted-foreground">Big screen mode</small></span></Button>
-          <Button onClick={() => navigate('/create')} variant="outline" className="h-auto justify-start gap-3 p-4 text-left"><PenTool className="h-5 w-5 text-secondary"/><span><b className="block">Make a quiz</b><small className="font-normal text-muted-foreground">Build your own</small></span></Button>
+          <Button onClick={() => setShowPicker(true)} disabled={loading} variant="outline" className="h-auto justify-start gap-3 p-4 text-left"><Gamepad2 className="h-5 w-5 text-accent"/><span><b className="block">Host a quiz</b><small className="font-normal text-muted-foreground">Big screen mode</small></span></Button>
+          <Button onClick={handleHostCanvas} disabled={loading} variant="outline" className="h-auto justify-start gap-3 p-4 text-left"><Paintbrush className="h-5 w-5 text-primary"/><span><b className="block">Infinite Canvas</b><small className="font-normal text-muted-foreground">Draw &amp; guess together</small></span></Button>
+          <Button onClick={() => navigate('/create')} variant="outline" className="col-span-2 h-auto justify-start gap-3 p-4 text-left"><PenTool className="h-5 w-5 text-secondary"/><span><b className="block">Make a quiz</b><small className="font-normal text-muted-foreground">Build your own</small></span></Button>
         </motion.div>
         <p className="flex items-center justify-center gap-2 text-xs text-muted-foreground"><Sparkles className="h-3.5 w-3.5"/> Fast, live and built for teams</p>
         </div>
