@@ -13,7 +13,7 @@ export interface StageCharacter { id: string; status: ContestantStatus; reaction
 const models = [maleA.url, femaleB.url, maleC.url, femaleD.url];
 
 function Character({ player, index, position, reduced }: { player: StageCharacter; index: number; position: [number, number, number]; reduced: boolean }) {
-  const variant = [...player.id].reduce((sum, c) => sum + c.charCodeAt(0), 0) % models.length;
+  const variant = index % models.length;
   const { scene, animations } = useGLTF(models[variant]);
   const object = useMemo(() => {
     const copy = clone(scene);
