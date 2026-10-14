@@ -78,9 +78,9 @@ const Index = () => {
 
   const inputCls = 'w-full min-w-0 border-0 bg-transparent px-0 py-2 font-display text-4xl font-extrabold text-foreground outline-none placeholder:text-muted-foreground/40';
   const modes = [
-    { label: 'Host a quiz', sub: 'Big screen, every phone plays', icon: Gamepad2, cls: 'bg-accent text-accent-foreground', rot: '-rotate-2', onClick: () => setShowPicker(true) },
-    { label: 'Pass the Pencil', sub: 'Draw it together, guess it fast', icon: Paintbrush, cls: 'bg-secondary text-secondary-foreground', rot: 'rotate-1', onClick: handleHostCanvas },
-    { label: 'Make a quiz', sub: 'Your questions, your rules', icon: PenTool, cls: 'bg-quiz-blue text-primary-foreground', rot: '-rotate-1', onClick: () => navigate('/create') },
+    { label: 'Host a quiz', sub: 'Big screen, every phone plays', icon: Gamepad2, cls: 'bg-accent text-accent-foreground', tilt: -2, onClick: () => setShowPicker(true) },
+    { label: 'Pass the Pencil', sub: 'Draw it together, guess it fast', icon: Paintbrush, cls: 'bg-secondary text-secondary-foreground', tilt: 1, onClick: handleHostCanvas },
+    { label: 'Make a quiz', sub: 'Your questions, your rules', icon: PenTool, cls: 'bg-quiz-blue text-primary-foreground', tilt: -1, onClick: () => navigate('/create') },
   ];
 
   return (
