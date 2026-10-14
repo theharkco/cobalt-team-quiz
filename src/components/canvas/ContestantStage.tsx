@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { Check, Pencil, Sparkles } from 'lucide-react';
+import { Check, Pencil, Sparkles, X } from 'lucide-react';
 import type { CanvasGame, CanvasGuess, CanvasPlayer } from '@/types/canvas';
 import { worldRoster } from './contestantWorld';
 import { cn } from '@/lib/utils';
@@ -8,7 +8,10 @@ interface Props { game: CanvasGame; players: CanvasPlayer[]; guesses: CanvasGues
 
 export default function ContestantStage({ game, players, guesses, now, meId }: Props) {
   const reduced = Boolean(useReducedMotion());
-  const roster = worldRoster(game, players, guesses, now, meId);
+  // Identity is independent of score/order, so climbing the standings never changes a character.
+  const identities = [...players].sort((a, b) => a.id.localeCompare(b.id));
+  const ranked = [...players].sort((a, b) => b.canvas_score - a.canvas_score || a.id.localeCompare(b.id));
+  const roster = worldRoster(game, ranked, guesses, now, meId);
   const done = roster.filter((p) => p.status === 'correct' || p.status === 'artist').length;
   return (
     <section className="pencil-team" aria-label="The team">
@@ -20,11 +23,15 @@ export default function ContestantStage({ game, players, guesses, now, meId }: P
         <motion.div className="h-full bg-secondary" animate={{ width: `${players.length ? done / players.length * 100 : 0}%` }} />
       </div>
       <div className="pencil-cloud" aria-label="Floating contestants">
-        {roster.map((p, index) => (
-          <motion.div layout key={p.id} data-status={p.status} data-player-id={p.id}
+        {roster.map((p, index) => {
+          const identity = identities.findIndex((player) => player.id === p.id);
+          const face = identity % 6;
+          return (
+          <motion.div layout key={p.id} data-status={p.status} data-player-id={p.id} data-face={face} data-color={identity % 20}
             transition={{ type: 'spring', stiffness: 220, damping: 24 }}
             initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }}
-            className={cn('pencil-cloud-player', p.isMe && 'pencil-cloud-me')}>
+            className={cn('pencil-cloud-player', `mascot-color-${identity % 20}`, p.isMe && 'pencil-cloud-me')}>
+            <span className="pencil-player-rank" aria-label={`Rank ${index + 1}`}>{String(index + 1).padStart(2, '0')}</span>
             <div className="pencil-character-space">
               <motion.div className="pencil-character" animate={reduced ? {} : { y: [0, -7, 0], rotate: [index % 2 ? -3 : 3, index % 2 ? 3 : -3, index % 2 ? -3 : 3] }}
                 transition={{ duration: 3.5 + index % 3 * 0.7, repeat: Infinity, ease: 'easeInOut', delay: index * 0.17 }}>
@@ -36,16 +43,21 @@ export default function ContestantStage({ game, players, guesses, now, meId }: P
                   <path d="M27 35Q30 25 37 27" className="mascot-shine" />
                   <ellipse cx="50" cy="75" rx="18" ry="10" className="mascot-belly" />
                   <g className="mascot-face">
-                    {p.status === 'correct' ? <><path d="M32 48Q37 41 42 48M59 48Q64 41 69 48" className="mascot-expression" /><path d="M43 58Q50 69 58 58Z" /></> : <><ellipse cx="37" cy="47" rx="3" ry="5" /><ellipse cx="64" cy="47" rx="3" ry="5" /><path d={p.status === 'drawing' ? 'M45 60Q51 54 57 60' : 'M44 58Q51 65 58 58'} className="mascot-expression" /></>}
+                    {p.status === 'correct' ? <><path d="M32 48Q37 41 42 48M59 48Q64 41 69 48" className="mascot-expression" /><path d="M43 58Q50 69 58 58Z" /></> : <>
+                      {face === 1 ? <><path d="M32 47Q37 42 42 47" className="mascot-expression" /><ellipse cx="64" cy="47" rx="3" ry="5" /></> : face === 2 ? <><path d="M32 46L42 49M59 49L69 46" className="mascot-expression" /></> : face === 4 ? <><circle cx="37" cy="47" r="4" /><circle cx="64" cy="47" r="4" /><path d="M31 37L42 39M60 39L70 37" className="mascot-expression" /></> : <><ellipse cx="37" cy="47" rx="3" ry={face === 5 ? 3 : 5} /><ellipse cx="64" cy="47" rx="3" ry={face === 5 ? 3 : 5} /></>}
+                      {face === 3 ? <ellipse cx="51" cy="61" rx="4" ry="5" /> : <path d={face === 1 ? 'M44 59Q51 66 59 55' : face === 5 ? 'M43 58Q51 73 60 58Z' : face === 4 ? 'M46 60L56 60' : 'M44 58Q51 65 58 58'} className="mascot-expression" />}
+                    </>}
                   </g>
                   <ellipse cx="28" cy="56" rx="6" ry="3" className="mascot-cheek" /><ellipse cx="74" cy="56" rx="6" ry="3" className="mascot-cheek" />
                 </svg>
               </motion.div>
-              <AnimatePresence mode="wait">
+              <AnimatePresence>
                 {(p.bubble || p.status === 'correct' || p.status === 'drawing') && (
-                  <motion.div key={p.bubble?.id ?? p.status} role="status" className={cn('pencil-speech', p.status === 'correct' && 'pencil-speech-correct', p.status === 'drawing' && 'pencil-speech-drawing')}
-                    initial={{ y: 8, opacity: 0, scale: 0.6 }} animate={{ y: 0, opacity: 1, scale: 1 }} exit={{ y: -8, opacity: 0 }} transition={{ type: 'spring', stiffness: 420, damping: 20 }}>
-                    {p.status === 'correct' ? <Check aria-label="Correct guess" className="h-4 w-4" /> : p.status === 'drawing' ? <Pencil aria-label="Drawing" className="h-4 w-4" /> : p.bubble?.text}
+                  <motion.div key={p.bubble?.id ?? p.status} role="status" className={cn('pencil-speech', p.bubble && 'pencil-speech-wrong', p.status === 'correct' && 'pencil-speech-correct', p.status === 'drawing' && 'pencil-speech-drawing')}
+                    initial={reduced ? { opacity: 0 } : { y: 14, opacity: 0, scale: 0.35, rotate: -12 }}
+                    animate={reduced ? { opacity: 1 } : { y: [14, -6, 0], opacity: 1, scale: [0.35, 1.15, 1], rotate: [-12, 6, -4, 2, 0] }}
+                    exit={{ y: -8, opacity: 0, scale: 0.9 }} transition={{ duration: reduced ? 0 : 0.55, ease: 'easeOut' }}>
+                    {p.status === 'correct' ? <Check aria-label="Correct guess" className="h-4 w-4" /> : p.status === 'drawing' ? <Pencil aria-label="Drawing" className="h-4 w-4" /> : <><X className="h-3 w-3 shrink-0" aria-hidden="true" /><span>{p.bubble?.text}</span></>}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -56,7 +68,7 @@ export default function ContestantStage({ game, players, guesses, now, meId }: P
             </p>
             <span className="pencil-player-score">{players.find((player) => player.id === p.id)?.canvas_score ?? 0} pts</span>
           </motion.div>
-        ))}
+        ); })}
         {!players.length && <p className="text-xs text-muted-foreground">Waiting for the team…</p>}
       </div>
     </section>
