@@ -113,9 +113,11 @@ export default function CanvasPlayerView() {
   const tools = isArtist && <DrawTools color={penColor} width={penWidth} onColor={setPenColor} onWidth={setPenWidth} />;
 
   return (
-    <QuizScreen showBack={false} eyebrow={`Word ${game.masterpiece_index}`} contentClassName="py-8" corner={<span className="text-sm font-bold tabular-nums text-primary">{me.canvas_score} pts</span>}>
-      <div className="mx-auto w-full max-w-5xl space-y-3 px-3">
+    <QuizScreen showBack={false} showBackdrop={false} eyebrow={`Pencil · Word ${game.masterpiece_index}`} contentClassName="py-5 md:py-8" corner={<span className="text-sm font-bold tabular-nums text-primary">{me.canvas_score} pts</span>}>
+      <div className="mx-auto w-full max-w-[1500px] space-y-4 px-3 md:px-8">
+        <div className="border-b border-border/60 pb-4">
         <CanvasStats game={game} now={now} compact />
+        </div>
         {isArtist
           ? <ArtistBanner turn={game.addition_index} word={prompt?.prompt} />
           : <div className="flex flex-wrap items-center justify-between gap-2"><ArtistHandoff artist={artist} />{knowsWord && prompt && <span className="text-sm text-muted-foreground">You passed the pencil · <b className="text-foreground">{prompt.prompt}</b></span>}</div>}
@@ -144,8 +146,8 @@ export default function CanvasPlayerView() {
                 </AnimatePresence>
               </div>
               <div className="flex gap-2">
-                <Input value={guess} onChange={(e) => setGuess(e.target.value)} aria-label="Your guess" placeholder="What are they drawing?" maxLength={40} autoComplete="off" autoFocus
-                  className="h-14 min-w-0 flex-1 border-0 bg-background/60 font-display text-2xl font-bold focus-visible:ring-2 focus-visible:ring-accent" />
+                <Input value={guess} onChange={(e) => setGuess(e.target.value)} aria-label="Your guess" placeholder="What is it?" maxLength={40} autoComplete="off" autoFocus
+                  className="h-14 min-w-0 flex-1 border-0 bg-background/60 font-display text-xl font-bold focus-visible:ring-2 focus-visible:ring-accent sm:text-2xl" />
                 <motion.div whileTap={{ scale: 0.9 }}>
                   <Button type="submit" size="lg" className="h-14 shrink-0 bg-accent px-4 text-lg text-accent-foreground hover:bg-accent/90" disabled={!guess.trim()}><Send /> Guess</Button>
                 </motion.div>
@@ -154,7 +156,9 @@ export default function CanvasPlayerView() {
           )
         ) : null}
 
-        <div className={cn('grid gap-3', isArtist && 'lg:grid-cols-[1fr_180px]')}>
+        {tools}
+        <div className="pencil-workspace">
+          <div className="pencil-main">
           <ArtistFrame active={isArtist}>
             <DrawingCanvas
               strokes={strokes}
@@ -170,10 +174,9 @@ export default function CanvasPlayerView() {
             <NewWordBanner game={game} now={now} isMe={isArtist} />
             <RevealBanner game={game} />
           </ArtistFrame>
-          {tools}
+          </div>
+          <ContestantStage game={game} players={players} guesses={guesses} now={now} meId={me.id} compact />
         </div>
-
-        <ContestantStage game={game} players={players} guesses={guesses} now={now} meId={me.id} compact />
         <CorrectBurst show={burst} points={myPoints} onDone={endBurst} />
       </div>
     </QuizScreen>

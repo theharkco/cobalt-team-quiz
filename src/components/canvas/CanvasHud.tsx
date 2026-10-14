@@ -4,6 +4,7 @@ import type { CanvasGame, CanvasPlayer } from '@/types/canvas';
 import { MAX_ARTISTS, PEN_COLORS, PEN_WIDTHS, teamPointsForTurn } from '@/data/canvas/canvasScoring';
 import { formatClock, secondsLeft } from '@/hooks/useCanvasGame';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 export function CanvasStats({ game, now, record, compact }: { game: CanvasGame; now: number; record?: number | null; compact?: boolean }) {
   const remaining = secondsLeft(game.game_ends_at, null, now);
@@ -100,13 +101,13 @@ export function PassBanner({ game, artist, now, isMe }: { game: CanvasGame; arti
           className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center overflow-hidden bg-primary/85 text-primary-foreground backdrop-blur-sm">
           <motion.div initial={{ x: '-120%', rotate: -40 }} animate={{ x: ['-120%', '0%', '0%', '120%'], rotate: [-40, 0, 0, 40] }}
             transition={{ duration: PASS_MS / 1000, times: [0, 0.2, 0.8, 1], ease: 'easeInOut' }}>
-            <Pencil className="h-16 w-16 md:h-24 md:w-24" />
+            <Pencil className="h-8 w-8 sm:h-16 sm:w-16" />
           </motion.div>
           <motion.p initial={{ scale: 0.3, rotate: -8 }} animate={{ scale: [0.3, 1.25, 1], rotate: [-8, 4, -2] }} transition={{ duration: 0.6, type: 'spring' }}
-            className="mt-2 font-display text-4xl font-black tracking-tight md:text-7xl">PASS THE PENCIL!</motion.p>
+            className="mt-2 px-2 text-center font-display text-xl font-black sm:text-4xl lg:text-6xl">PASS THE PENCIL!</motion.p>
           <motion.p initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.45, type: 'spring', bounce: 0.6 }}
-            className="mt-2 font-display text-2xl font-bold md:text-4xl">{isMe ? "You're up!" : `${artist!.name}, you're up!`}</motion.p>
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="mt-1 font-semibold">
+            className="mt-2 px-2 text-center font-display text-sm font-bold sm:text-2xl lg:text-4xl">{isMe ? "You're up!" : `${artist?.name}, you're up!`}</motion.p>
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="mt-1 px-2 text-center text-xs font-semibold sm:text-base">
             Artist {game.addition_index} of {MAX_ARTISTS} · now worth +{teamPointsForTurn(game.addition_index, game.addition_seconds)}
           </motion.p>
         </motion.div>
@@ -127,9 +128,9 @@ export function NewWordBanner({ game, now, isMe }: { game: CanvasGame; now: numb
           className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center bg-secondary text-secondary-foreground">
           <motion.p initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="stage-kicker text-secondary-foreground/80">Fresh canvas</motion.p>
           <motion.p initial={{ scale: 0 }} animate={{ scale: [0, 1.3, 1] }} transition={{ delay: 0.25, duration: 0.6 }}
-            className="font-display text-6xl font-black md:text-8xl">Word {game.masterpiece_index}</motion.p>
+            className="font-display text-3xl font-black sm:text-6xl lg:text-8xl">Word {game.masterpiece_index}</motion.p>
           <motion.p initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.6, type: 'spring' }}
-            className="mt-2 font-display text-2xl font-bold">{isMe ? 'You start — get drawing!' : 'Get ready to guess!'}</motion.p>
+            className="mt-2 px-2 text-center font-display text-sm font-bold sm:text-2xl">{isMe ? 'You start — get drawing!' : 'Get ready to guess!'}</motion.p>
         </motion.div>
       )}
     </AnimatePresence>
@@ -143,10 +144,10 @@ export function RevealBanner({ game }: { game: CanvasGame }) {
     <motion.div initial={{ scale: 0.85, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
       className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-background/80 p-4 text-center backdrop-blur-sm">
       <p className="stage-kicker">{success ? (game.addition_index >= 3 ? 'Rescued by artist 3!' : 'Guessed!') : game.last_result === 'skipped' ? 'Skipped' : 'Nobody got it'}</p>
-      <p className="font-display text-4xl font-bold capitalize md:text-5xl">{game.revealed_answer}</p>
+      <p className="break-words font-display text-2xl font-bold capitalize sm:text-4xl md:text-5xl">{game.revealed_answer}</p>
       {success
-        ? <p className="font-display text-2xl font-bold text-secondary">+{game.last_points} team points</p>
-        : <p className="text-muted-foreground">No points this time — next word coming up.</p>}
+        ? <p className="font-display text-sm font-bold text-secondary sm:text-2xl">+{game.last_points} team points</p>
+        : <p className="text-xs text-muted-foreground sm:text-base">No points this time — next word coming up.</p>}
     </motion.div>
   );
 }
@@ -189,23 +190,23 @@ export function ArtistFrame({ active, children }: { active?: boolean; children: 
 
 export function DrawTools({ color, width, onColor, onWidth }: { color: string; width: number; onColor: (c: string) => void; onWidth: (w: number) => void }) {
   return (
-    <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="stage-panel space-y-3 rounded-lg p-3">
-      <div className="grid grid-cols-10 gap-1.5 lg:grid-cols-4">
+    <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex flex-wrap items-center gap-3 border-y border-border/60 py-3">
+      <div className="grid flex-1 grid-cols-10 gap-1.5 sm:max-w-sm">
         {PEN_COLORS.map((c) => (
-          <motion.button key={c} type="button" whileTap={{ scale: 0.8 }} animate={{ scale: color === c ? 1.15 : 1 }} onClick={() => onColor(c)}
+          <Button key={c} type="button" variant="ghost" onClick={() => onColor(c)}
             aria-label={`Pen color ${c}`} aria-pressed={color === c}
-            className={cn('aspect-square w-full rounded-full border-2', color === c ? 'border-foreground ring-2 ring-primary' : 'border-border')}
+            className={cn('aspect-square h-auto w-full rounded-full border-2 p-0', color === c ? 'border-foreground ring-2 ring-primary' : 'border-border')}
             style={{ background: c }} />
         ))}
       </div>
-      <div className="grid grid-cols-3 gap-1.5 lg:grid-cols-1">
+      <div className="grid grid-cols-3 gap-1.5">
         {PEN_WIDTHS.map((w) => (
-          <motion.button key={w.label} type="button" whileTap={{ scale: 0.9 }} onClick={() => onWidth(w.value)} aria-pressed={width === w.value}
+          <Button key={w.label} type="button" variant="ghost" onClick={() => onWidth(w.value)} aria-pressed={width === w.value}
             className={cn('flex h-11 items-center justify-center gap-2 rounded-md border text-sm font-semibold transition-colors',
               width === w.value ? 'border-primary bg-primary/15 text-primary' : 'border-border text-muted-foreground')}>
             <span className="rounded-full" style={{ width: w.value * 1400, height: w.value * 1400, background: color, minWidth: 4, minHeight: 4 }} />
             {w.label}
-          </motion.button>
+          </Button>
         ))}
       </div>
     </motion.div>

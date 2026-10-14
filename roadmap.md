@@ -1,5 +1,8 @@
 # Quizclash roadmap
 
+- [x] Replace 3D contestants with expressive floating 2D characters; verified confirmed verdict bubbles and hidden correct answers in a four-player round.
+- [x] Improve in-game layout; verified team stays right of the canvas with no overflow at 390, 768 and 1280px.
+
 - [x] Pass the Pencil: roaming miniature top-down world, overhead verdict bubbles, and persistent green solved zone.
 - [x] Pass the Pencil: keep the word open after correct guesses; verified four live players, all saved awards, mobile layout, and 24 regression tests.
 

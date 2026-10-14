@@ -298,21 +298,23 @@ export default function CanvasHostView() {
 
   const artist = players.find((p) => p.id === game.current_artist_id);
   const correctNow = guesses.filter((g) => g.is_correct && g.masterpiece_index === game.masterpiece_index);
-  const ranked = [...players].sort((a, b) => b.canvas_score - a.canvas_score);
   const timeUp = secondsLeftOf(game, now) === 0;
 
   return (
-    <QuizScreen eyebrow={`${TITLE} · Word ${game.masterpiece_index}`} contentClassName="py-8" corner={<span className="font-display text-xl font-bold tracking-widest text-primary">{joinCode}</span>}>
-      <div className="mx-auto w-full max-w-[1700px] space-y-4 px-4 md:px-8">
+    <QuizScreen showBackdrop={false} eyebrow={`Pencil · Word ${game.masterpiece_index}`} contentClassName="py-5 md:py-8" corner={<span className="font-display text-xl font-bold tabular-nums text-primary">{joinCode}</span>}>
+      <div className="mx-auto w-full max-w-[1500px] space-y-5 px-3 md:px-8">
+        <div className="border-b border-border/60 pb-5">
         <CanvasStats game={game} now={now} record={record} />
-        <div className="grid gap-5 xl:grid-cols-[1fr_380px]">
-          <div className="space-y-3">
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
             <ArtistHandoff artist={artist} />
-            <div className="flex items-center gap-4"><TurnPips game={game} /><div className="flex-1"><AdditionTimer game={game} now={now} /></div></div>
+            <div className="flex w-full items-center gap-4 sm:w-96"><TurnPips game={game} /><div className="flex-1"><AdditionTimer game={game} now={now} /></div></div>
+        </div>
             {correctNow.length > 0 && (game.phase === 'drawing' || game.phase === 'grace') && <p className="text-sm font-bold text-secondary">{correctNow.length} got it! Everyone else — keep guessing.</p>}
             {timeUp && game.phase === 'drawing' && <p className="text-sm font-bold text-accent">Time's up — last turn!</p>}
-            <div className="mx-auto w-full max-w-[calc((100vh-320px)*4/3)] min-w-[min(100%,640px)]">
-            <div className="relative">
+        <div className="pencil-workspace">
+          <div className="pencil-main">
+            <div className="relative overflow-hidden rounded-lg border border-border">
               <DrawingCanvas ref={canvasRef} strokes={strokes} live={live} className="rounded-md border-0" />
               <PassBanner game={game} artist={artist} now={now} />
               <NewWordBanner game={game} now={now} />
@@ -321,11 +323,11 @@ export default function CanvasHostView() {
                 <div className="absolute inset-0 flex items-center justify-center bg-background/70"><p className="font-semibold">Waiting for at least 2 players…</p></div>
               )}
             </div>
-            </div>
           </div>
-          <aside className="space-y-5">
-              <ContestantStage game={game} players={players} guesses={guesses} now={now} />
-            <div className="stage-panel rounded-lg p-4">
+          <ContestantStage game={game} players={players} guesses={guesses} now={now} />
+        </div>
+        <div className="flex flex-wrap items-start justify-between gap-5 border-t border-border/60 pt-4">
+            <div className="min-w-0 flex-1">
               <p className="stage-kicker mb-3 flex items-center gap-2"><TrendingUp className="h-4 w-4 text-secondary" /> Recent team gains</p>
               {gains.length === 0 && <p className="text-sm text-muted-foreground">None yet.</p>}
               <ul className="space-y-1.5">
@@ -338,23 +340,12 @@ export default function CanvasHostView() {
                 ))}
               </ul>
             </div>
-            <div className="stage-panel rounded-lg p-4">
-              <p className="stage-kicker mb-3">Players</p>
-              <ol className="space-y-1.5">
-                {ranked.map((p, i) => (
-                  <li key={p.id} className={cn('flex items-center gap-2 text-sm', p.id === game.current_artist_id && 'font-bold')}>
-                    <span className="w-5 text-muted-foreground tabular-nums">{i + 1}</span>
-                    <span className="flex-1 truncate">{p.name}{p.id === game.current_artist_id && ' ✎'}</span>
-                    <span className="tabular-nums text-muted-foreground">{p.canvas_score}</span>
-                  </li>
-                ))}
-              </ol>
-            </div>
-            <Button variant="outline" className="w-full" disabled={game.phase !== 'drawing'} onClick={() => resolveFail('skipped')}>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" disabled={game.phase !== 'drawing'} onClick={() => resolveFail('skipped')}>
               <SkipForward /> Skip word
             </Button>
-            <Button variant="ghost" className="w-full" onClick={finishGame}>End game now</Button>
-          </aside>
+            <Button variant="ghost" onClick={finishGame}>End game now</Button>
+          </div>
         </div>
       </div>
     </QuizScreen>
