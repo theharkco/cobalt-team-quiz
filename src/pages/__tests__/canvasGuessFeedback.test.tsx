@@ -10,6 +10,8 @@ const state = vi.hoisted(() => ({
 vi.mock('react-router-dom', () => ({ useParams: () => ({ sessionId: 'session', playerId: 'me' }) }));
 vi.mock('@/hooks/useCanvasGame', () => ({ useCanvasGame: () => ({ ...state, loaded: true, strokes: [], live: [] }), useNow: () => 0, canvasDb: { rpc: () => Promise.resolve({ data: [{ prompt: 'Pirate ship', answer: 'pirate ship' }] }) } }));
 vi.mock('@/components/canvas/ContestantStage', () => ({ default: () => <div>The team</div> }));
+vi.mock('@/components/canvas/CanvasLeaderboard', () => ({ default: () => null }));
+vi.mock('@/components/canvas/CanvasGuessFeed', () => ({ default: () => null }));
 vi.mock('@/components/canvas/CorrectBurst', () => ({ default: () => null }));
 vi.mock('@/components/quiz/QuizScreen', () => ({ default: ({ children }: { children: React.ReactNode }) => <div>{children}</div> }));
 vi.mock('@/components/canvas/DrawingCanvas', () => ({ default: () => <div data-testid="drawing-canvas" /> }));
