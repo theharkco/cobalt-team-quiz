@@ -1,7 +1,7 @@
 # Quizclash roadmap
 
-- [ ] Shared guess chat above contestants with names and hidden correct answers.
-- [ ] Restore historical team record and top ten individual scores on pencil screens; verify live.
+- [x] Shared guess chat above contestants with names and hidden correct answers; verified host and three phones.
+- [x] Restore historical team record and top ten individual scores on pencil screens; verified saved scores and layouts at 390/768/1280px.
 
 - [x] Compact score-ranked characters with twenty distinct rendered colors, six faces and animated red rejection bubbles; verified with twenty live players.
 - [x] Audited all drawing prompts; replaced abstract/overly trivial words and weighted selection toward concrete medium prompts.

@@ -37,7 +37,7 @@ async function loadRecords() {
 
 export default function CanvasLeaderboard({ game, players }: { game: CanvasGame; players: CanvasPlayer[] }) {
   const [view, setView] = useState('all-time');
-  const records = useQuery({ queryKey: ['pencil-records', game.status], queryFn: loadRecords, staleTime: 15000, refetchInterval: 30000 });
+  const records = useQuery({ queryKey: ['pencil-records', game.id, game.status], queryFn: loadRecords, staleTime: 15000, refetchInterval: 30000 });
   const ranked = view === 'all-time' ? records.data?.ranked ?? [] : [...players].sort((a, b) => b.canvas_score - a.canvas_score || a.name.localeCompare(b.name)).slice(0, 10);
   return (
     <section aria-label="Pencil leaderboard" className="border-t border-border py-6">
