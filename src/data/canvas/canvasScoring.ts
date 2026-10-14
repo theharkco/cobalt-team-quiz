@@ -1,4 +1,6 @@
-export const TURN_SECONDS = 15;
+export const TURN_SECONDS = 30;
+export const PEN_COLORS = ['#1f2937', '#ef4444', '#f97316', '#eab308', '#22c55e', '#0ea5e9', '#8b5cf6', '#ec4899', '#92400e', '#9ca3af'];
+export const PEN_WIDTHS = [{ label: 'Thin', value: 0.004 }, { label: 'Medium', value: 0.007 }, { label: 'Thick', value: 0.014 }];
 export const MAX_ARTISTS = 3;
 export const EXTRA_GUESS_WINDOW_MS = 2000;
 
