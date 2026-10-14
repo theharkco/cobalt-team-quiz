@@ -1,6 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import ContestantStage from '@/components/canvas/ContestantStage';
+import CorrectBurst from '@/components/canvas/CorrectBurst';
 import { useParams } from 'react-router-dom';
 import { Check, Send, X } from 'lucide-react';
+import { motion } from 'framer-motion';
 import QuizScreen from '@/components/quiz/QuizScreen';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,7 +18,7 @@ import { PEN_COLORS, PEN_WIDTHS } from '@/data/canvas/canvasScoring';
 
 export default function CanvasPlayerView() {
   const { sessionId, playerId } = useParams<{ sessionId: string; playerId: string }>();
-  const { game, players, strokes, guesses, live, loaded, sendLive, commitStroke } = useCanvasGame(sessionId);
+  const { game, players, strokes, guesses, live, loaded, sendLive, commitStroke, sendGuess } = useCanvasGame(sessionId);
   const now = useNow();
   const [prompt, setPrompt] = useState<{ prompt: string; answer: string } | null>(null);
   const [guess, setGuess] = useState('');
@@ -40,6 +43,14 @@ export default function CanvasPlayerView() {
   const myGuesses = useMemo(() => guesses.filter((g) => game && g.player_id === playerId
     && g.masterpiece_index === game.masterpiece_index), [guesses, game, playerId]);
   const solved = myGuesses.some((g) => g.is_correct);
+  const myPoints = myGuesses.find((g) => g.is_correct)?.points_earned ?? 0;
+  const [burst, setBurst] = useState(false);
+  const wasSolved = useRef(false);
+  useEffect(() => {
+    if (solved && !wasSolved.current) setBurst(true);
+    wasSolved.current = solved;
+  }, [solved]);
+  const endBurst = useCallback(() => setBurst(false), []);
 
   if (!loaded) return <QuizScreen eyebrow="Pass the Pencil"><p className="text-muted-foreground">Loading…</p></QuizScreen>;
   if (!game || !me) return <QuizScreen eyebrow="Pass the Pencil"><p>We couldn't find you in this game.</p></QuizScreen>;
@@ -74,9 +85,7 @@ export default function CanvasPlayerView() {
     const text = guess.trim();
     if (!text || solved) return;
     setGuess('');
-    await canvasDb.from('canvas_guesses').insert({
-      game_id: game.id, player_id: me.id, masterpiece_index: game.masterpiece_index, addition_index: game.addition_index, guess: text,
-    });
+    await sendGuess(me.id, text);
   };
 
   const visibleLive = live.filter((l) => l.key !== liveKey);
@@ -112,7 +121,8 @@ export default function CanvasPlayerView() {
 
         {!isArtist && !knowsWord && (game.phase === 'drawing' || game.phase === 'grace') ? (
           solved ? (
-            <div className="flex items-center gap-2 rounded-lg border border-secondary p-4 font-bold text-secondary"><Check /> You got it! Nice one.</div>
+            <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', bounce: 0.6 }}
+              className="flex items-center gap-2 rounded-lg border-2 border-secondary bg-secondary/15 p-4 font-display text-xl font-bold text-secondary"><Check /> You got it! +{myPoints}</motion.div>
           ) : (
             <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); submitGuess(); }}>
               <Input value={guess} onChange={(e) => setGuess(e.target.value)} placeholder="What are they drawing?" maxLength={40} autoComplete="off" className="h-12 text-lg" />
@@ -130,6 +140,8 @@ export default function CanvasPlayerView() {
             ))}
           </ul>
         )}
+        <ContestantStage game={game} players={players} guesses={guesses} now={now} meId={me.id} compact />
+        <CorrectBurst show={burst} points={myPoints} onDone={endBurst} />
       </div>
     </QuizScreen>
   );
