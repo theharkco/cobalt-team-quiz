@@ -190,7 +190,7 @@ export const formatClock = (s: number) => `${Math.floor(s / 60)}:${String(s % 60
 /** Keep broadcast-only guesses and correct flags that the database hasn't caught up with yet. */
 export function mergeGuesses(local: CanvasGuess[], db: CanvasGuess[]): CanvasGuess[] {
   const byId = new Map(local.map((g) => [g.id, g]));
-  const out = db.map((d) => {
+  const out: CanvasGuess[] = db.map((d): CanvasGuess => {
     const l = byId.get(d.id);
     return l?.is_correct && !d.is_correct
       ? { ...d, verdict: 'correct', is_correct: true, points_earned: l.points_earned }
