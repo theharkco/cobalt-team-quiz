@@ -90,7 +90,11 @@ export function useCanvasGame(sessionId: string | undefined) {
       })
       .on('broadcast', { event: 'correct' }, ({ payload }) => {
         const { id, points } = payload as { id: string; points: number };
-        setGuesses((prev) => prev.map((x) => (x.id === id ? { ...x, is_correct: true, points_earned: points } : x)));
+        setGuesses((prev) => prev.map((x) => (x.id === id ? { ...x, verdict: 'correct', is_correct: true, points_earned: points } : x)));
+      })
+      .on('broadcast', { event: 'incorrect' }, ({ payload }) => {
+        const { id } = payload as { id: string };
+        setGuesses((prev) => prev.map((x) => x.id === id && !x.is_correct ? { ...x, verdict: 'incorrect' } : x));
       })
       .subscribe();
     channelRef.current = ch;
@@ -151,13 +155,18 @@ export function useCanvasGame(sessionId: string | undefined) {
 
   /** Host only: tell everyone instantly, then persist. */
   const markCorrect = useCallback(async (id: string, points: number) => {
-    setGuesses((prev) => prev.map((x) => (x.id === id ? { ...x, is_correct: true, points_earned: points } : x)));
+    setGuesses((prev) => prev.map((x) => (x.id === id ? { ...x, verdict: 'correct', is_correct: true, points_earned: points } : x)));
     channelRef.current?.send({ type: 'broadcast', event: 'correct', payload: { id, points } });
     await canvasDb.from('canvas_guesses').update({ is_correct: true, points_earned: points }).eq('id', id);
   }, []);
 
+  const markIncorrect = useCallback((id: string) => {
+    setGuesses((prev) => prev.map((x) => x.id === id && !x.is_correct ? { ...x, verdict: 'incorrect' } : x));
+    channelRef.current?.send({ type: 'broadcast', event: 'incorrect', payload: { id } });
+  }, []);
+
   return {
-    removeStrokes, sendGuess, markCorrect,
+    removeStrokes, sendGuess, markCorrect, markIncorrect,
     game, setGame, joinCode, players, strokes, guesses, loaded,
     live: Object.values(live),
     refreshGame, refreshPlayers, refreshStrokes, refreshGuesses, sendLive, commitStroke, setLive,
@@ -179,11 +188,13 @@ export const secondsLeft = (iso: string | null, totalSeconds: number | null, now
 export const formatClock = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
 /** Keep broadcast-only guesses and correct flags that the database hasn't caught up with yet. */
-function mergeGuesses(local: CanvasGuess[], db: CanvasGuess[]): CanvasGuess[] {
+export function mergeGuesses(local: CanvasGuess[], db: CanvasGuess[]): CanvasGuess[] {
   const byId = new Map(local.map((g) => [g.id, g]));
-  const out = db.map((d) => {
+  const out: CanvasGuess[] = db.map((d): CanvasGuess => {
     const l = byId.get(d.id);
-    return l?.is_correct && !d.is_correct ? { ...d, is_correct: true, points_earned: l.points_earned } : d;
+    return l?.is_correct && !d.is_correct
+      ? { ...d, verdict: 'correct', is_correct: true, points_earned: l.points_earned }
+      : { ...d, verdict: d.is_correct ? 'correct' : l?.verdict };
   });
   const ids = new Set(db.map((d) => d.id));
   for (const l of local) if (!ids.has(l.id) && l.game_id === db[0]?.game_id) out.push(l);

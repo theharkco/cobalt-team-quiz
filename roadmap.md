@@ -1,5 +1,8 @@
 # Quizclash roadmap
 
+- [x] Pass the Pencil: immediate confirmed wrong-guess feedback, guessing above canvas, no personal guess history.
+- [x] Pass the Pencil: animated 3D contestant stage; verified host and player live flow and character motion.
+
 - [x] Pass the Pencil: adjustable artist/game time sliders and time-scaled escalating team points; verify live round.
 - [x] Pass the Pencil: guesser points decrease with elapsed word time, never with guess count; verify awards and feedback match.
 

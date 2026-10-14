@@ -51,20 +51,24 @@ export default function CanvasPlayerView() {
     wasSolved.current = solved;
   }, [solved]);
   const endBurst = useCallback(() => setBurst(false), []);
-  const solvedRef = useRef(solved);
-  solvedRef.current = solved;
-  const [wrong, setWrong] = useState<{ id: number; text: string } | null>(null);
+  const [wrong, setWrong] = useState<{ id: string; text: string } | null>(null);
+  const reacted = useRef(new Set<string>());
   const wrongTimer = useRef<ReturnType<typeof setTimeout>>();
-  const flagWrongLater = (text: string) => {
+  useEffect(() => {
+    if (solved) { setWrong(null); clearTimeout(wrongTimer.current); return; }
+    const rejected = myGuesses.filter((g) => g.verdict === 'incorrect' && !reacted.current.has(g.id));
+    if (!rejected.length) return;
+    rejected.forEach((g) => reacted.current.add(g.id));
+    const latest = rejected[rejected.length - 1];
+    setWrong({ id: latest.id, text: latest.guess });
     clearTimeout(wrongTimer.current);
-    wrongTimer.current = setTimeout(() => {
-      if (solvedRef.current) return;
-      const id = Date.now();
-      setWrong({ id, text });
-      wrongTimer.current = setTimeout(() => setWrong((w) => (w?.id === id ? null : w)), 1400);
-    }, 900);
-  };
-  useEffect(() => () => clearTimeout(wrongTimer.current), []);
+    wrongTimer.current = setTimeout(() => setWrong(null), 1400);
+  }, [myGuesses, solved]);
+  useEffect(() => {
+    setWrong(null);
+    clearTimeout(wrongTimer.current);
+    return () => clearTimeout(wrongTimer.current);
+  }, [game?.masterpiece_index]);
 
   if (!loaded) return <QuizScreen showBack={false} eyebrow="Pass the Pencil"><p className="text-muted-foreground">Loading…</p></QuizScreen>;
   if (!game || !me) return <QuizScreen showBack={false} eyebrow="Pass the Pencil"><p>We couldn't find you in this game.</p></QuizScreen>;
@@ -101,7 +105,6 @@ export default function CanvasPlayerView() {
     const text = guess.trim();
     if (!text || solved) return;
     setGuess('');
-    flagWrongLater(text);
     await sendGuess(me.id, text);
   };
 
@@ -117,6 +120,40 @@ export default function CanvasPlayerView() {
           ? <ArtistBanner turn={game.addition_index} word={prompt?.prompt} />
           : <div className="flex flex-wrap items-center justify-between gap-2"><ArtistHandoff artist={artist} />{knowsWord && prompt && <span className="text-sm text-muted-foreground">You passed the pencil · <b className="text-foreground">{prompt.prompt}</b></span>}</div>}
         <div className="flex items-center gap-3"><TurnPips game={game} /><div className="flex-1"><AdditionTimer game={game} now={now} /></div></div>
+        {!isArtist && !knowsWord && (game.phase === 'drawing' || game.phase === 'grace') ? (
+          solved ? (
+            <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', bounce: 0.6 }}
+              className="flex items-center gap-2 rounded-lg border-2 border-secondary bg-secondary/15 p-4 font-display text-xl font-bold text-secondary"><Check /> You got it! +{myPoints}</motion.div>
+          ) : (
+            <motion.form
+              animate={wrong ? { x: [0, -10, 9, -6, 4, 0] } : { x: 0 }}
+              transition={{ duration: 0.45 }}
+              className={cn('relative rounded-lg border-2 bg-card p-3 transition-colors',
+                wrong ? 'border-destructive shadow-[0_0_24px_hsl(var(--destructive)/0.45)]' : 'border-accent shadow-[0_0_24px_hsl(var(--accent)/0.3)]')}
+              onSubmit={(e) => { e.preventDefault(); submitGuess(); }}>
+              <div className="mb-2 flex min-h-7 items-center justify-between gap-2">
+                <p className="stage-kicker text-accent">Your guess</p>
+                <AnimatePresence>
+                  {wrong && (
+                    <motion.span key={wrong.id} role="status" initial={{ scale: 0, rotate: -20, opacity: 0 }} animate={{ scale: 1, rotate: 0, opacity: 1 }} exit={{ scale: 0.5, opacity: 0, y: -10 }}
+                      transition={{ type: 'spring', bounce: 0.6 }}
+                      className="flex items-center gap-1 min-w-0 truncate rounded-md bg-destructive px-2 py-0.5 text-xs font-bold text-destructive-foreground">
+                      <X className="h-4 w-4 shrink-0" /> Not quite!
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </div>
+              <div className="flex gap-2">
+                <Input value={guess} onChange={(e) => setGuess(e.target.value)} aria-label="Your guess" placeholder="What are they drawing?" maxLength={40} autoComplete="off" autoFocus
+                  className="h-14 min-w-0 flex-1 border-0 bg-background/60 font-display text-2xl font-bold focus-visible:ring-2 focus-visible:ring-accent" />
+                <motion.div whileTap={{ scale: 0.9 }}>
+                  <Button type="submit" size="lg" className="h-14 shrink-0 bg-accent px-4 text-lg text-accent-foreground hover:bg-accent/90" disabled={!guess.trim()}><Send /> Guess</Button>
+                </motion.div>
+              </div>
+            </motion.form>
+          )
+        ) : null}
+
         <div className={cn('grid gap-3', isArtist && 'lg:grid-cols-[1fr_180px]')}>
           <ArtistFrame active={isArtist}>
             <DrawingCanvas
@@ -136,50 +173,6 @@ export default function CanvasPlayerView() {
           {tools}
         </div>
 
-        {!isArtist && !knowsWord && (game.phase === 'drawing' || game.phase === 'grace') ? (
-          solved ? (
-            <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', bounce: 0.6 }}
-              className="flex items-center gap-2 rounded-lg border-2 border-secondary bg-secondary/15 p-4 font-display text-xl font-bold text-secondary"><Check /> You got it! +{myPoints}</motion.div>
-          ) : (
-            <motion.form
-              key={wrong?.id ?? 'guess'}
-              animate={wrong ? { x: [0, -14, 12, -8, 6, 0] } : { x: 0 }}
-              transition={{ duration: 0.45 }}
-              className={cn('relative rounded-xl border-2 bg-card p-3 transition-colors',
-                wrong ? 'border-destructive shadow-[0_0_24px_hsl(var(--destructive)/0.45)]' : 'border-accent shadow-[0_0_24px_hsl(var(--accent)/0.3)]')}
-              onSubmit={(e) => { e.preventDefault(); submitGuess(); }}>
-              <div className="mb-2 flex items-center justify-between">
-                <p className="stage-kicker text-accent">Your guess</p>
-                <AnimatePresence>
-                  {wrong && (
-                    <motion.span initial={{ scale: 0, rotate: -20, opacity: 0 }} animate={{ scale: 1, rotate: 0, opacity: 1 }} exit={{ scale: 0.5, opacity: 0, y: -10 }}
-                      transition={{ type: 'spring', bounce: 0.6 }}
-                      className="flex items-center gap-1 rounded-full bg-destructive px-3 py-0.5 text-sm font-bold text-destructive-foreground">
-                      <X className="h-4 w-4" /> Nope — "{wrong.text}"
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </div>
-              <div className="flex gap-2">
-                <Input value={guess} onChange={(e) => setGuess(e.target.value)} placeholder="What are they drawing?" maxLength={40} autoComplete="off" autoFocus
-                  className="h-14 flex-1 border-0 bg-background/60 font-display text-2xl font-bold focus-visible:ring-2 focus-visible:ring-accent" />
-                <motion.div whileTap={{ scale: 0.9 }}>
-                  <Button type="submit" size="lg" className="h-14 bg-accent px-6 text-lg text-accent-foreground hover:bg-accent/90" disabled={!guess.trim()}><Send /> Guess</Button>
-                </motion.div>
-              </div>
-            </motion.form>
-          )
-        ) : null}
-
-        {!knowsWord && myGuesses.length > 0 && (
-          <ul className="flex flex-wrap gap-2">
-            {myGuesses.map((g) => (
-              <li key={g.id} className={cn('flex items-center gap-1 rounded-md border px-2 py-0.5 text-sm', g.is_correct ? 'border-secondary text-secondary' : 'border-border text-muted-foreground')}>
-                {g.is_correct ? <Check className="h-3.5 w-3.5" /> : <X className="h-3.5 w-3.5" />}{g.guess}
-              </li>
-            ))}
-          </ul>
-        )}
         <ContestantStage game={game} players={players} guesses={guesses} now={now} meId={me.id} compact />
         <CorrectBurst show={burst} points={myPoints} onDone={endBurst} />
       </div>

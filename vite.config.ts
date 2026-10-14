@@ -8,6 +8,12 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    proxy: {
+      '/__l5e/assets-v1': {
+        target: 'https://id-preview--031b8b53-830b-4f2a-b14e-6e6239d0eec6.lovable.app',
+        changeOrigin: true,
+      },
+    },
     hmr: {
       overlay: false,
     },
