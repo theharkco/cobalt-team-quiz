@@ -188,7 +188,7 @@
   .pencil-main { min-width: 0; display: flex; flex-direction: column; gap: 12px; }
   .pencil-team { min-width: 0; border-left: 1px solid hsl(var(--border) / .6); padding-left: 10px; }
   .pencil-team-heading { display: flex; flex-direction: column; gap: 4px; padding-bottom: 12px; }
-  .pencil-cloud { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; padding: 16px 0; }
+  .pencil-cloud { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; padding: 16px 0; max-height: 65vh; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: hsl(var(--border)) transparent; }
   .pencil-cloud-player { min-width: 0; text-align: center; position: relative; padding-bottom: 8px; }
   .pencil-character-space { position: relative; width: 100%; height: 76px; }
   .pencil-character { margin: auto; width: 70px; }

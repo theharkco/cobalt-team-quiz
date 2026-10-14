@@ -113,7 +113,7 @@ export default function CanvasPlayerView() {
   const tools = isArtist && <DrawTools color={penColor} width={penWidth} onColor={setPenColor} onWidth={setPenWidth} />;
 
   return (
-    <QuizScreen showBack={false} eyebrow={`Pass the Pencil · Word ${game.masterpiece_index}`} contentClassName="py-5 md:py-8" corner={<span className="text-sm font-bold tabular-nums text-primary">{me.canvas_score} pts</span>}>
+    <QuizScreen showBack={false} showBackdrop={false} eyebrow={`Pencil · Word ${game.masterpiece_index}`} contentClassName="py-5 md:py-8" corner={<span className="text-sm font-bold tabular-nums text-primary">{me.canvas_score} pts</span>}>
       <div className="mx-auto w-full max-w-[1500px] space-y-4 px-3 md:px-8">
         <div className="border-b border-border/60 pb-4">
         <CanvasStats game={game} now={now} compact />
@@ -146,8 +146,8 @@ export default function CanvasPlayerView() {
                 </AnimatePresence>
               </div>
               <div className="flex gap-2">
-                <Input value={guess} onChange={(e) => setGuess(e.target.value)} aria-label="Your guess" placeholder="What are they drawing?" maxLength={40} autoComplete="off" autoFocus
-                  className="h-14 min-w-0 flex-1 border-0 bg-background/60 font-display text-2xl font-bold focus-visible:ring-2 focus-visible:ring-accent" />
+                <Input value={guess} onChange={(e) => setGuess(e.target.value)} aria-label="Your guess" placeholder="What is it?" maxLength={40} autoComplete="off" autoFocus
+                  className="h-14 min-w-0 flex-1 border-0 bg-background/60 font-display text-xl font-bold focus-visible:ring-2 focus-visible:ring-accent sm:text-2xl" />
                 <motion.div whileTap={{ scale: 0.9 }}>
                   <Button type="submit" size="lg" className="h-14 shrink-0 bg-accent px-4 text-lg text-accent-foreground hover:bg-accent/90" disabled={!guess.trim()}><Send /> Guess</Button>
                 </motion.div>

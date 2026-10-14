@@ -301,7 +301,7 @@ export default function CanvasHostView() {
   const timeUp = secondsLeftOf(game, now) === 0;
 
   return (
-    <QuizScreen eyebrow={`${TITLE} · Word ${game.masterpiece_index}`} contentClassName="py-5 md:py-8" corner={<span className="font-display text-xl font-bold tabular-nums text-primary">{joinCode}</span>}>
+    <QuizScreen showBackdrop={false} eyebrow={`Pencil · Word ${game.masterpiece_index}`} contentClassName="py-5 md:py-8" corner={<span className="font-display text-xl font-bold tabular-nums text-primary">{joinCode}</span>}>
       <div className="mx-auto w-full max-w-[1500px] space-y-5 px-3 md:px-8">
         <div className="border-b border-border/60 pb-5">
         <CanvasStats game={game} now={now} record={record} />

@@ -15,14 +15,15 @@ interface QuizScreenProps {
   showBack?: boolean;
   /** Custom back action; defaults to the front page. */
   onBack?: () => void;
+  showBackdrop?: boolean;
 }
 
-export default function QuizScreen({ children, className, contentClassName, eyebrow, corner, showBack = true, onBack }: QuizScreenProps) {
+export default function QuizScreen({ children, className, contentClassName, eyebrow, corner, showBack = true, onBack, showBackdrop = true }: QuizScreenProps) {
   const navigate = useNavigate();
   return (
     <main className={cn('quiz-screen', className)}>
       <div className="stage-grid" aria-hidden="true" />
-      <PartyBackdrop />
+      {showBackdrop && <PartyBackdrop />}
       <header className="stage-chrome">
         {showBack && (
           <motion.button type="button" aria-label="Back to the front page" onClick={onBack ?? (() => navigate('/'))}
