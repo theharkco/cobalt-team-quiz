@@ -10,6 +10,10 @@ import type { QuizQuestion } from '@/data/questionTypes';
 import { canvasDb } from '@/hooks/useCanvasGame';
 import { ArrowLeft, ArrowRight, Gamepad2, Paintbrush, PenTool, Sparkles } from 'lucide-react';
 
+// Hover/tap spring for the mode cards: no delay, so the card settles back the
+// instant the pointer leaves (the entrance stagger lives on the wrapper instead).
+const CARD_SPRING = { type: 'spring' as const, stiffness: 900, damping: 16, mass: 0.5 };
+
 const Index = () => {
   const navigate = useNavigate();
   const { createSession, joinSession, findSession, error, setError } = useQuizSession();
@@ -78,9 +82,9 @@ const Index = () => {
 
   const inputCls = 'w-full min-w-0 border-0 bg-transparent px-0 py-2 font-display text-4xl font-extrabold text-foreground outline-none placeholder:text-muted-foreground/40';
   const modes = [
-    { label: 'Host a quiz', sub: 'Big screen, every phone plays', icon: Gamepad2, cls: 'bg-accent text-accent-foreground', rot: '-rotate-2', onClick: () => setShowPicker(true) },
-    { label: 'Pass the Pencil', sub: 'Draw it together, guess it fast', icon: Paintbrush, cls: 'bg-secondary text-secondary-foreground', rot: 'rotate-1', onClick: handleHostCanvas },
-    { label: 'Make a quiz', sub: 'Your questions, your rules', icon: PenTool, cls: 'bg-quiz-blue text-primary-foreground', rot: '-rotate-1', onClick: () => navigate('/create') },
+    { label: 'Host a quiz', sub: 'Big screen, every phone plays', icon: Gamepad2, cls: 'bg-accent text-accent-foreground', tilt: -2, onClick: () => setShowPicker(true) },
+    { label: 'Pass the Pencil', sub: 'Draw it together, guess it fast', icon: Paintbrush, cls: 'bg-secondary text-secondary-foreground', tilt: 1, onClick: handleHostCanvas },
+    { label: 'Make a quiz', sub: 'Your questions, your rules', icon: PenTool, cls: 'bg-quiz-blue text-primary-foreground', tilt: -1, onClick: () => navigate('/create') },
   ];
 
   return (
@@ -141,16 +145,18 @@ const Index = () => {
 
           <div className="grid gap-4 sm:grid-cols-3">
             {modes.map((m, i) => (
-              <motion.button key={m.label} type="button" onClick={m.onClick} disabled={loading}
-                initial={{ y: 80, opacity: 0, rotate: 12 }} animate={{ y: 0, opacity: 1 }}
-                whileHover={{ y: -8, rotate: i % 2 ? 3 : -3, scale: 1.05, transition: { type: 'spring', stiffness: 700, damping: 14 } }}
-                whileTap={{ scale: 0.92, rotate: 0, transition: { duration: 0.08 } }}
-                transition={{ type: 'spring', bounce: 0.55, delay: 0.4 + i * 0.1 }}
-                className={`sticker ${m.cls} ${m.rot} flex flex-col items-start gap-2 p-4 text-left focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring disabled:opacity-50`}>
-                <m.icon className="h-7 w-7" aria-hidden />
-                <span className="font-display text-lg font-extrabold leading-tight">{m.label}</span>
-                <span className="text-sm font-semibold opacity-80">{m.sub}</span>
-              </motion.button>
+              <motion.div key={m.label} initial={{ y: 80, opacity: 0, rotate: 12 }} animate={{ y: 0, opacity: 1, rotate: m.tilt }}
+                transition={{ type: 'spring', bounce: 0.55, delay: 0.4 + i * 0.1 }}>
+                <motion.button type="button" onClick={m.onClick} disabled={loading}
+                  whileHover={{ y: -8, rotate: i % 2 ? 3 : -3, scale: 1.05, transition: { type: 'spring', stiffness: 700, damping: 14 } }}
+                  whileTap={{ scale: 0.92, rotate: 0, transition: { duration: 0.08 } }}
+                  transition={CARD_SPRING}
+                  className={`sticker ${m.cls} flex h-full w-full flex-col items-start gap-2 p-4 text-left focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring disabled:opacity-50`}>
+                  <m.icon className="h-7 w-7" aria-hidden />
+                  <span className="font-display text-lg font-extrabold leading-tight">{m.label}</span>
+                  <span className="text-sm font-semibold opacity-80">{m.sub}</span>
+                </motion.button>
+              </motion.div>
             ))}
           </div>
         </div>
