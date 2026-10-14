@@ -1,6 +1,7 @@
 # Quizclash roadmap
 
 - [ ] Pass the Pencil: adjustable artist/game time sliders and time-scaled escalating team points; verify live round.
+- [ ] Pass the Pencil: guesser points decrease with elapsed word time, never with guess count; verify awards and feedback match.
 
 - [x] Full UI redesign (graphite/cyan/lime stage system)
 - [x] Infinite Canvas co-op drawing game: host-set game length, artist rotation, prompts, live drawing, guessing, scoring, gallery, results
