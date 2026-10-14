@@ -21,7 +21,7 @@ interface Gain { word: string; points: number; artists: number }
 
 export default function CanvasHostView() {
   const { sessionId } = useParams<{ sessionId: string }>();
-  const { game, setGame, joinCode, players, strokes, guesses, live, loaded, refreshPlayers } = useCanvasGame(sessionId);
+  const { game, setGame, joinCode, players, strokes, guesses, live, loaded, refreshPlayers, markCorrect } = useCanvasGame(sessionId);
   const now = useNow();
   const canvasRef = useRef<DrawingCanvasHandle>(null);
   const [duration, setDuration] = useState(12);
@@ -183,13 +183,13 @@ export default function CanvasHostView() {
       if (correctRef.current.some((c) => c.playerId === guess.player_id)) continue;
       if (!isCorrectGuess(guess.guess, prompt.answer, prompt.alternates)) continue;
       correctRef.current.push({ playerId: guess.player_id, at: new Date(guess.created_at).getTime() });
-      canvasDb.from('canvas_guesses').update({ is_correct: true, points_earned: correctRef.current.length === 1 ? 100 : 40 }).eq('id', guess.id);
+      markCorrect(guess.id, correctRef.current.length === 1 ? 100 : 40);
       if (!graceTimer.current && g.phase === 'drawing') {
         patch({ phase: 'grace' });
         graceTimer.current = setTimeout(() => { graceTimer.current = null; resolveSuccess(); }, EXTRA_GUESS_WINDOW_MS);
       }
     }
-  }, [guesses, resolveSuccess, patch]);
+  }, [guesses, resolveSuccess, patch, markCorrect]);
 
   // Turn timeout + idle restart when players arrive
   useEffect(() => {
