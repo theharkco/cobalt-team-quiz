@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import DrawingCanvas from '@/components/canvas/DrawingCanvas';
 import CanvasResults from '@/components/canvas/CanvasResults';
-import { AdditionTimer, ArtistHandoff, CanvasStats, RevealBanner, SceneTrail } from '@/components/canvas/CanvasHud';
+import { AdditionTimer, ArtistHandoff, CanvasStats, PassBanner, RevealBanner, TurnPips } from '@/components/canvas/CanvasHud';
 import { canvasDb, useCanvasGame, useNow } from '@/hooks/useCanvasGame';
 import type { Point } from '@/types/canvas';
 import { cn } from '@/lib/utils';
@@ -23,38 +23,40 @@ export default function CanvasPlayerView() {
 
   const me = players.find((p) => p.id === playerId);
   const isArtist = !!game && game.current_artist_id === playerId && game.phase === 'drawing';
-  const additionKey = game ? `${game.masterpiece_index}-${game.addition_index}-${game.current_artist_id}` : '';
+  const knowsWord = !!game && (game.round_artist_ids ?? []).includes(playerId ?? '');
+  const roundKey = game ? `${game.masterpiece_index}-${knowsWord}` : '';
 
   useEffect(() => {
     setPrompt(null);
     setErasing(false);
-    if (!isArtist || !game) return;
+    if (!knowsWord || !game) return;
     canvasDb.rpc('get_canvas_prompt_for_artist', { _game_id: game.id, _player_id: playerId }).then(({ data }) => {
       const row = Array.isArray(data) ? data[0] : null;
       if (row) setPrompt(row);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [additionKey, isArtist]);
+  }, [roundKey]);
+  useEffect(() => { setErasing(false); }, [isArtist]);
 
   const myGuesses = useMemo(() => guesses.filter((g) => game && g.player_id === playerId
-    && g.masterpiece_index === game.masterpiece_index && g.addition_index === game.addition_index), [guesses, game, playerId]);
+    && g.masterpiece_index === game.masterpiece_index), [guesses, game, playerId]);
   const solved = myGuesses.some((g) => g.is_correct);
-  const myStrokes = useMemo(() => strokes.filter((s) => game && s.artist_id === playerId && s.addition_index === game.addition_index), [strokes, game, playerId]);
+  const myStrokes = useMemo(() => strokes.filter((s) => game && s.artist_id === playerId), [strokes, game, playerId]);
 
-  if (!loaded) return <QuizScreen eyebrow="Infinite Canvas"><p className="text-muted-foreground">Loading…</p></QuizScreen>;
-  if (!game || !me) return <QuizScreen eyebrow="Infinite Canvas"><p>We couldn't find you in this game.</p></QuizScreen>;
+  if (!loaded) return <QuizScreen eyebrow="Pass the Pencil"><p className="text-muted-foreground">Loading…</p></QuizScreen>;
+  if (!game || !me) return <QuizScreen eyebrow="Pass the Pencil"><p>We couldn't find you in this game.</p></QuizScreen>;
 
   if (game.status === 'finished') {
-    return <QuizScreen eyebrow="Infinite Canvas · Final"><CanvasResults game={game} players={players} compact /></QuizScreen>;
+    return <QuizScreen eyebrow="Pass the Pencil · Final"><CanvasResults game={game} players={players} compact /></QuizScreen>;
   }
 
   if (game.status === 'lobby') {
     return (
-      <QuizScreen eyebrow="Infinite Canvas">
+      <QuizScreen eyebrow="Pass the Pencil">
         <div className="mx-auto max-w-md space-y-4 text-center">
           <p className="stage-kicker">You're in</p>
           <p className="font-display text-5xl font-bold" style={{ color: me.color }}>{me.name}</p>
-          <p className="text-muted-foreground">When it's your turn, you'll get a secret word to draw in your own color. The rest of the time, guess what the artist is adding.</p>
+          <p className="text-muted-foreground">When the pencil comes to you, you'll see the secret word and get 15 seconds to draw in your own color. The rest of the time, guess the word!</p>
           <p className="text-sm text-muted-foreground">{players.length} players waiting for the host…</p>
         </div>
       </QuizScreen>
@@ -87,18 +89,22 @@ export default function CanvasPlayerView() {
   const visibleLive = live.filter((l) => l.key !== liveKey);
 
   return (
-    <QuizScreen eyebrow={`Masterpiece ${game.masterpiece_index}`} corner={<span className="text-sm font-bold tabular-nums" style={{ color: me.color }}>{me.canvas_score} pts</span>}>
+    <QuizScreen eyebrow={`Word ${game.masterpiece_index}`} corner={<span className="text-sm font-bold tabular-nums" style={{ color: me.color }}>{me.canvas_score} pts</span>}>
       <div className="mx-auto w-full max-w-xl space-y-3">
         <CanvasStats game={game} now={now} compact />
-        <SceneTrail scene={game.scene} />
         {isArtist ? (
           <div className="stage-panel rounded-lg border-primary p-3">
-            <p className="stage-kicker">Your secret prompt — draw only the new part</p>
-            <p className="font-display text-2xl font-bold">
-              {prompt ? <>{prompt.prompt} <span className="text-sm font-semibold text-muted-foreground">(they must guess “{prompt.answer}”)</span></> : '…'}
-            </p>
+            <p className="stage-kicker">Your turn — artist {game.addition_index} of 3. Draw:</p>
+            <p className="font-display text-3xl font-bold">{prompt ? prompt.prompt : '…'}</p>
+          </div>
+        ) : knowsWord ? (
+          <div className="stage-panel rounded-lg p-3">
+            <p className="stage-kicker">You passed the pencil — cheer them on</p>
+            <p className="font-display text-xl font-bold">{prompt?.prompt ?? '…'}</p>
+            <ArtistHandoff artist={artist} />
           </div>
         ) : <ArtistHandoff artist={artist} />}
+        <TurnPips game={game} />
         <AdditionTimer game={game} now={now} />
         <div className="relative">
           <DrawingCanvas
@@ -112,6 +118,7 @@ export default function CanvasPlayerView() {
             onCommit={onCommit}
             onEraseAt={onEraseAt}
           />
+          <PassBanner game={game} artist={artist} now={now} isMe={isArtist} />
           <RevealBanner game={game} />
         </div>
 
@@ -122,18 +129,18 @@ export default function CanvasPlayerView() {
             <Button variant="outline" disabled={!myStrokes.length} onClick={() => removeStrokes([myStrokes[myStrokes.length - 1].id])}><Undo2 /> Undo</Button>
             <Button variant="outline" disabled={!myStrokes.length} onClick={() => removeStrokes(myStrokes.map((s) => s.id))}><Trash2 /> Clear</Button>
           </div>
-        ) : game.phase === 'drawing' ? (
+        ) : !knowsWord && (game.phase === 'drawing' || game.phase === 'grace') ? (
           solved ? (
-            <div className="flex items-center gap-2 rounded-lg border border-secondary p-4 font-bold text-secondary"><Check /> You got it! Waiting for the others…</div>
+            <div className="flex items-center gap-2 rounded-lg border border-secondary p-4 font-bold text-secondary"><Check /> You got it! Nice one.</div>
           ) : (
             <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); submitGuess(); }}>
-              <Input value={guess} onChange={(e) => setGuess(e.target.value)} placeholder="What's the new addition?" maxLength={40} autoComplete="off" className="h-12 text-lg" />
+              <Input value={guess} onChange={(e) => setGuess(e.target.value)} placeholder="What are they drawing?" maxLength={40} autoComplete="off" className="h-12 text-lg" />
               <Button type="submit" size="lg" disabled={!guess.trim()}><Send /> Guess</Button>
             </form>
           )
         ) : null}
 
-        {!isArtist && myGuesses.length > 0 && (
+        {!knowsWord && myGuesses.length > 0 && (
           <ul className="flex flex-wrap gap-2">
             {myGuesses.map((g) => (
               <li key={g.id} className={cn('flex items-center gap-1 rounded-md border px-2 py-0.5 text-sm', g.is_correct ? 'border-secondary text-secondary' : 'border-border text-muted-foreground')}>

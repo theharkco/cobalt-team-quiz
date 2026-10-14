@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { Crown, Medal, Trophy } from 'lucide-react';
 import { canvasDb } from '@/hooks/useCanvasGame';
 import type { CanvasGame, CanvasMasterpiece, CanvasPlayer } from '@/types/canvas';
-import { sceneSentence } from '@/data/canvas/promptBanks';
 
 interface Props { game: CanvasGame; players: CanvasPlayer[]; compact?: boolean }
 
@@ -21,7 +20,6 @@ export default function CanvasResults({ game, players, compact }: Props) {
 
   const ranked = [...players].sort((a, b) => b.canvas_score - a.canvas_score);
   const mvp = ranked[0];
-  const longest = pieces.reduce((m, p) => Math.max(m, p.additions), 0);
   const beatRecord = previousBest !== null && game.team_score > previousBest;
 
   return (
@@ -30,12 +28,12 @@ export default function CanvasResults({ game, players, compact }: Props) {
         <p className="stage-kicker">Team score</p>
         <p className="font-display text-[clamp(3.5rem,10vw,7rem)] font-bold leading-none text-secondary tabular-nums">{game.team_score.toLocaleString()}</p>
         <p className="mt-3 font-semibold text-muted-foreground">
-          {previousBest === null ? ' ' : beatRecord ? 'New team record!' : `Record to beat: ${previousBest.toLocaleString()}`}
+          {previousBest === null ? ' ' : beatRecord ? `New team record! Previous best: ${previousBest.toLocaleString()}` : `Record to beat: ${previousBest.toLocaleString()}`}
         </p>
         <div className="mt-6 grid grid-cols-3 gap-3 border-t border-border pt-6">
-          <Stat label="Additions guessed" value={game.total_additions} />
-          <Stat label="Masterpieces" value={pieces.length} />
-          <Stat label="Longest masterpiece" value={longest} />
+          <Stat label="Words guessed" value={game.total_additions} />
+          <Stat label="Words attempted" value={game.words_attempted} />
+          <Stat label="3-artist rescues" value={game.rescue_count} />
         </div>
       </motion.section>
 
@@ -56,15 +54,15 @@ export default function CanvasResults({ game, players, compact }: Props) {
           </ol>
         </div>
         <div className="space-y-3">
-          <p className="stage-kicker flex items-center gap-2"><Trophy className="h-4 w-4" /> Masterpiece gallery</p>
-          {pieces.length === 0 && <p className="text-muted-foreground">No masterpieces were finished this time.</p>}
+          <p className="stage-kicker flex items-center gap-2"><Trophy className="h-4 w-4" /> Drawing gallery</p>
+          {pieces.length === 0 && <p className="text-muted-foreground">No drawings this time.</p>}
           <div className="grid gap-4 sm:grid-cols-2">
             {pieces.map((p) => (
               <figure key={p.id} className="stage-panel overflow-hidden rounded-lg">
-                {p.image_data && <img src={p.image_data} alt={sceneSentence(p.scene)} className="aspect-[4/3] w-full object-cover" />}
+                {p.image_data && <img src={p.image_data} alt={p.scene[0] ?? 'Drawing'} className="aspect-[4/3] w-full object-cover" />}
                 <figcaption className="space-y-1 p-3">
-                  <p className="font-semibold leading-snug">{sceneSentence(p.scene) || 'Untitled'}</p>
-                  <p className="text-xs text-muted-foreground">{p.additions} additions · {p.points} points</p>
+                  <p className="font-semibold leading-snug">{p.scene[0] || 'Untitled'}</p>
+                  <p className="text-xs text-muted-foreground">{p.additions} {p.additions === 1 ? 'artist' : 'artists'} · {p.points ? `+${p.points} points` : 'not guessed'}</p>
                 </figcaption>
               </figure>
             ))}
