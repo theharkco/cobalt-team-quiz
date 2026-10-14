@@ -75,7 +75,7 @@ export default function CanvasPlayerView() {
 
   if (game.status === 'lobby') {
     return (
-      <QuizScreen showBack={false} eyebrow="Pass the Pencil">
+      <QuizScreen showBack={false} eyebrow="Pass the Pencil" contentClassName="px-4 py-10 md:px-8 md:py-16">
         <div className="mx-auto max-w-md space-y-4 text-center">
           <p className="stage-kicker">You're in</p>
           <p className="font-display text-5xl font-bold text-primary">{me.name}</p>
@@ -108,7 +108,7 @@ export default function CanvasPlayerView() {
   const tools = isArtist && <DrawTools color={penColor} width={penWidth} onColor={setPenColor} onWidth={setPenWidth} />;
 
   return (
-    <QuizScreen showBack={false} eyebrow={`Word ${game.masterpiece_index}`} corner={<span className="text-sm font-bold tabular-nums text-primary">{me.canvas_score} pts</span>}>
+    <QuizScreen showBack={false} eyebrow={`Word ${game.masterpiece_index}`} contentClassName="py-8" corner={<span className="text-sm font-bold tabular-nums text-primary">{me.canvas_score} pts</span>}>
       <div className="mx-auto w-full max-w-5xl space-y-3 px-3">
         <CanvasStats game={game} now={now} compact />
         {isArtist
