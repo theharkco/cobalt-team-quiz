@@ -65,6 +65,241 @@ export type Database = {
           },
         ]
       }
+      canvas_games: {
+        Row: {
+          addition_index: number
+          addition_seconds: number
+          addition_started_at: string | null
+          created_at: string
+          current_artist_id: string | null
+          duration_seconds: number
+          game_ends_at: string | null
+          id: string
+          last_artist_id: string | null
+          last_points: number
+          last_result: string | null
+          masterpiece_index: number
+          phase: string
+          revealed_answer: string | null
+          scene: Json
+          session_id: string
+          status: string
+          team_score: number
+          total_additions: number
+        }
+        Insert: {
+          addition_index?: number
+          addition_seconds?: number
+          addition_started_at?: string | null
+          created_at?: string
+          current_artist_id?: string | null
+          duration_seconds?: number
+          game_ends_at?: string | null
+          id?: string
+          last_artist_id?: string | null
+          last_points?: number
+          last_result?: string | null
+          masterpiece_index?: number
+          phase?: string
+          revealed_answer?: string | null
+          scene?: Json
+          session_id: string
+          status?: string
+          team_score?: number
+          total_additions?: number
+        }
+        Update: {
+          addition_index?: number
+          addition_seconds?: number
+          addition_started_at?: string | null
+          created_at?: string
+          current_artist_id?: string | null
+          duration_seconds?: number
+          game_ends_at?: string | null
+          id?: string
+          last_artist_id?: string | null
+          last_points?: number
+          last_result?: string | null
+          masterpiece_index?: number
+          phase?: string
+          revealed_answer?: string | null
+          scene?: Json
+          session_id?: string
+          status?: string
+          team_score?: number
+          total_additions?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "canvas_games_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: true
+            referencedRelation: "quiz_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      canvas_guesses: {
+        Row: {
+          addition_index: number
+          created_at: string
+          game_id: string
+          guess: string
+          id: string
+          is_correct: boolean
+          masterpiece_index: number
+          player_id: string
+          points_earned: number
+        }
+        Insert: {
+          addition_index: number
+          created_at?: string
+          game_id: string
+          guess: string
+          id?: string
+          is_correct?: boolean
+          masterpiece_index: number
+          player_id: string
+          points_earned?: number
+        }
+        Update: {
+          addition_index?: number
+          created_at?: string
+          game_id?: string
+          guess?: string
+          id?: string
+          is_correct?: boolean
+          masterpiece_index?: number
+          player_id?: string
+          points_earned?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "canvas_guesses_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "canvas_games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      canvas_masterpieces: {
+        Row: {
+          additions: number
+          created_at: string
+          game_id: string
+          id: string
+          image_data: string | null
+          masterpiece_index: number
+          points: number
+          scene: Json
+        }
+        Insert: {
+          additions?: number
+          created_at?: string
+          game_id: string
+          id?: string
+          image_data?: string | null
+          masterpiece_index: number
+          points?: number
+          scene?: Json
+        }
+        Update: {
+          additions?: number
+          created_at?: string
+          game_id?: string
+          id?: string
+          image_data?: string | null
+          masterpiece_index?: number
+          points?: number
+          scene?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "canvas_masterpieces_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "canvas_games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      canvas_secrets: {
+        Row: {
+          alternates: Json
+          answer: string | null
+          game_id: string
+          host_token: string
+          prompt: string | null
+        }
+        Insert: {
+          alternates?: Json
+          answer?: string | null
+          game_id: string
+          host_token: string
+          prompt?: string | null
+        }
+        Update: {
+          alternates?: Json
+          answer?: string | null
+          game_id?: string
+          host_token?: string
+          prompt?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "canvas_secrets_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: true
+            referencedRelation: "canvas_games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      canvas_strokes: {
+        Row: {
+          addition_index: number
+          artist_id: string
+          color: string
+          created_at: string
+          game_id: string
+          id: string
+          masterpiece_index: number
+          points: Json
+          width: number
+        }
+        Insert: {
+          addition_index: number
+          artist_id: string
+          color: string
+          created_at?: string
+          game_id: string
+          id?: string
+          masterpiece_index: number
+          points: Json
+          width?: number
+        }
+        Update: {
+          addition_index?: number
+          artist_id?: string
+          color?: string
+          created_at?: string
+          game_id?: string
+          id?: string
+          masterpiece_index?: number
+          points?: Json
+          width?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "canvas_strokes_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "canvas_games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       custom_quiz_questions: {
         Row: {
           acceptable_answers: Json | null
@@ -174,24 +409,30 @@ export type Database = {
       }
       players: {
         Row: {
+          canvas_score: number
           color: string
           created_at: string
+          draw_count: number
           id: string
           name: string
           score: number
           session_id: string
         }
         Insert: {
+          canvas_score?: number
           color?: string
           created_at?: string
+          draw_count?: number
           id?: string
           name: string
           score?: number
           session_id: string
         }
         Update: {
+          canvas_score?: number
           color?: string
           created_at?: string
+          draw_count?: number
           id?: string
           name?: string
           score?: number
@@ -211,6 +452,7 @@ export type Database = {
         Row: {
           created_at: string
           current_question: number
+          game_mode: string
           id: string
           join_code: string
           question_started_at: string | null
@@ -220,6 +462,7 @@ export type Database = {
         Insert: {
           created_at?: string
           current_question?: number
+          game_mode?: string
           id?: string
           join_code: string
           question_started_at?: string | null
@@ -229,6 +472,7 @@ export type Database = {
         Update: {
           created_at?: string
           current_question?: number
+          game_mode?: string
           id?: string
           join_code?: string
           question_started_at?: string | null
@@ -250,7 +494,31 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_canvas_prompt_for_artist: {
+        Args: { _game_id: string; _player_id: string }
+        Returns: {
+          answer: string
+          prompt: string
+        }[]
+      }
+      get_canvas_prompt_for_host: {
+        Args: { _game_id: string; _host_token: string }
+        Returns: {
+          alternates: Json
+          answer: string
+          prompt: string
+        }[]
+      }
+      set_canvas_prompt: {
+        Args: {
+          _alternates: Json
+          _answer: string
+          _game_id: string
+          _host_token: string
+          _prompt: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
