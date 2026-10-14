@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import DrawingCanvas from '@/components/canvas/DrawingCanvas';
 import CanvasResults from '@/components/canvas/CanvasResults';
-import { AdditionTimer, ArtistHandoff, CanvasStats, PassBanner, RevealBanner, TurnPips } from '@/components/canvas/CanvasHud';
+import { AdditionTimer, ArtistBanner, ArtistFrame, CanvasStats, PassBanner, RevealBanner, TurnPips } from '@/components/canvas/CanvasHud';
 import { canvasDb, useCanvasGame, useNow } from '@/hooks/useCanvasGame';
 import type { Point } from '@/types/canvas';
 import { cn } from '@/lib/utils';
@@ -15,7 +15,7 @@ const PEN_WIDTH = 0.008;
 
 export default function CanvasPlayerView() {
   const { sessionId, playerId } = useParams<{ sessionId: string; playerId: string }>();
-  const { game, players, strokes, guesses, live, loaded, sendLive, commitStroke } = useCanvasGame(sessionId);
+  const { game, players, strokes, guesses, live, loaded, sendLive, commitStroke, removeStrokes } = useCanvasGame(sessionId);
   const now = useNow();
   const [prompt, setPrompt] = useState<{ prompt: string; answer: string } | null>(null);
   const [guess, setGuess] = useState('');
@@ -71,7 +71,6 @@ export default function CanvasPlayerView() {
     sendLive({ key: liveKey, color: me.color, width: PEN_WIDTH, points: [] }, true);
     await commitStroke(me.id, me.color, PEN_WIDTH, points);
   };
-  const removeStrokes = (ids: string[]) => ids.length && canvasDb.from('canvas_strokes').delete().in('id', ids);
   const onEraseAt = ([x, y]: Point) => {
     const hit = myStrokes.find((s) => s.points.some(([px, py]) => Math.hypot(px - x, py - y) < 0.025));
     if (hit) removeStrokes([hit.id]);
@@ -88,48 +87,42 @@ export default function CanvasPlayerView() {
 
   const visibleLive = live.filter((l) => l.key !== liveKey);
 
+  const tools = isArtist && (
+    <div className="grid grid-cols-4 gap-2 lg:grid-cols-1">
+      <Button variant={!erasing ? 'default' : 'outline'} onClick={() => setErasing(false)}><Pencil /> Pen</Button>
+      <Button variant={erasing ? 'default' : 'outline'} onClick={() => setErasing(true)}><Eraser /> Erase</Button>
+      <Button variant="outline" disabled={!myStrokes.length} onClick={() => removeStrokes([myStrokes[myStrokes.length - 1].id])}><Undo2 /> Undo</Button>
+      <Button variant="outline" disabled={!myStrokes.length} onClick={() => removeStrokes(myStrokes.map((s) => s.id))}><Trash2 /> Clear</Button>
+    </div>
+  );
+
   return (
     <QuizScreen eyebrow={`Word ${game.masterpiece_index}`} corner={<span className="text-sm font-bold tabular-nums" style={{ color: me.color }}>{me.canvas_score} pts</span>}>
-      <div className="mx-auto w-full max-w-xl space-y-3">
+      <div className="mx-auto w-full max-w-5xl space-y-3 px-3">
         <CanvasStats game={game} now={now} compact />
-        {isArtist ? (
-          <div className="stage-panel rounded-lg border-primary p-3">
-            <p className="stage-kicker">Your turn — artist {game.addition_index} of 3. Draw:</p>
-            <p className="font-display text-3xl font-bold">{prompt ? prompt.prompt : '…'}</p>
-          </div>
-        ) : knowsWord ? (
-          <div className="stage-panel rounded-lg p-3">
-            <p className="stage-kicker">You passed the pencil — cheer them on</p>
-            <p className="font-display text-xl font-bold">{prompt?.prompt ?? '…'}</p>
-            <ArtistHandoff artist={artist} />
-          </div>
-        ) : <ArtistHandoff artist={artist} />}
-        <TurnPips game={game} />
-        <AdditionTimer game={game} now={now} />
-        <div className="relative">
-          <DrawingCanvas
-            strokes={strokes}
-            live={isArtist ? live : visibleLive}
-            editable={isArtist}
-            color={me.color}
-            width={PEN_WIDTH}
-            erasing={erasing}
-            onLive={onLive}
-            onCommit={onCommit}
-            onEraseAt={onEraseAt}
-          />
-          <PassBanner game={game} artist={artist} now={now} isMe={isArtist} />
-          <RevealBanner game={game} />
+        <ArtistBanner artist={artist} isMe={isArtist} turn={game.addition_index} word={knowsWord ? prompt?.prompt : undefined} passed={knowsWord && !isArtist} />
+        <div className="flex items-center gap-3"><TurnPips game={game} /><div className="flex-1"><AdditionTimer game={game} now={now} /></div></div>
+        <div className={cn('grid gap-3', isArtist && 'lg:grid-cols-[1fr_140px]')}>
+          <ArtistFrame artist={artist}>
+            <DrawingCanvas
+              strokes={strokes}
+              live={isArtist ? live : visibleLive}
+              editable={isArtist}
+              color={me.color}
+              width={PEN_WIDTH}
+              erasing={erasing}
+              onLive={onLive}
+              onCommit={onCommit}
+              onEraseAt={onEraseAt}
+              className="rounded-md border-0"
+            />
+            <PassBanner game={game} artist={artist} now={now} isMe={isArtist} />
+            <RevealBanner game={game} />
+          </ArtistFrame>
+          {tools}
         </div>
 
-        {isArtist ? (
-          <div className="grid grid-cols-4 gap-2">
-            <Button variant={!erasing ? 'default' : 'outline'} onClick={() => setErasing(false)}><Pencil /> Pen</Button>
-            <Button variant={erasing ? 'default' : 'outline'} onClick={() => setErasing(true)}><Eraser /> Erase</Button>
-            <Button variant="outline" disabled={!myStrokes.length} onClick={() => removeStrokes([myStrokes[myStrokes.length - 1].id])}><Undo2 /> Undo</Button>
-            <Button variant="outline" disabled={!myStrokes.length} onClick={() => removeStrokes(myStrokes.map((s) => s.id))}><Trash2 /> Clear</Button>
-          </div>
-        ) : !knowsWord && (game.phase === 'drawing' || game.phase === 'grace') ? (
+        {!isArtist && !knowsWord && (game.phase === 'drawing' || game.phase === 'grace') ? (
           solved ? (
             <div className="flex items-center gap-2 rounded-lg border border-secondary p-4 font-bold text-secondary"><Check /> You got it! Nice one.</div>
           ) : (

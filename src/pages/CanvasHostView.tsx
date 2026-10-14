@@ -6,7 +6,7 @@ import QuizScreen from '@/components/quiz/QuizScreen';
 import { Button } from '@/components/ui/button';
 import DrawingCanvas, { type DrawingCanvasHandle } from '@/components/canvas/DrawingCanvas';
 import CanvasResults from '@/components/canvas/CanvasResults';
-import { AdditionTimer, ArtistHandoff, CanvasStats, PassBanner, RevealBanner, TurnPips } from '@/components/canvas/CanvasHud';
+import { AdditionTimer, ArtistBanner, ArtistFrame, CanvasStats, PassBanner, RevealBanner, TurnPips } from '@/components/canvas/CanvasHud';
 import { canvasDb, useCanvasGame, useNow } from '@/hooks/useCanvasGame';
 import { EXTRA_GUESS_WINDOW_MS, MAX_ARTISTS, TURN_SECONDS, individualAwards, isCorrectGuess, pickArtist, teamPointsForTurn } from '@/data/canvas/canvasScoring';
 import { pickPrompt, type CanvasPrompt } from '@/data/canvas/promptBanks';
@@ -36,6 +36,7 @@ export default function CanvasHostView() {
   const correctRef = useRef<{ playerId: string; at: number }[]>([]);
   const graceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const busyRef = useRef(false);
+  const waitingRef = useRef(false);
   const guessesRef = useRef(guesses);
   guessesRef.current = guesses;
 
@@ -85,7 +86,8 @@ export default function CanvasHostView() {
     if (!g || !token) return;
     const roster = await fetchRoster(g);
     const artistId = await assignArtist(roster, []);
-    if (!artistId) { await patch({ phase: 'idle', current_artist_id: null }); busyRef.current = false; return; }
+    if (!artistId) { waitingRef.current = true; await patch({ phase: 'idle', current_artist_id: null }); busyRef.current = false; return; }
+    waitingRef.current = false;
     const prompt = pickPrompt(g.used_answers ?? []);
     promptRef.current = prompt;
     processedRef.current = new Set(guessesRef.current.map((x) => x.id));
@@ -196,7 +198,7 @@ export default function CanvasHostView() {
       const end = new Date(game.addition_started_at).getTime() + game.addition_seconds * 1000;
       if (now >= end) passPencil();
     }
-    if (game.phase === 'idle' && players.length > 1) { busyRef.current = true; startRound(); }
+    if (game.phase === 'idle' && waitingRef.current && players.length > 1) { busyRef.current = true; startRound(); }
   }, [now, game, players.length, passPencil, startRound]);
 
   const startGame = async () => {
@@ -264,24 +266,23 @@ export default function CanvasHostView() {
 
   return (
     <QuizScreen eyebrow={`${TITLE} · Word ${game.masterpiece_index}`} corner={<span className="font-display text-xl font-bold tracking-widest text-primary">{joinCode}</span>}>
-      <div className="mx-auto w-full max-w-7xl space-y-5">
+      <div className="mx-auto w-full max-w-[1700px] space-y-4 px-4 md:px-8">
         <CanvasStats game={game} now={now} record={record} />
-        <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
+        <div className="grid gap-5 xl:grid-cols-[1fr_300px]">
           <div className="space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <ArtistHandoff artist={artist} />
-              <TurnPips game={game} />
-            </div>
+            <ArtistBanner artist={artist} turn={game.addition_index} large />
+            <div className="flex items-center gap-4"><TurnPips game={game} /><div className="flex-1"><AdditionTimer game={game} now={now} /></div></div>
             {game.phase === 'grace' && <p className="text-sm font-bold text-secondary">{correctNow.length} got it! 2 seconds for anyone else…</p>}
             {timeUp && game.phase === 'drawing' && <p className="text-sm font-bold text-accent">Time's up — last turn!</p>}
-            <AdditionTimer game={game} now={now} />
-            <div className="relative">
-              <DrawingCanvas ref={canvasRef} strokes={strokes} live={live} />
+            <div className="mx-auto w-full max-w-[calc((100vh-320px)*4/3)] min-w-[min(100%,640px)]">
+            <ArtistFrame artist={artist}>
+              <DrawingCanvas ref={canvasRef} strokes={strokes} live={live} className="rounded-md border-0" />
               <PassBanner game={game} artist={artist} now={now} />
               <RevealBanner game={game} />
               {game.phase === 'idle' && (
                 <div className="absolute inset-0 flex items-center justify-center bg-background/70"><p className="font-semibold">Waiting for at least 2 players…</p></div>
               )}
+            </ArtistFrame>
             </div>
           </div>
           <aside className="space-y-5">
