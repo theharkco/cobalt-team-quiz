@@ -5,3 +5,4 @@
 - Canvas prompts live only in `canvas_secrets` and are read through security-definer functions (artist or host token). Why: guessers' phones must not see the answer.
 - Live in-progress strokes use Realtime broadcast; only finished strokes are stored. Why: smooth drawing without a database write per point.
 - Pass the Pencil reuses canvas columns: `masterpiece_index` = word/round, `addition_index` = artist turn (1-3), `round_artist_ids` = everyone who saw the word. Why: additive schema, no renames.
+- Canvas timing settings persist in the existing game duration fields; all team-point displays and host scoring use the shared duration-aware scoring function. Why: timing survives refreshes and displayed awards match saved scores.

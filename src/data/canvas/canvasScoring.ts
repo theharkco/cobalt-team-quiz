@@ -4,8 +4,12 @@ export const PEN_WIDTHS = [{ label: 'Thin', value: 0.004 }, { label: 'Medium', v
 export const MAX_ARTISTS = 3;
 export const EXTRA_GUESS_WINDOW_MS = 2000;
 
-/** Team points for a word guessed during artist turn 1, 2 or 3. */
-export const teamPointsForTurn = (turn: number) => 100 * Math.min(MAX_ARTISTS, Math.max(1, turn));
+/** Later artists earn more; shorter turns increase difficulty. Round to whole points. */
+export const teamPointsForTurn = (turn: number, seconds = TURN_SECONDS) => {
+  const artist = Number.isFinite(turn) ? Math.min(MAX_ARTISTS, Math.max(1, Math.floor(turn))) : 1;
+  const duration = Number.isFinite(seconds) && seconds > 0 ? seconds : TURN_SECONDS;
+  return Math.round(100 * artist * TURN_SECONDS / duration);
+};
 
 export interface IndividualAward { playerId: string; points: number }
 

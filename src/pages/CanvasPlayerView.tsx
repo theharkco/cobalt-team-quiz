@@ -79,7 +79,8 @@ export default function CanvasPlayerView() {
         <div className="mx-auto max-w-md space-y-4 text-center">
           <p className="stage-kicker">You're in</p>
           <p className="font-display text-5xl font-bold text-primary">{me.name}</p>
-          <p className="text-muted-foreground">When the pencil comes to you, you'll see the secret word and get 30 seconds to draw. Pick any color you like. The rest of the time, guess the word!</p>
+          <p className="text-muted-foreground">When the pencil comes to you, you'll see the secret word and get {game.addition_seconds} seconds to draw. Pick any color you like. The rest of the time, guess the word!</p>
+          <p className="font-display font-bold text-primary">{game.addition_seconds}s per artist · {game.duration_seconds / 60} min game</p>
           <p className="text-sm text-muted-foreground">{players.length} players waiting for the host…</p>
         </div>
       </QuizScreen>
