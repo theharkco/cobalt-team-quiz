@@ -405,7 +405,7 @@ export default function PlayerView() {
   // LOBBY
   if (!session || session.status === 'lobby') {
     return (
-      <QuizScreen eyebrow="Team checked in" contentClassName="max-w-md px-5 py-10">
+      <QuizScreen showBack={false} eyebrow="Team checked in" contentClassName="max-w-md px-5 py-10">
         <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex min-h-[calc(100vh-8rem)] flex-col justify-center">
           <p className="stage-kicker flex items-center gap-2"><span className="status-dot"/> Connected to the room</p>
           <div className="my-8 border-y border-border py-10"><p className="text-sm text-muted-foreground">Playing as</p><h1 className="mt-2 break-words font-display text-5xl font-bold">{player?.name}</h1></div>
@@ -423,7 +423,7 @@ export default function PlayerView() {
     const isCorrectResult = resultKind === 'exact' || resultKind === 'close';
 
     return (
-      <QuizScreen eyebrow={`Question ${session.current_question + 1} / ${quizQuestions.length}`} corner={<div className="rounded-md bg-muted px-3 py-1.5 text-sm font-bold tabular-nums"><span className="text-secondary">{player?.score ?? 0}</span> pts</div>} contentClassName="max-w-xl px-4 py-5">
+      <QuizScreen showBack={false} eyebrow={`Question ${session.current_question + 1} / ${quizQuestions.length}`} corner={<div className="rounded-md bg-muted px-3 py-1.5 text-sm font-bold tabular-nums"><span className="text-secondary">{player?.score ?? 0}</span> pts</div>} contentClassName="max-w-xl px-4 py-5">
         <AnimatePresence>
           {isTransitioning && (
             <QuestionTransitionOverlay questionNumber={session.current_question + 1} />
@@ -538,7 +538,7 @@ export default function PlayerView() {
   if (session.status === 'leaderboard') {
     const rank = players.findIndex((p) => p.id === playerId) + 1;
     return (
-      <QuizScreen eyebrow="Round standings" contentClassName="max-w-md px-5 py-10">
+      <QuizScreen showBack={false} eyebrow="Round standings" contentClassName="max-w-md px-5 py-10">
         <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex min-h-[calc(100vh-8rem)] flex-col justify-center">
           <p className="stage-kicker">Current position</p>
           <div className="my-7 flex items-end gap-5 border-y border-border py-8"><span className="font-display text-8xl font-bold text-primary tabular-nums">{String(rank).padStart(2, '0')}</span><span className="mb-3 font-display text-2xl font-bold text-muted-foreground">of {players.length}</span></div>
@@ -552,7 +552,7 @@ export default function PlayerView() {
   // FINISHED
   if (session.status === 'finished') {
     return (
-      <QuizScreen eyebrow="Final results" contentClassName="max-w-3xl px-4 py-10 md:px-8">
+      <QuizScreen showBack={false} eyebrow="Final results" contentClassName="max-w-3xl px-4 py-10 md:px-8">
         <div className="flex min-h-[calc(100vh-9rem)] w-full flex-col items-center justify-center gap-8">
           <Leaderboard players={players} isFinal />
           <Button

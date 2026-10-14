@@ -66,16 +66,16 @@ export default function CanvasPlayerView() {
   };
   useEffect(() => () => clearTimeout(wrongTimer.current), []);
 
-  if (!loaded) return <QuizScreen eyebrow="Pass the Pencil"><p className="text-muted-foreground">Loading…</p></QuizScreen>;
-  if (!game || !me) return <QuizScreen eyebrow="Pass the Pencil"><p>We couldn't find you in this game.</p></QuizScreen>;
+  if (!loaded) return <QuizScreen showBack={false} eyebrow="Pass the Pencil"><p className="text-muted-foreground">Loading…</p></QuizScreen>;
+  if (!game || !me) return <QuizScreen showBack={false} eyebrow="Pass the Pencil"><p>We couldn't find you in this game.</p></QuizScreen>;
 
   if (game.status === 'finished') {
-    return <QuizScreen eyebrow="Pass the Pencil · Final"><CanvasResults game={game} players={players} compact /></QuizScreen>;
+    return <QuizScreen showBack={false} eyebrow="Pass the Pencil · Final"><CanvasResults game={game} players={players} compact /></QuizScreen>;
   }
 
   if (game.status === 'lobby') {
     return (
-      <QuizScreen eyebrow="Pass the Pencil">
+      <QuizScreen showBack={false} eyebrow="Pass the Pencil">
         <div className="mx-auto max-w-md space-y-4 text-center">
           <p className="stage-kicker">You're in</p>
           <p className="font-display text-5xl font-bold text-primary">{me.name}</p>
@@ -108,7 +108,7 @@ export default function CanvasPlayerView() {
   const tools = isArtist && <DrawTools color={penColor} width={penWidth} onColor={setPenColor} onWidth={setPenWidth} />;
 
   return (
-    <QuizScreen eyebrow={`Word ${game.masterpiece_index}`} corner={<span className="text-sm font-bold tabular-nums text-primary">{me.canvas_score} pts</span>}>
+    <QuizScreen showBack={false} eyebrow={`Word ${game.masterpiece_index}`} corner={<span className="text-sm font-bold tabular-nums text-primary">{me.canvas_score} pts</span>}>
       <div className="mx-auto w-full max-w-5xl space-y-3 px-3">
         <CanvasStats game={game} now={now} compact />
         {isArtist
