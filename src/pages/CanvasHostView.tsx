@@ -269,7 +269,7 @@ export default function CanvasHostView() {
     <QuizScreen eyebrow={`${TITLE} · Word ${game.masterpiece_index}`} corner={<span className="font-display text-xl font-bold tracking-widest text-primary">{joinCode}</span>}>
       <div className="mx-auto w-full max-w-[1700px] space-y-4 px-4 md:px-8">
         <CanvasStats game={game} now={now} record={record} />
-        <div className="grid gap-5 xl:grid-cols-[1fr_300px]">
+        <div className="grid gap-5 xl:grid-cols-[1fr_380px]">
           <div className="space-y-3">
             <ArtistHandoff artist={artist} />
             <div className="flex items-center gap-4"><TurnPips game={game} /><div className="flex-1"><AdditionTimer game={game} now={now} /></div></div>
@@ -286,9 +286,9 @@ export default function CanvasHostView() {
               )}
             </div>
             </div>
-            <ContestantStage game={game} players={players} guesses={guesses} now={now} />
           </div>
           <aside className="space-y-5">
+              <ContestantStage game={game} players={players} guesses={guesses} now={now} />
             <div className="stage-panel rounded-lg p-4">
               <p className="stage-kicker mb-3 flex items-center gap-2"><TrendingUp className="h-4 w-4 text-secondary" /> Recent team gains</p>
               {gains.length === 0 && <p className="text-sm text-muted-foreground">None yet.</p>}
