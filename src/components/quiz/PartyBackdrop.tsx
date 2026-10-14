@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 
 const SHAPES = [
@@ -28,9 +29,10 @@ export default function PartyBackdrop() {
   );
 }
 
-/** Brand wordmark whose letters bounce in and wiggle. */
+/** Brand wordmark whose letters bounce in and wiggle. Hover reacts instantly. */
 export function BouncyWord({ text, className }: { text: string; className?: string }) {
   const reduce = useReducedMotion();
+  const [entered, setEntered] = useState(false);
   return (
     <span className={className} aria-label={text}>
       {text.split('').map((ch, i) => (
@@ -41,7 +43,8 @@ export function BouncyWord({ text, className }: { text: string; className?: stri
           initial={{ y: -60, opacity: 0, rotate: -20 }}
           animate={{ y: 0, opacity: 1, rotate: 0 }}
           whileHover={reduce ? undefined : { y: -10, rotate: i % 2 ? 10 : -10, scale: 1.2 }}
-          transition={{ type: 'spring', bounce: 0.65, delay: i * 0.05 }}
+          onAnimationComplete={() => setEntered(true)}
+          transition={entered ? { type: 'spring', bounce: 0.65 } : { type: 'spring', bounce: 0.65, delay: i * 0.05 }}
         >
           {ch === ' ' ? '\u00A0' : ch}
         </motion.span>
