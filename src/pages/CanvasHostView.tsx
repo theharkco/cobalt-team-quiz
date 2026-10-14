@@ -27,6 +27,7 @@ export default function CanvasHostView() {
   const canvasRef = useRef<DrawingCanvasHandle>(null);
   const [duration, setDuration] = useState(12);
   const [artistSeconds, setArtistSeconds] = useState(TURN_SECONDS);
+  const settingsGameId = useRef<string | null>(null);
   const [record, setRecord] = useState<number | null>(null);
   const [gains, setGains] = useState<Gain[]>([]);
 
@@ -43,10 +44,11 @@ export default function CanvasHostView() {
   guessesRef.current = guesses;
 
   useEffect(() => {
-    if (!game) return;
+    if (!game || settingsGameId.current === game.id) return;
+    settingsGameId.current = game.id;
     setDuration(game.duration_seconds / 60);
     setArtistSeconds(game.addition_seconds);
-  }, [game?.duration_seconds, game?.addition_seconds]);
+  }, [game]);
 
   useEffect(() => {
     canvasDb.from('canvas_games').select('team_score').eq('status', 'finished').order('team_score', { ascending: false }).limit(1)
