@@ -4,6 +4,7 @@ import type { CanvasGame, CanvasPlayer } from '@/types/canvas';
 import { MAX_ARTISTS, PEN_COLORS, PEN_WIDTHS, teamPointsForTurn } from '@/data/canvas/canvasScoring';
 import { formatClock, secondsLeft } from '@/hooks/useCanvasGame';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 export function CanvasStats({ game, now, record, compact }: { game: CanvasGame; now: number; record?: number | null; compact?: boolean }) {
   const remaining = secondsLeft(game.game_ends_at, null, now);
