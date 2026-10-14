@@ -22,6 +22,10 @@ function nextLine(current: string) {
 /**
  * The one-liner under the front-page title: types a sentence out character by
  * character, holds it, wipes it, and starts a new random sentence.
+ *
+ * `erasing` decides which direction the text moves, so the typing branch must
+ * not run while wiping — otherwise a deleted character is instantly retyped and
+ * the sentence never changes.
  */
 export default function TypewriterTagline() {
   const [line, setLine] = useState(() => pickTagline());
@@ -40,23 +44,23 @@ export default function TypewriterTagline() {
       return () => clearTimeout(t);
     }
 
+    if (erasing) {
+      if (shown.length > 0) {
+        const t = setTimeout(() => setShown((s) => s.slice(0, -1)), ERASE_MS);
+        return () => clearTimeout(t);
+      }
+      setErasing(false);
+      setLine(nextLine(line));
+      return;
+    }
+
     if (shown.length < line.length) {
       const t = setTimeout(() => setShown(line.slice(0, shown.length + 1)), TYPE_MS);
       return () => clearTimeout(t);
     }
 
-    if (!erasing) {
-      const t = setTimeout(() => setErasing(true), HOLD_MS);
-      return () => clearTimeout(t);
-    }
-
-    if (shown.length > 0) {
-      const t = setTimeout(() => setShown((s) => s.slice(0, -1)), ERASE_MS);
-      return () => clearTimeout(t);
-    }
-
-    setErasing(false);
-    setLine(nextLine(line));
+    const t = setTimeout(() => setErasing(true), HOLD_MS);
+    return () => clearTimeout(t);
   }, [shown, line, erasing, reduced]);
 
   return (
