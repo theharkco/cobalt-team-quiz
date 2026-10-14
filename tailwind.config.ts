@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ["Space Grotesk", "sans-serif"],
-        body: ["Manrope", "sans-serif"],
+        display: ["Bricolage Grotesque", "sans-serif"],
+        body: ["Figtree", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
