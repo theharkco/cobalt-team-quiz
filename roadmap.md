@@ -1,8 +1,8 @@
 # Quizclash roadmap
 
-- [ ] Compact score-ranked characters with unique colors/faces and animated red wrong-guess bubbles.
-- [ ] Audit all drawing prompts and rebalance for amateurs.
-- [ ] Make passed-pencil guessing restriction obvious and verify in a live handoff.
+- [x] Compact score-ranked characters with twenty distinct rendered colors, six faces and animated red rejection bubbles; verified with twenty live players.
+- [x] Audited all drawing prompts; replaced abstract/overly trivial words and weighted selection toward concrete medium prompts.
+- [x] Clear passed-pencil guessing restriction; verified live handoff, next-word reset and descending persisted scores.
 
 - [x] Replace 3D contestants with expressive floating 2D characters; verified confirmed verdict bubbles and hidden correct answers in a four-player round.
 - [x] Improve in-game layout; verified team stays right of the canvas with no overflow at 390, 768 and 1280px.
