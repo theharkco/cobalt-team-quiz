@@ -3,7 +3,7 @@ import ContestantStage from '@/components/canvas/ContestantStage';
 import CorrectBurst from '@/components/canvas/CorrectBurst';
 import { useParams } from 'react-router-dom';
 import { Check, Send, X } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import QuizScreen from '@/components/quiz/QuizScreen';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -51,6 +51,20 @@ export default function CanvasPlayerView() {
     wasSolved.current = solved;
   }, [solved]);
   const endBurst = useCallback(() => setBurst(false), []);
+  const solvedRef = useRef(solved);
+  solvedRef.current = solved;
+  const [wrong, setWrong] = useState<{ id: number; text: string } | null>(null);
+  const wrongTimer = useRef<ReturnType<typeof setTimeout>>();
+  const flagWrongLater = (text: string) => {
+    clearTimeout(wrongTimer.current);
+    wrongTimer.current = setTimeout(() => {
+      if (solvedRef.current) return;
+      const id = Date.now();
+      setWrong({ id, text });
+      wrongTimer.current = setTimeout(() => setWrong((w) => (w?.id === id ? null : w)), 1400);
+    }, 900);
+  };
+  useEffect(() => () => clearTimeout(wrongTimer.current), []);
 
   if (!loaded) return <QuizScreen eyebrow="Pass the Pencil"><p className="text-muted-foreground">Loading…</p></QuizScreen>;
   if (!game || !me) return <QuizScreen eyebrow="Pass the Pencil"><p>We couldn't find you in this game.</p></QuizScreen>;
@@ -85,6 +99,7 @@ export default function CanvasPlayerView() {
     const text = guess.trim();
     if (!text || solved) return;
     setGuess('');
+    flagWrongLater(text);
     await sendGuess(me.id, text);
   };
 
@@ -124,10 +139,33 @@ export default function CanvasPlayerView() {
             <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', bounce: 0.6 }}
               className="flex items-center gap-2 rounded-lg border-2 border-secondary bg-secondary/15 p-4 font-display text-xl font-bold text-secondary"><Check /> You got it! +{myPoints}</motion.div>
           ) : (
-            <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); submitGuess(); }}>
-              <Input value={guess} onChange={(e) => setGuess(e.target.value)} placeholder="What are they drawing?" maxLength={40} autoComplete="off" className="h-12 text-lg" />
-              <Button type="submit" size="lg" disabled={!guess.trim()}><Send /> Guess</Button>
-            </form>
+            <motion.form
+              key={wrong?.id ?? 'guess'}
+              animate={wrong ? { x: [0, -14, 12, -8, 6, 0] } : { x: 0 }}
+              transition={{ duration: 0.45 }}
+              className={cn('relative rounded-xl border-2 bg-card p-3 transition-colors',
+                wrong ? 'border-destructive shadow-[0_0_24px_hsl(var(--destructive)/0.45)]' : 'border-accent shadow-[0_0_24px_hsl(var(--accent)/0.3)]')}
+              onSubmit={(e) => { e.preventDefault(); submitGuess(); }}>
+              <div className="mb-2 flex items-center justify-between">
+                <p className="stage-kicker text-accent">Your guess</p>
+                <AnimatePresence>
+                  {wrong && (
+                    <motion.span initial={{ scale: 0, rotate: -20, opacity: 0 }} animate={{ scale: 1, rotate: 0, opacity: 1 }} exit={{ scale: 0.5, opacity: 0, y: -10 }}
+                      transition={{ type: 'spring', bounce: 0.6 }}
+                      className="flex items-center gap-1 rounded-full bg-destructive px-3 py-0.5 text-sm font-bold text-destructive-foreground">
+                      <X className="h-4 w-4" /> Nope — "{wrong.text}"
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </div>
+              <div className="flex gap-2">
+                <Input value={guess} onChange={(e) => setGuess(e.target.value)} placeholder="What are they drawing?" maxLength={40} autoComplete="off" autoFocus
+                  className="h-14 flex-1 border-0 bg-background/60 font-display text-2xl font-bold focus-visible:ring-2 focus-visible:ring-accent" />
+                <motion.div whileTap={{ scale: 0.9 }}>
+                  <Button type="submit" size="lg" className="h-14 bg-accent px-6 text-lg text-accent-foreground hover:bg-accent/90" disabled={!guess.trim()}><Send /> Guess</Button>
+                </motion.div>
+              </div>
+            </motion.form>
           )
         ) : null}
 
