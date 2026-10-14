@@ -10,7 +10,8 @@ import ContestantStage from '@/components/canvas/ContestantStage';
 import CanvasResults from '@/components/canvas/CanvasResults';
 import { AdditionTimer, ArtistHandoff, CanvasStats, NewWordBanner, PassBanner, RevealBanner, TurnPips } from '@/components/canvas/CanvasHud';
 import { canvasDb, useCanvasGame, useNow } from '@/hooks/useCanvasGame';
-import { EXTRA_GUESS_WINDOW_MS, MAX_ARTISTS, TURN_SECONDS, guesserPointsForGuess, individualAwards, isCorrectGuess, pickArtist, teamPointsForTurn } from '@/data/canvas/canvasScoring';
+import { MAX_ARTISTS, TURN_SECONDS, guesserPointsForGuess, individualAwards, isCorrectGuess, pickArtist, teamPointsForTurn } from '@/data/canvas/canvasScoring';
+import { roundAction } from '@/data/canvas/canvasRound';
 import { pickPrompt, type CanvasPrompt } from '@/data/canvas/promptBanks';
 import type { CanvasGame, CanvasPlayer } from '@/types/canvas';
 import { cn } from '@/lib/utils';
@@ -37,7 +38,6 @@ export default function CanvasHostView() {
   const promptRef = useRef<CanvasPrompt | null>(null);
   const processedRef = useRef<Set<string>>(new Set());
   const correctRef = useRef<{ playerId: string; at: number; points: number }[]>([]);
-  const graceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const busyRef = useRef(false);
   const waitingRef = useRef(false);
   const guessesRef = useRef(guesses);
@@ -86,7 +86,8 @@ export default function CanvasHostView() {
   const assignArtist = async (roster: CanvasPlayer[], exclude: string[]) => {
     const id = pickArtist(roster, exclude);
     if (!id) return null;
-    const p = roster.find((r) => r.id === id)!;
+    const p = roster.find((r) => r.id === id);
+    if (!p) return null;
     await canvasDb.from('players').update({ draw_count: p.draw_count + 1 }).eq('id', id);
     return id;
   };
@@ -135,7 +136,7 @@ export default function CanvasHostView() {
   const resolveSuccess = useCallback(async () => {
     const g = gameRef.current;
     const prompt = promptRef.current;
-    if (!g || !prompt || g.phase !== 'grace') return;
+    if (!g || !prompt || (g.phase !== 'drawing' && g.phase !== 'grace') || busyRef.current) return;
     busyRef.current = true;
     const ordered = [...correctRef.current].sort((a, b) => a.at - b.at);
     const awards = individualAwards(g.round_artist_ids, ordered.map((c) => c.playerId), Object.fromEntries(ordered.map((c) => [c.playerId, c.points])));
@@ -157,38 +158,47 @@ export default function CanvasHostView() {
 
   const resolveFail = useCallback(async (result: 'fail' | 'skipped') => {
     const g = gameRef.current;
-    if (!g || g.phase !== 'drawing') return;
+    if (!g || g.phase !== 'drawing' || busyRef.current) return;
+    if (correctRef.current.length) { await resolveSuccess(); return; }
     busyRef.current = true;
     await saveDrawing(0);
     setGains((prev) => [{ word: promptRef.current?.text ?? '', points: 0, artists: g.round_artist_ids.length }, ...prev].slice(0, 6));
     await patch({ phase: 'reveal', last_result: result, revealed_answer: promptRef.current?.answer ?? '', last_points: 0 });
     afterReveal();
-  }, [patch, afterReveal]);
+  }, [patch, afterReveal, resolveSuccess]);
 
   const passPencil = useCallback(async () => {
     const g = gameRef.current;
-    if (!g || g.phase !== 'drawing') return;
+    if (!g || g.phase !== 'drawing' || busyRef.current) return;
+    if (correctRef.current.length) { await resolveSuccess(); return; }
     if (g.addition_index >= MAX_ARTISTS || timeIsUp()) { await resolveFail('fail'); return; }
     busyRef.current = true;
     const roster = await fetchRoster(g);
     const next = await assignArtist(roster, g.round_artist_ids);
-    if (!next) { await resolveFail('fail'); return; }
+    if (!next) { busyRef.current = false; await resolveFail('fail'); return; }
     await patch({
       addition_index: g.addition_index + 1, current_artist_id: next, round_artist_ids: [...g.round_artist_ids, next],
       addition_started_at: new Date().toISOString(),
     });
     busyRef.current = false;
-  }, [patch, resolveFail]);
+  }, [patch, resolveFail, resolveSuccess]);
 
   // Check incoming guesses
   useEffect(() => {
     const g = gameRef.current;
     const prompt = promptRef.current;
     if (!g || !prompt || (g.phase !== 'drawing' && g.phase !== 'grace')) return;
+    // Persisted correct guesses survive a host refresh; never award the word twice.
+    for (const guess of guesses) {
+      if (guess.masterpiece_index === g.masterpiece_index && guess.is_correct && !correctRef.current.some((c) => c.playerId === guess.player_id)) {
+        correctRef.current.push({ playerId: guess.player_id, at: Date.parse(guess.created_at), points: guess.points_earned });
+      }
+    }
     for (const guess of guesses) {
       if (processedRef.current.has(guess.id)) continue;
       processedRef.current.add(guess.id);
       if (guess.masterpiece_index !== g.masterpiece_index) continue;
+      if (guess.addition_index !== g.addition_index) continue;
       if (g.round_artist_ids.includes(guess.player_id) || g.current_artist_id === guess.player_id) continue;
       if (correctRef.current.some((c) => c.playerId === guess.player_id)) continue;
       if (!isCorrectGuess(guess.guess, prompt.answer, prompt.alternates)) {
@@ -198,22 +208,23 @@ export default function CanvasHostView() {
       const points = guesserPointsForGuess(g.addition_index, g.addition_seconds, g.addition_started_at, guess.created_at);
       correctRef.current.push({ playerId: guess.player_id, at: new Date(guess.created_at).getTime(), points });
       markCorrect(guess.id, points);
-      if (!graceTimer.current && g.phase === 'drawing') {
-        patch({ phase: 'grace' });
-        graceTimer.current = setTimeout(() => { graceTimer.current = null; resolveSuccess(); }, EXTRA_GUESS_WINDOW_MS);
-      }
     }
-  }, [guesses, resolveSuccess, patch, markCorrect, markIncorrect]);
+    const eligible = players.filter((p) => !g.round_artist_ids.includes(p.id)).map((p) => p.id);
+    if (roundAction(eligible, correctRef.current.map((c) => c.playerId), false) === 'success') resolveSuccess();
+  }, [guesses, players, now, resolveSuccess, markCorrect, markIncorrect]);
 
   // Turn timeout + idle restart when players arrive
   useEffect(() => {
     if (!game || game.status !== 'playing' || busyRef.current) return;
-    if (game.phase === 'drawing' && game.addition_started_at) {
+    if ((game.phase === 'drawing' || game.phase === 'grace') && game.addition_started_at) {
       const end = new Date(game.addition_started_at).getTime() + game.addition_seconds * 1000;
-      if (now >= end) passPencil();
+      if (now >= end || timeIsUp()) {
+        if (correctRef.current.length) resolveSuccess();
+        else passPencil();
+      }
     }
     if (game.phase === 'idle' && waitingRef.current && players.length > 1) { busyRef.current = true; startRound(); }
-  }, [now, game, players.length, passPencil, startRound]);
+  }, [now, game, players.length, passPencil, startRound, resolveSuccess]);
 
   const startGame = async () => {
     if (!game) return;
@@ -298,7 +309,7 @@ export default function CanvasHostView() {
           <div className="space-y-3">
             <ArtistHandoff artist={artist} />
             <div className="flex items-center gap-4"><TurnPips game={game} /><div className="flex-1"><AdditionTimer game={game} now={now} /></div></div>
-            {game.phase === 'grace' && <p className="text-sm font-bold text-secondary">{correctNow.length} got it! 2 seconds for anyone else…</p>}
+            {correctNow.length > 0 && (game.phase === 'drawing' || game.phase === 'grace') && <p className="text-sm font-bold text-secondary">{correctNow.length} got it! Everyone else — keep guessing.</p>}
             {timeUp && game.phase === 'drawing' && <p className="text-sm font-bold text-accent">Time's up — last turn!</p>}
             <div className="mx-auto w-full max-w-[calc((100vh-320px)*4/3)] min-w-[min(100%,640px)]">
             <div className="relative">
