@@ -114,6 +114,7 @@ export const TAGLINES = [
   "Come for the quiz, stay because someone drew a cat that looked like a potato.",
   "Thursday: questions, drawings, guesses, and one leaderboard nobody respects.",
   "Every Thursday we try to draw better than last week. We do not.",
+  "We have never once agreed on what the drawing was supposed to be.",
 ] as const;
 
 const LAST_KEY = 'go-cobalt-tagline-index';
