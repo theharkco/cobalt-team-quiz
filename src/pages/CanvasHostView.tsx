@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import QuizScreen from '@/components/quiz/QuizScreen';
 import { Button } from '@/components/ui/button';
 import DrawingCanvas, { type DrawingCanvasHandle } from '@/components/canvas/DrawingCanvas';
+import ContestantStage from '@/components/canvas/ContestantStage';
 import CanvasResults from '@/components/canvas/CanvasResults';
 import { AdditionTimer, ArtistHandoff, CanvasStats, NewWordBanner, PassBanner, RevealBanner, TurnPips } from '@/components/canvas/CanvasHud';
 import { canvasDb, useCanvasGame, useNow } from '@/hooks/useCanvasGame';
@@ -285,6 +286,7 @@ export default function CanvasHostView() {
               )}
             </div>
             </div>
+            <ContestantStage game={game} players={players} guesses={guesses} now={now} />
           </div>
           <aside className="space-y-5">
             <div className="stage-panel rounded-lg p-4">
