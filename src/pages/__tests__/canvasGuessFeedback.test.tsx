@@ -44,7 +44,7 @@ describe('canvas wrong-guess feedback', () => {
     expect(screen.queryByText('Not quite!')).not.toBeInTheDocument();
     act(() => { state.guesses = [{ id: 'guess', player_id: 'me', masterpiece_index: 1, guess: 'cat', verdict: 'incorrect', is_correct: false }]; });
     view.rerender(<CanvasPlayerView />);
-    expect(screen.getByRole('status')).toHaveTextContent('Not quite!');
+    expect(screen.getByText('Not quite!').closest('[role="status"]')).toHaveTextContent('Not quite!');
     expect(screen.getByRole('textbox', { name: 'Your guess' })).toBe(input);
     expect(screen.queryByText('cat')).not.toBeInTheDocument();
     fireEvent.change(input, { target: { value: 'dog' } });
