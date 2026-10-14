@@ -169,7 +169,7 @@ export default function QuizPicker({ onSelect, onBack }: Props) {
         </div>
 
         {/* Create new quiz */}
-        <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between"><Button onClick={onBack} variant="ghost"><ArrowLeft /> Back</Button><Button
+        <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between"><span /><Button
           onClick={() => navigate('/create')}
           variant="outline"
           className="h-12"

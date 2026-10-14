@@ -15,7 +15,7 @@ const Index = () => {
   const { createSession, joinSession, findSession, error, setError } = useQuizSession();
   const [params, setParams] = useSearchParams();
   const showPicker = params.get('host') === 'quiz';
-  const setShowPicker = (v: boolean) => (v ? setParams({ host: 'quiz' }) : navigate(-1));
+  const setShowPicker = (v: boolean) => setParams(v ? { host: 'quiz' } : {});
   const [joinCode, setJoinCode] = useState('');
   const [codeOk, setCodeOk] = useState(false);
   const [playerName, setPlayerName] = useState('');

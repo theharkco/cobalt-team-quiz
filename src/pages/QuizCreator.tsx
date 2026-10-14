@@ -201,9 +201,6 @@ export default function QuizCreator() {
       <div className="grid gap-6 lg:grid-cols-[20rem_1fr]">
         {/* Header */}
         <aside className="lg:sticky lg:top-20 lg:self-start"><motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="mb-6">
-          <Button variant="ghost" onClick={() => navigate('/')} className="mb-5 -ml-3">
-            <ArrowLeft /> Back
-          </Button>
           <p className="stage-kicker">{isEditing ? 'Editing set' : 'New set'}</p><h1 className="mt-2 text-4xl font-display font-bold mb-2">
             {isEditing ? 'Edit Quiz' : 'Create Quiz'}
           </h1>
