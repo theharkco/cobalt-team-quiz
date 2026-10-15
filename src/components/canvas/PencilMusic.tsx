@@ -13,6 +13,7 @@ export default function PencilMusic() {
   const [started, setStarted] = useState(false);
 
   useEffect(() => {
+    resumeBgMusic(); // keep playing across page switches once unlocked
     const unlock = () => {
       startBgMusic();
       setStarted(true);
