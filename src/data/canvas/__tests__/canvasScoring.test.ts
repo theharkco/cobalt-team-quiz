@@ -5,24 +5,24 @@ import { pickPrompt, ALL_PROMPTS } from '../promptBanks';
 const pts = (awards: { playerId: string; points: number }[]) => Object.fromEntries(awards.map((a) => [a.playerId, a.points]));
 
 describe('pass the pencil scoring', () => {
-  it('team points by artist turn', () => {
-    expect([1, 2, 3].map((turn) => teamPointsForTurn(turn))).toEqual([100, 200, 300]);
+  it('team points by artist turn — earlier artists award the group more', () => {
+    expect([1, 2, 3].map((turn) => teamPointsForTurn(turn))).toEqual([300, 200, 100]);
   });
 
   it('scales team points with turn duration and rounds to integers', () => {
-    expect([1, 2, 3].map((turn) => teamPointsForTurn(turn, 15))).toEqual([200, 400, 600]);
-    expect([1, 2, 3].map((turn) => teamPointsForTurn(turn, 60))).toEqual([50, 100, 150]);
-    expect([1, 2, 3].map((turn) => teamPointsForTurn(turn, 45))).toEqual([67, 133, 200]);
+    expect([1, 2, 3].map((turn) => teamPointsForTurn(turn, 15))).toEqual([600, 400, 200]);
+    expect([1, 2, 3].map((turn) => teamPointsForTurn(turn, 60))).toEqual([150, 100, 50]);
+    expect([1, 2, 3].map((turn) => teamPointsForTurn(turn, 45))).toEqual([200, 133, 67]);
     for (let seconds = 10; seconds <= 90; seconds += 5) {
-      expect(teamPointsForTurn(2, seconds)).toBeGreaterThan(teamPointsForTurn(1, seconds));
-      expect(teamPointsForTurn(3, seconds)).toBeGreaterThan(teamPointsForTurn(2, seconds));
+      expect(teamPointsForTurn(1, seconds)).toBeGreaterThan(teamPointsForTurn(2, seconds));
+      expect(teamPointsForTurn(2, seconds)).toBeGreaterThan(teamPointsForTurn(3, seconds));
     }
   });
 
   it('guards invalid scoring inputs', () => {
-    expect(teamPointsForTurn(0, 0)).toBe(100);
-    expect(teamPointsForTurn(9, NaN)).toBe(300);
-    expect(teamPointsForTurn(NaN, -1)).toBe(100);
+    expect(teamPointsForTurn(0, 0)).toBe(300);
+    expect(teamPointsForTurn(9, NaN)).toBe(100);
+    expect(teamPointsForTurn(NaN, -1)).toBe(300);
   });
 
   it('first artist success', () => {
