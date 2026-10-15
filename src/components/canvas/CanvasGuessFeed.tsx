@@ -19,13 +19,17 @@ export default function CanvasGuessFeed({ game, players, guesses }: { game: Canv
         {!ordered.length && <p className="text-xs text-muted-foreground">No guesses yet.</p>}
         {ordered.map((g, i) => {
           const correct = g.is_correct || g.verdict === 'correct';
-          const confirmed = g.verdict === 'incorrect' || g.masterpiece_index < game.masterpiece_index || game.phase === 'reveal' || game.status === 'finished';
+          const confirmed = !!g.verdict || g.masterpiece_index < game.masterpiece_index || game.phase === 'reveal' || game.status === 'finished';
           return <div key={g.id}>
             {(i === 0 || ordered[i - 1].masterpiece_index !== g.masterpiece_index) && <p className="mb-2 mt-3 text-xs font-semibold text-muted-foreground">Word {g.masterpiece_index}</p>}
             <motion.div initial={{ opacity: 0, x: reduced ? 0 : 8 }} animate={{ opacity: 1, x: 0 }} className="pencil-chat-entry">
               <p className="break-words text-xs font-bold">{players.find((p) => p.id === g.player_id)?.name ?? 'Former player'}</p>
               {correct ? <p className="flex flex-wrap items-center gap-1 text-xs font-semibold text-secondary"><Check className="h-3 w-3 shrink-0" /> Got it! <span>+{g.points_earned}</span></p>
-                : <p className={confirmed ? 'break-words text-xs text-foreground' : 'text-xs text-muted-foreground'}>{confirmed ? g.guess : 'Checking…'}</p>}
+                : <div className="flex flex-wrap items-baseline gap-2">
+                    <p className={confirmed ? 'break-words text-xs text-foreground' : 'text-xs text-muted-foreground'}>{confirmed ? g.guess : 'Checking…'}</p>
+                    {confirmed && g.verdict === 'very-close' && <span className="text-[10px] font-bold uppercase tracking-wider text-orange-500">Very Close!</span>}
+                    {confirmed && g.verdict === 'close' && <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500">Close</span>}
+                  </div>}
             </motion.div>
           </div>;
         })}
