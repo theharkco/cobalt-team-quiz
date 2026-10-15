@@ -47,10 +47,10 @@ export default function CanvasLeaderboard({ game, players }: { game: CanvasGame;
       </div>
       <div className="grid gap-6 sm:grid-cols-[1fr_2fr]">
         <div>
-          <p className="stage-kicker">Highest team score</p>
+          <p className="stage-kicker">Highest group score</p>
           <p className="mt-2 font-display text-4xl font-bold tabular-nums text-secondary">{records.isError ? '—' : records.data ? records.data.teamBest.toLocaleString() : '…'}</p>
           <p className="mt-2 text-xs text-muted-foreground">Completed games · all-time best</p>
-          <p className="mt-4 text-sm text-muted-foreground">This team <b className="text-foreground tabular-nums">{game.team_score.toLocaleString()} pts</b></p>
+          <p className="mt-4 text-sm text-muted-foreground">This game <b className="text-foreground tabular-nums">{game.team_score.toLocaleString()} pts</b></p>
         </div>
         <div>
           <h3 className="mb-3 font-bold">Top 10 individuals</h3>

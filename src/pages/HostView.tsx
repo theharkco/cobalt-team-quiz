@@ -370,11 +370,11 @@ export default function HostView() {
           >
             <div><p className="stage-kicker">Join the game</p><p className="mt-3 select-all break-all text-lg font-semibold text-muted-foreground md:text-2xl">{window.location.origin}</p></div>
             <div><p className="stage-kicker mb-3">Game code</p><p className="font-display text-[clamp(4.5rem,12vw,9rem)] font-bold leading-none tracking-[0.12em] text-primary tabular-nums">{session?.join_code || '----'}</p></div>
-            <div className="flex items-center gap-3 border-t border-border pt-5 text-sm text-muted-foreground"><span className="status-dot"/> Waiting for teams to check in</div>
+            <div className="flex items-center gap-3 border-t border-border pt-5 text-sm text-muted-foreground"><span className="status-dot"/> Waiting for players to check in</div>
           </motion.div>
 
           <div className="stage-panel flex min-h-[440px] flex-col rounded-lg">
-            <div className="flex items-center justify-between border-b border-border p-5"><p className="font-display text-xl font-bold">Teams in the room</p><span className="flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-sm font-bold"><Users className="h-4 w-4 text-secondary"/>{players.length}</span></div>
+            <div className="flex items-center justify-between border-b border-border p-5"><p className="font-display text-xl font-bold">Players in the room</p><span className="flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-sm font-bold"><Users className="h-4 w-4 text-secondary"/>{players.length}</span></div>
             <div className="flex flex-1 flex-wrap content-start gap-2 p-5">
               <AnimatePresence>
                 {players.map((p) => (
@@ -407,7 +407,7 @@ export default function HostView() {
                 <Play /> Start the showdown
               </Button>
             </motion.div>
-          ) : <p className="text-center text-sm text-muted-foreground">The start control unlocks when the first team arrives.</p>}
+          ) : <p className="text-center text-sm text-muted-foreground">The start control unlocks when the first player arrives.</p>}
             </div>
           </div>
         </div>

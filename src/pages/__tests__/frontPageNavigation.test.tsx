@@ -54,7 +54,7 @@ describe('front-page game navigation', () => {
     expect(screen.getByTestId('location')).toHaveTextContent('/create');
   });
 
-  it.each([['canvas', "What's your name?", '/canvas/session/player'], ['quiz', "What's your team called?", '/play/session/player']])('joins %s independently of the selected game', async (gameMode, label, destination) => {
+  it.each([['canvas', "What's your name?", '/canvas/session/player'], ['quiz', "What's your name?", '/play/session/player']])('joins %s independently of the selected game', async (gameMode, label, destination) => {
     mocks.findSession.mockResolvedValue({ game_mode: gameMode });
     mocks.joinSession.mockResolvedValue({ id: 'player', session_id: 'session' });
     open('/?mode=quiz');

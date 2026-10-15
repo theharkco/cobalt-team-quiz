@@ -26,10 +26,10 @@ export default function CanvasResults({ game, players, compact }: Props) {
   return (
     <div className="mx-auto w-full max-w-6xl space-y-8">
       <motion.section initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="stage-panel rounded-lg p-6 text-center md:p-10">
-        <p className="stage-kicker">Team score</p>
+        <p className="stage-kicker">Group score</p>
         <p className="font-display text-[clamp(3.5rem,10vw,7rem)] font-bold leading-none text-secondary tabular-nums">{game.team_score.toLocaleString()}</p>
         <p className="mt-3 font-semibold text-muted-foreground">
-          {previousBest === null ? ' ' : beatRecord ? `New team record! Previous best: ${previousBest.toLocaleString()}` : `Record to beat: ${previousBest.toLocaleString()}`}
+          {previousBest === null ? ' ' : beatRecord ? `New group record! Previous best: ${previousBest.toLocaleString()}` : `Record to beat: ${previousBest.toLocaleString()}`}
         </p>
         <div className="mt-6 grid grid-cols-3 gap-3 border-t border-border pt-6">
           <Stat label="Words guessed" value={game.total_additions} />

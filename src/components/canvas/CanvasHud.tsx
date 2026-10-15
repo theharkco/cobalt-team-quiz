@@ -12,7 +12,7 @@ export function CanvasStats({ game, now, record, compact }: { game: CanvasGame; 
   return (
     <div className={cn('grid items-end gap-3', compact ? 'grid-cols-3' : 'grid-cols-2 md:grid-cols-5')}>
       <div className={cn(compact ? 'col-span-1' : 'col-span-2 md:col-span-1')}>
-        <p className="stage-kicker">Team score</p>
+        <p className="stage-kicker">Group score</p>
         <motion.p key={game.team_score} initial={{ scale: 1.15 }} animate={{ scale: 1 }}
           className={cn('font-display font-bold leading-none text-secondary tabular-nums', compact ? 'text-3xl' : 'text-5xl md:text-6xl')}>
           {game.team_score.toLocaleString()}
@@ -146,7 +146,7 @@ export function RevealBanner({ game }: { game: CanvasGame }) {
       <p className="stage-kicker">{success ? (game.addition_index >= 3 ? 'Rescued by artist 3!' : 'Guessed!') : game.last_result === 'skipped' ? 'Skipped' : 'Nobody got it'}</p>
       <p className="break-words font-display text-2xl font-bold capitalize sm:text-4xl md:text-5xl">{game.revealed_answer}</p>
       {success
-        ? <p className="font-display text-sm font-bold text-secondary sm:text-2xl">+{game.last_points} team points</p>
+        ? <p className="font-display text-sm font-bold text-secondary sm:text-2xl">+{game.last_points} group points</p>
         : <p className="text-xs text-muted-foreground sm:text-base">No points this time — next word coming up.</p>}
     </motion.div>
   );
