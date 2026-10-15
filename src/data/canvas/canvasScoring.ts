@@ -49,13 +49,13 @@ export function guesserPointsForGuess(turn: number, turnSeconds: number, turnSta
  * roundArtists: artists in drawing order (last = active when guessed).
  * correctGuessers: ordered by guess time (first = fastest).
  */
-export function individualAwards(roundArtists: string[], correctGuessers: string[], guesserPoints: Record<string, number> = {}): IndividualAward[] {
+export function individualAwards(roundArtists: string[], correctGuessers: string[], guesserPoints: Record<string, number> = {}, drawerPoints?: number): IndividualAward[] {
   if (correctGuessers.length === 0 || roundArtists.length === 0) return [];
   const totals = new Map<string, number>();
   const add = (id: string, pts: number) => totals.set(id, (totals.get(id) ?? 0) + pts);
   const active = roundArtists[roundArtists.length - 1];
   roundArtists.slice(0, -1).forEach((id) => add(id, 50));
-  add(active, 100 + (roundArtists.length >= MAX_ARTISTS ? 50 : 0));
+  add(active, drawerPoints ?? 100);
   const artists = new Set(roundArtists);
   const seen = new Set<string>();
   correctGuessers.forEach((id) => {
