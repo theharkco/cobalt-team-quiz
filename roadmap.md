@@ -1,5 +1,8 @@
 # Quizclash roadmap
 
+- [ ] Let the host join as a player in the same tab, reusing drawing/guessing and keeping host controls.
+- [ ] Verify host drawing, guessing, handoffs, score persistence, refresh and hidden-word behavior.
+
 - [x] Reduce hidden-host-tab stalls with a worker clock and deadline-driven reveals; verified live handoff, rejection, correct scoring and next word with host window intervals stopped, plus four clock tests.
 
 - [x] Shared guess chat above contestants with names and hidden correct answers; verified host and three phones.
