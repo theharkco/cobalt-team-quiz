@@ -92,9 +92,9 @@ export function useCanvasGame(sessionId: string | undefined) {
         const { id, points } = payload as { id: string; points: number };
         setGuesses((prev) => prev.map((x) => (x.id === id ? { ...x, verdict: 'correct', is_correct: true, points_earned: points } : x)));
       })
-      .on('broadcast', { event: 'incorrect' }, ({ payload }) => {
-        const { id } = payload as { id: string };
-        setGuesses((prev) => prev.map((x) => x.id === id && !x.is_correct ? { ...x, verdict: 'incorrect' } : x));
+      .on('broadcast', { event: 'verdict' }, ({ payload }) => {
+        const { id, verdict } = payload as { id: string; verdict: 'incorrect' | 'close' | 'very-close' };
+        setGuesses((prev) => prev.map((x) => x.id === id && !x.is_correct ? { ...x, verdict } : x));
       })
       .subscribe();
     channelRef.current = ch;
@@ -160,13 +160,13 @@ export function useCanvasGame(sessionId: string | undefined) {
     await canvasDb.from('canvas_guesses').update({ is_correct: true, points_earned: points }).eq('id', id);
   }, []);
 
-  const markIncorrect = useCallback((id: string) => {
-    setGuesses((prev) => prev.map((x) => x.id === id && !x.is_correct ? { ...x, verdict: 'incorrect' } : x));
-    channelRef.current?.send({ type: 'broadcast', event: 'incorrect', payload: { id } });
+  const markVerdict = useCallback((id: string, verdict: 'incorrect' | 'close' | 'very-close') => {
+    setGuesses((prev) => prev.map((x) => x.id === id && !x.is_correct ? { ...x, verdict } : x));
+    channelRef.current?.send({ type: 'broadcast', event: 'verdict', payload: { id, verdict } });
   }, []);
 
   return {
-    removeStrokes, sendGuess, markCorrect, markIncorrect,
+    removeStrokes, sendGuess, markCorrect, markVerdict,
     game, setGame, joinCode, players, strokes, guesses, loaded,
     live: Object.values(live),
     refreshGame, refreshPlayers, refreshStrokes, refreshGuesses, sendLive, commitStroke, setLive,

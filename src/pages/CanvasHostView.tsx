@@ -16,7 +16,7 @@ import CanvasResults from '@/components/canvas/CanvasResults';
 import { AdditionTimer, ArtistHandoff, CanvasStats, NewWordBanner, PassBanner, RevealBanner, TurnPips } from '@/components/canvas/CanvasHud';
 import { canvasDb, useCanvasGame } from '@/hooks/useCanvasGame';
 import { useCanvasHostClock } from '@/hooks/useCanvasHostClock';
-import { MAX_ARTISTS, TURN_SECONDS, guesserPointsForGuess, individualAwards, isCorrectGuess, pickArtist, teamPointsForTurn } from '@/data/canvas/canvasScoring';
+import { MAX_ARTISTS, TURN_SECONDS, guesserPointsForGuess, individualAwards, evaluateGuessVerdict, isCorrectGuess, pickArtist, teamPointsForTurn } from '@/data/canvas/canvasScoring';
 import { roundAction } from '@/data/canvas/canvasRound';
 import { pickPrompt, type CanvasPrompt } from '@/data/canvas/promptBanks';
 import type { CanvasGame, CanvasPlayer } from '@/types/canvas';
@@ -30,7 +30,7 @@ interface Gain { word: string; points: number; artists: number }
 export default function CanvasHostView() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const canvasState = useCanvasGame(sessionId);
-  const { game, setGame, joinCode, players, strokes, guesses, live, loaded, refreshPlayers, markCorrect, markIncorrect } = canvasState;
+  const { game, setGame, joinCode, players, strokes, guesses, live, loaded, refreshPlayers, markCorrect, markVerdict } = canvasState;
   const { joinSession, error: joinError, setError: setJoinError } = useQuizSession();
   const [hostPlayerId, setHostPlayerId] = useState<string | null>(() => sessionId ? sessionStorage.getItem(`canvas-host-player-${sessionId}`) : null);
   const [hostName, setHostName] = useState('');
@@ -214,9 +214,11 @@ export default function CanvasHostView() {
       if (guess.addition_index !== g.addition_index) continue;
       if (g.round_artist_ids.includes(guess.player_id) || g.current_artist_id === guess.player_id) continue;
       if (correctRef.current.some((c) => c.playerId === guess.player_id)) continue;
-      if (!isCorrectGuess(guess.guess, prompt.answer, prompt.alternates)) {
-        markIncorrect(guess.id);
+      const result = evaluateGuessVerdict(guess.guess, prompt.answer, prompt.alternates);
+      if (result !== 'correct') {
+        markVerdict(guess.id, result);
         continue;
+      }
       }
       const points = guesserPointsForGuess(g.addition_index, g.addition_seconds, g.addition_started_at, guess.created_at);
       correctRef.current.push({ playerId: guess.player_id, at: new Date(guess.created_at).getTime(), points });
@@ -224,7 +226,7 @@ export default function CanvasHostView() {
     }
     const eligible = players.filter((p) => !g.round_artist_ids.includes(p.id)).map((p) => p.id);
     if (roundAction(eligible, correctRef.current.map((c) => c.playerId), false) === 'success') resolveSuccess();
-  }, [guesses, players, now, resolveSuccess, markCorrect, markIncorrect]);
+  }, [guesses, players, now, resolveSuccess, markCorrect, markVerdict]);
 
   // Turn timeout + idle restart when players arrive
   useEffect(() => {

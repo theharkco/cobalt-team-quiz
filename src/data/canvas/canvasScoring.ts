@@ -115,3 +115,34 @@ export function isCorrectGuess(guess: string, answer: string, alternates: string
   }
   return false;
 }
+
+export type GuessVerdict = 'correct' | 'very-close' | 'close' | 'incorrect';
+
+/** Host-authoritative verdict evaluation for near-misses. */
+export function evaluateGuessVerdict(guess: string, answer: string, alternates: string[] = []): GuessVerdict {
+  if (isCorrectGuess(guess, answer, alternates)) return 'correct';
+  
+  const g = normalize(guess);
+  if (!g) return 'incorrect';
+  const targets = [answer, ...alternates].map(normalize).filter(Boolean);
+  
+  let minDistance = Infinity;
+  let targetLen = 0;
+  
+  for (const t of targets) {
+    const sG = squash(g);
+    const sT = squash(t);
+    const dist = levenshtein(sG, sT);
+    if (dist < minDistance) {
+      minDistance = dist;
+      targetLen = t.length;
+    }
+  }
+  
+  const tolerance = targetLen <= 4 ? 0 : targetLen <= 7 ? 1 : 2;
+  
+  if (minDistance <= tolerance + 1) return 'very-close';
+  if (minDistance <= tolerance + 2) return 'close';
+  
+  return 'incorrect';
+}
