@@ -121,6 +121,13 @@ export function startBgMusic() {
   scheduler = setInterval(tick, LOOKAHEAD_MS);
 }
 
+// Resume after a page switch without needing a new gesture — only works if
+// the audio context was already unlocked by an earlier tap/click.
+export function resumeBgMusic() {
+  if (running || !ctx) return;
+  startBgMusic();
+}
+
 export function stopBgMusic() {
   running = false;
   if (scheduler) { clearInterval(scheduler); scheduler = null; }
