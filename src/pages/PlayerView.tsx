@@ -405,7 +405,7 @@ export default function PlayerView() {
   // LOBBY
   if (!session || session.status === 'lobby') {
     return (
-      <QuizScreen showBack={false} eyebrow="Team checked in" contentClassName="max-w-md px-5 py-10">
+      <QuizScreen showBack={false} eyebrow="Player checked in" contentClassName="max-w-md px-5 py-10">
         <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex min-h-[calc(100vh-8rem)] flex-col justify-center">
           <p className="stage-kicker flex items-center gap-2"><span className="status-dot"/> Connected to the room</p>
           <div className="my-8 border-y border-border py-10"><p className="text-sm text-muted-foreground">Playing as</p><h1 className="mt-2 break-words font-display text-5xl font-bold">{player?.name}</h1></div>
