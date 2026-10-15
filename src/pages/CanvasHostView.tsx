@@ -13,6 +13,7 @@ import ContestantStage from '@/components/canvas/ContestantStage';
 import CanvasGuessFeed from '@/components/canvas/CanvasGuessFeed';
 import CanvasLeaderboard from '@/components/canvas/CanvasLeaderboard';
 import CanvasResults from '@/components/canvas/CanvasResults';
+import PencilMusic from '@/components/canvas/PencilMusic';
 import { AdditionTimer, ArtistHandoff, CanvasStats, NewWordBanner, PassBanner, RevealBanner, TurnPips } from '@/components/canvas/CanvasHud';
 import { canvasDb, useCanvasGame } from '@/hooks/useCanvasGame';
 import { useCanvasHostClock } from '@/hooks/useCanvasHostClock';
@@ -295,13 +296,14 @@ export default function CanvasHostView() {
   if (!token) return <QuizScreen eyebrow={TITLE}><p>This screen isn't the host for this game.</p></QuizScreen>;
 
   if (game.status === 'finished') {
-    return <QuizScreen eyebrow={`${TITLE} · Final`}><CanvasResults game={game} players={players} /></QuizScreen>;
+    return <QuizScreen eyebrow={`${TITLE} · Final`}><PencilMusic /><CanvasResults game={game} players={players} /></QuizScreen>;
   }
 
   if (game.status === 'lobby') {
     const url = `${window.location.origin}`;
     return (
       <QuizScreen className="pencil-host-lobby" eyebrow={`${TITLE} · Lobby`} contentClassName="px-4 py-10 md:px-8 md:py-16">
+        <PencilMusic />
         <div className="pencil-lobby-layout mx-auto grid w-full max-w-6xl gap-10 lg:grid-cols-[1.1fr_.9fr]">
           <section className="space-y-6">
             <p className="stage-kicker flex items-center gap-2"><Paintbrush className="h-4 w-4 text-primary" /> Co-op Pictionary relay</p>
@@ -433,6 +435,7 @@ export default function CanvasHostView() {
           </div>
         </div>
         <CanvasLeaderboard game={game} players={players} />
+        <PencilMusic />
       </div>
     </QuizScreen>
   );
