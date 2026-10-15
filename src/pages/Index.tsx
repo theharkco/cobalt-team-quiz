@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import PartyBackdrop, { BouncyWord } from '@/components/quiz/PartyBackdrop';
 import { Button } from '@/components/ui/button';
 import QuizPicker from '@/components/quiz/QuizPicker';
@@ -20,7 +20,20 @@ const Index = () => {
   const { createSession, joinSession, findSession, error, setError } = useQuizSession();
   const [params, setParams] = useSearchParams();
   const showPicker = params.get('host') === 'quiz';
-  const setShowPicker = (v: boolean) => setParams(v ? { host: 'quiz' } : {});
+  const selectedMode = params.get('mode') === 'quiz' ? 'quiz' : params.get('mode') === 'canvas' ? 'canvas' : null;
+  const setShowPicker = (v: boolean) => setParams(v ? { mode: 'quiz', host: 'quiz' } : { mode: 'quiz' });
+  const reducedMotion = useReducedMotion();
+  const actionTitleRef = useRef<HTMLHeadingElement>(null);
+  const firstModeRef = useRef<HTMLButtonElement>(null);
+  const previousModeRef = useRef(selectedMode);
+  const startingRef = useRef(false);
+  useEffect(() => {
+    if (!showPicker) {
+      if (selectedMode) actionTitleRef.current?.focus();
+      else if (previousModeRef.current) firstModeRef.current?.focus();
+    }
+    previousModeRef.current = selectedMode;
+  }, [selectedMode, showPicker]);
   const [joinCode, setJoinCode] = useState('');
   const [codeOk, setCodeOk] = useState(false);
   const [playerName, setPlayerName] = useState('');
@@ -28,7 +41,10 @@ const Index = () => {
   const [gameMode, setGameMode] = useState('quiz');
 
   const handleHost = async (questions: QuizQuestion[], quizId?: string) => {
+    if (startingRef.current) return;
+    startingRef.current = true;
     setLoading(true);
+    try {
     const session = await createSession();
     if (session) {
       sessionStorage.setItem(`quiz-questions-${session.id}`, JSON.stringify(questions));
@@ -37,11 +53,17 @@ const Index = () => {
       }
       navigate(`/host/${session.id}`);
     }
-    setLoading(false);
+    } finally {
+      startingRef.current = false;
+      setLoading(false);
+    }
   };
 
   const handleHostCanvas = async () => {
+    if (startingRef.current) return;
+    startingRef.current = true;
     setLoading(true);
+    try {
     const session = await createSession();
     if (session) {
       const token = crypto.randomUUID();
@@ -51,7 +73,10 @@ const Index = () => {
       if (g) await canvasDb.rpc('set_canvas_prompt', { _game_id: (g as { id: string }).id, _host_token: token, _prompt: null, _answer: null, _alternates: [] });
       navigate(`/canvas-host/${session.id}`);
     }
-    setLoading(false);
+    } finally {
+      startingRef.current = false;
+      setLoading(false);
+    }
   };
 
   const handleCheckCode = async () => {
@@ -83,9 +108,8 @@ const Index = () => {
 
   const inputCls = 'w-full min-w-0 border-0 bg-transparent px-0 py-2 font-display text-4xl font-extrabold text-foreground outline-none placeholder:text-muted-foreground/40';
   const modes = [
-    { label: 'Host a quiz', sub: 'You host. Your team plays from anywhere', icon: Gamepad2, cls: 'bg-accent text-accent-foreground', tilt: -2, onClick: () => setShowPicker(true) },
-    { label: 'Pass the Pencil', sub: 'Draw it together, guess it fast', icon: Paintbrush, cls: 'bg-secondary text-secondary-foreground', tilt: 1, onClick: handleHostCanvas },
-    { label: 'Make a quiz', sub: 'Your questions, your rules', icon: PenTool, cls: 'bg-quiz-blue text-primary-foreground', tilt: -1, onClick: () => navigate('/create') },
+    { mode: 'quiz', label: 'Quiz', sub: 'Questions, music & friendly rivalry', icon: Gamepad2, cls: 'bg-accent text-accent-foreground', tilt: -2 },
+    { mode: 'canvas', label: 'Pass the Pencil', sub: 'Draw it together, guess it fast', icon: Paintbrush, cls: 'bg-secondary text-secondary-foreground', tilt: 1 },
   ];
 
   return (
@@ -127,11 +151,11 @@ const Index = () => {
                   <motion.span initial={{ scale: 0 }} animate={{ scale: [0, 1.3, 1] }} className="rounded-full bg-secondary px-3 py-0.5 text-sm font-extrabold text-secondary-foreground">Game {joinCode} found!</motion.span>
                   <Button variant="ghost" size="sm" onClick={() => { setCodeOk(false); setError(null); }}><ArrowLeft /> Change</Button>
                 </div>
-                <label htmlFor="name" className="mb-3 block font-display text-2xl font-extrabold">What's your team called?</label>
+                <label htmlFor="name" className="mb-3 block font-display text-2xl font-extrabold">{gameMode === 'canvas' ? "What's your name?" : "What's your team called?"}</label>
                 <div className="flex items-center gap-3 rounded-xl border-[3px] border-[hsl(var(--shadow-color))] bg-background px-4 focus-within:ring-4 focus-within:ring-primary/60">
                   <input id="name" name="team" value={playerName}
                     onChange={(e) => { setPlayerName(e.target.value); setError(null); }}
-                    placeholder="The Brainiacs…" autoFocus autoComplete="off" maxLength={24}
+                    placeholder={gameMode === 'canvas' ? 'Your name…' : 'The Brainiacs…'} autoFocus autoComplete="off" maxLength={24}
                     onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
                     className={`${inputCls} text-3xl`} />
                   <Button onClick={handleJoin} disabled={loading || !playerName.trim()} size="icon" aria-label="Join game" className="h-12 w-12 shrink-0"><ArrowRight /></Button>
@@ -142,22 +166,45 @@ const Index = () => {
             {error && <p role="alert" className="mt-4 animate-shake font-bold text-destructive">{error}</p>}
           </motion.div>
 
-          <div className="grid gap-4 sm:grid-cols-3">
+          <section aria-label="Start a game" className="min-h-[220px]">
+          <AnimatePresence initial={false}>
+          {!selectedMode ? (
+          <motion.div key="games" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: reducedMotion ? 0 : 0.18 }} className="grid grid-cols-2 gap-4">
             {modes.map((m, i) => (
-              <motion.div key={m.label} initial={{ y: 80, opacity: 0, rotate: 12 }} animate={{ y: 0, opacity: 1, rotate: m.tilt }}
-                transition={{ type: 'spring', bounce: 0.55, delay: 0.4 + i * 0.1 }}>
-                <motion.button type="button" onClick={m.onClick} disabled={loading}
-                  whileHover={{ y: -8, rotate: i % 2 ? 3 : -3, scale: 1.05, transition: { type: 'spring', stiffness: 700, damping: 14 } }}
-                  whileTap={{ scale: 0.92, rotate: 0, transition: { duration: 0.08 } }}
-                  transition={CARD_SPRING}
-                  className={`sticker ${m.cls} flex h-full w-full flex-col items-start gap-2 p-4 text-left focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring disabled:opacity-50`}>
-                  <m.icon className="h-7 w-7" aria-hidden />
-                  <span className="font-display text-lg font-extrabold leading-tight">{m.label}</span>
-                  <span className="text-sm font-semibold opacity-80">{m.sub}</span>
-                </motion.button>
+              <motion.div key={m.label} animate={{ rotate: reducedMotion ? 0 : m.tilt }}
+                whileHover={reducedMotion ? undefined : { y: -5, rotate: i % 2 ? 3 : -3 }}
+                whileTap={reducedMotion ? undefined : { scale: 0.96 }} transition={CARD_SPRING}>
+                <Button ref={i === 0 ? firstModeRef : undefined} type="button" variant="ghost" onClick={() => setParams({ mode: m.mode })} disabled={loading}
+                  className={`sticker ${m.cls} h-full min-h-[200px] w-full flex-col items-start justify-between gap-4 whitespace-normal p-5 text-left hover:bg-inherit hover:text-inherit [&_svg]:size-7`}>
+                  <m.icon aria-hidden="true" />
+                  <span className="flex flex-col gap-2">
+                    <span className="font-display text-2xl font-extrabold leading-tight">{m.label}</span>
+                    <span className="text-sm font-semibold leading-snug opacity-80">{m.sub}</span>
+                  </span>
+                  <ArrowRight aria-hidden="true" className="self-end" />
+                </Button>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
+          ) : (
+            <motion.div key={selectedMode} initial={{ opacity: 0, y: reducedMotion ? 0 : 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reducedMotion ? 0 : 0.18 }} className="space-y-4">
+              <Button variant="ghost" size="sm" onClick={() => setParams({})} disabled={loading} className="px-0"><ArrowLeft aria-hidden="true" /> Back to games</Button>
+              <h2 ref={actionTitleRef} tabIndex={-1} className="flex items-center gap-3 font-display text-3xl font-extrabold outline-none">
+                {selectedMode === 'quiz' ? <Gamepad2 className="size-7 text-accent" aria-hidden="true" /> : <Paintbrush className="size-7 text-secondary" aria-hidden="true" />}
+                {selectedMode === 'quiz' ? 'Quiz' : 'Pass the Pencil'}
+              </h2>
+              <div className="grid gap-3">
+                {selectedMode === 'quiz' ? <>
+                  <Button size="lg" onClick={() => setShowPicker(true)} disabled={loading} className="w-full justify-between"><span>Host a quiz</span><ArrowRight aria-hidden="true" /></Button>
+                  <Button variant="outline" size="lg" onClick={() => navigate('/create')} disabled={loading} className="w-full justify-between"><span className="flex items-center gap-2"><PenTool aria-hidden="true" /> Make a quiz</span><ArrowRight aria-hidden="true" /></Button>
+                </> : (
+                  <Button variant="secondary" size="lg" onClick={handleHostCanvas} disabled={loading} className="w-full justify-between"><span>{loading ? 'Starting game…' : 'Host a game'}</span><ArrowRight aria-hidden="true" /></Button>
+                )}
+              </div>
+            </motion.div>
+          )}
+          </AnimatePresence>
+          </section>
         </div>
       </div>
     </main>

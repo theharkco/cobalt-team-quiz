@@ -1,5 +1,7 @@
 # Agent rules
 
+- Front-page game selection and quiz-picker navigation use URL search parameters, preserving the legacy `?host=quiz` entry; joining remains mode-agnostic. Why: browser Back and shared links must reflect the visible choice without changing game creation flows.
+
 - Pass the Pencil (formerly Infinite Canvas) is a separate game mode (`quiz_sessions.game_mode = 'canvas'`) with its own pages and `canvas_*` tables; quiz code stays untouched. Why: keeps the two game loops independent.
 - The canvas host screen is the sole authority for the turn loop, guess checking and scoring. Why: there are no accounts, so one writer avoids races.
 - Host participation uses a session-scoped saved player ID and the shared CanvasParticipantView fed by the host's existing game subscription; promptRef remains authority-only, never a participant display source. Why: one writer and one subscription preserve scoring while the UI only reveals words to eligible artists.

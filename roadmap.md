@@ -1,5 +1,8 @@
 # Quizclash roadmap
 
+- [x] Replace mixed front-page actions with game selection followed by mode-specific actions, retaining global joining and direct quiz links.
+- [x] Verify navigation, keyboard focus, code/name joining and narrow/wide layouts without adding completed test games to records; five tests passed and live Pencil lobby joining verified at 390/768/1280 widths.
+
 - [x] Let the host join as a player in the same tab, reusing drawing/guessing and keeping host controls.
 - [x] Verified live host drawing, guessing, handoffs, saved score after refresh, next-word recovery and hidden-word UI; fifteen regression tests passed.
 
