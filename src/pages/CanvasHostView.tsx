@@ -81,8 +81,10 @@ export default function CanvasHostView() {
     if (!g) return;
     const next = { ...g, ...fields } as CanvasGame;
     gameRef.current = next;
-    setGame(next);
     await canvasDb.from('canvas_games').update(fields).eq('id', g.id);
+    // Artist prompt access depends on the saved round_artist_ids. Do not mount
+    // the host's drawing screen before that change has reached the database.
+    setGame(next);
   }, [setGame]);
 
   const timeIsUp = () => {
