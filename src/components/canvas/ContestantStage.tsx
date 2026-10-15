@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { Check, Pencil, Sparkles, X } from 'lucide-react';
+import { Check, Flame, Pencil, Sparkles, X } from 'lucide-react';
 import type { CanvasGame, CanvasGuess, CanvasPlayer } from '@/types/canvas';
 import { worldRoster } from './contestantWorld';
 import { cn } from '@/lib/utils';
@@ -53,11 +53,11 @@ export default function ContestantStage({ game, players, guesses, now, meId }: P
               </motion.div>
               <AnimatePresence>
                 {(p.bubble || p.status === 'correct' || p.status === 'drawing') && (
-                  <motion.div key={p.bubble?.id ?? p.status} role="status" className={cn('pencil-speech', p.bubble && 'pencil-speech-wrong', p.status === 'correct' && 'pencil-speech-correct', p.status === 'drawing' && 'pencil-speech-drawing')}
+                  <motion.div key={p.bubble?.id ?? p.status} role="status" className={cn('pencil-speech', p.bubble && (p.bubble.closeness ? 'pencil-speech-near' : 'pencil-speech-wrong'), p.status === 'correct' && 'pencil-speech-correct', p.status === 'drawing' && 'pencil-speech-drawing')}
                     initial={reduced ? { opacity: 0 } : { y: 14, opacity: 0, scale: 0.35, rotate: -12 }}
                     animate={reduced ? { opacity: 1 } : { y: [14, -6, 0], opacity: 1, scale: [0.35, 1.15, 1], rotate: [-12, 6, -4, 2, 0] }}
                     exit={{ y: -8, opacity: 0, scale: 0.9 }} transition={{ duration: reduced ? 0 : 0.55, ease: 'easeOut' }}>
-                    {p.status === 'correct' ? <Check aria-label="Correct guess" className="h-4 w-4" /> : p.status === 'drawing' ? <Pencil aria-label="Drawing" className="h-4 w-4" /> : <><X className="h-3 w-3 shrink-0" aria-hidden="true" /><span>{p.bubble?.text}</span></>}
+                    {p.status === 'correct' ? <Check aria-label="Correct guess" className="h-4 w-4" /> : p.status === 'drawing' ? <Pencil aria-label="Drawing" className="h-4 w-4" /> : p.bubble?.closeness ? <span><span className="flex items-center justify-center gap-1"><Flame className="h-3 w-3 shrink-0" />{p.bubble.closeness === 'very-close' ? 'So close!' : 'Warm!'}</span>{p.bubble.text}</span> : <><X className="h-3 w-3 shrink-0" aria-hidden="true" /><span>{p.bubble?.text}</span></>}
                   </motion.div>
                 )}
               </AnimatePresence>

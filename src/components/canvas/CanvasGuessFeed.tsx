@@ -27,8 +27,8 @@ export default function CanvasGuessFeed({ game, players, guesses }: { game: Canv
               {correct ? <p className="flex flex-wrap items-center gap-1 text-xs font-semibold text-secondary"><Check className="h-3 w-3 shrink-0" /> Got it! <span>+{g.points_earned}</span></p>
                 : <div className="flex flex-wrap items-baseline gap-2">
                     <p className={confirmed ? 'break-words text-xs text-foreground' : 'text-xs text-muted-foreground'}>{confirmed ? g.guess : 'Checking…'}</p>
-                    {confirmed && g.verdict === 'very-close' && <span className="text-[10px] font-bold uppercase tracking-wider text-orange-500">Very Close!</span>}
-                    {confirmed && g.verdict === 'close' && <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500">Close</span>}
+                    {confirmed && g.verdict === 'very-close' && <span className="pencil-near-label">So close!</span>}
+                    {confirmed && g.verdict === 'close' && <span className="pencil-near-label">Getting warm!</span>}
                   </div>}
             </motion.div>
           </div>;

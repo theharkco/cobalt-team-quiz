@@ -118,31 +118,23 @@ export function isCorrectGuess(guess: string, answer: string, alternates: string
 
 export type GuessVerdict = 'correct' | 'very-close' | 'close' | 'incorrect';
 
-/** Host-authoritative verdict evaluation for near-misses. */
+/** Host-only spelling/partial-phrase feedback; not a semantic similarity or points score. */
 export function evaluateGuessVerdict(guess: string, answer: string, alternates: string[] = []): GuessVerdict {
   if (isCorrectGuess(guess, answer, alternates)) return 'correct';
-  
   const g = normalize(guess);
-  if (!g) return 'incorrect';
+  if (g.length < 3) return 'incorrect';
   const targets = [answer, ...alternates].map(normalize).filter(Boolean);
-  
-  let minDistance = Infinity;
-  let targetLen = 0;
-  
+  let best = 0;
   for (const t of targets) {
     const sG = squash(g);
     const sT = squash(t);
-    const dist = levenshtein(sG, sT);
-    if (dist < minDistance) {
-      minDistance = dist;
-      targetLen = t.length;
+    best = Math.max(best, 1 - levenshtein(sG, sT) / Math.max(sG.length, sT.length));
+    const words = g.split(' ');
+    const targetWords = t.split(' ');
+    // Whole meaningful words: "ship" is close to "pirate ship", "hip" isn't.
+    if (targetWords.length > 1 && words.every((word) => word.length >= 3 && targetWords.includes(word))) {
+      best = Math.max(best, words.length / targetWords.length >= 0.66 ? 0.85 : 0.7);
     }
   }
-  
-  const tolerance = targetLen <= 4 ? 0 : targetLen <= 7 ? 1 : 2;
-  
-  if (minDistance <= tolerance + 1) return 'very-close';
-  if (minDistance <= tolerance + 2) return 'close';
-  
-  return 'incorrect';
+  return best >= 0.82 ? 'very-close' : best >= 0.65 ? 'close' : 'incorrect';
 }

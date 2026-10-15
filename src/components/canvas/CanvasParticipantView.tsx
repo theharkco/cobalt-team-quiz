@@ -4,6 +4,7 @@ import CanvasGuessFeed from '@/components/canvas/CanvasGuessFeed';
 import CanvasLeaderboard from '@/components/canvas/CanvasLeaderboard';
 import CorrectBurst from '@/components/canvas/CorrectBurst';
 import GuessWordStatus from '@/components/canvas/GuessWordStatus';
+import NearMissFeedback from '@/components/canvas/NearMissFeedback';
 import { Check, Eye, LockKeyhole, Pencil, Send, Trophy, Users, X } from 'lucide-react';
 import HowToPlay from '@/components/quiz/HowToPlay';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -62,18 +63,19 @@ export default function CanvasParticipantView({ state, playerId, now, hostContro
     wasSolved.current = solved;
   }, [solved]);
   const endBurst = useCallback(() => setBurst(false), []);
-  const [wrong, setWrong] = useState<{ id: string; text: string } | null>(null);
+  const [wrong, setWrong] = useState<{ id: string; text: string; closeness?: 'close' | 'very-close' } | null>(null);
   const reacted = useRef(new Set<string>());
   const wrongTimer = useRef<ReturnType<typeof setTimeout>>();
   useEffect(() => {
     if (solved) { setWrong(null); clearTimeout(wrongTimer.current); return; }
-    const rejected = myGuesses.filter((g) => g.verdict === 'incorrect' && !reacted.current.has(g.id));
+    const rejected = myGuesses.filter((g) => g.verdict && g.verdict !== 'correct' && !reacted.current.has(g.id));
     if (!rejected.length) return;
     rejected.forEach((g) => reacted.current.add(g.id));
     const latest = rejected[rejected.length - 1];
-    setWrong({ id: latest.id, text: latest.guess });
+    const closeness = latest.verdict === 'close' || latest.verdict === 'very-close' ? latest.verdict : undefined;
+    setWrong({ id: latest.id, text: latest.guess, closeness });
     clearTimeout(wrongTimer.current);
-    wrongTimer.current = setTimeout(() => setWrong(null), 1400);
+    wrongTimer.current = setTimeout(() => setWrong(null), closeness ? 3000 : 1400);
   }, [myGuesses, solved]);
   useEffect(() => {
     setWrong(null);
@@ -178,15 +180,15 @@ export default function CanvasParticipantView({ state, playerId, now, hostContro
               className="flex items-center gap-2 rounded-lg border-2 border-secondary bg-secondary/15 p-4 font-display text-xl font-bold text-secondary"><Check /> You got it! +{myPoints}</motion.div>
           ) : (
             <motion.form
-              animate={wrong ? { x: [0, -10, 9, -6, 4, 0] } : { x: 0 }}
+              animate={wrong && !wrong.closeness ? { x: [0, -10, 9, -6, 4, 0] } : { x: 0 }}
               transition={{ duration: 0.45 }}
               className={cn('relative rounded-lg border-2 bg-card p-3 transition-colors',
-                wrong ? 'border-destructive shadow-[0_0_24px_hsl(var(--destructive)/0.45)]' : 'border-accent shadow-[0_0_24px_hsl(var(--accent)/0.3)]')}
+                wrong?.closeness ? 'pencil-guess-near' : wrong ? 'border-destructive shadow-[0_0_24px_hsl(var(--destructive)/0.45)]' : 'border-accent shadow-[0_0_24px_hsl(var(--accent)/0.3)]')}
               onSubmit={(e) => { e.preventDefault(); submitGuess(); }}>
               <div className="mb-2 flex min-h-7 items-center justify-between gap-2">
                 <p className="stage-kicker text-accent">Your guess</p>
                 <AnimatePresence>
-                  {wrong && (
+                  {wrong && !wrong.closeness && (
                     <motion.span key={wrong.id} role="status" initial={{ scale: 0, rotate: -20, opacity: 0 }} animate={{ scale: 1, rotate: 0, opacity: 1 }} exit={{ scale: 0.5, opacity: 0, y: -10 }}
                       transition={{ type: 'spring', bounce: 0.6 }}
                       className="flex items-center gap-1 min-w-0 truncate rounded-md bg-destructive px-2 py-0.5 text-xs font-bold text-destructive-foreground">
@@ -195,6 +197,7 @@ export default function CanvasParticipantView({ state, playerId, now, hostContro
                   )}
                 </AnimatePresence>
               </div>
+              <AnimatePresence mode="wait">{wrong?.closeness && <NearMissFeedback key={wrong.id} level={wrong.closeness} />}</AnimatePresence>
               <div className="flex gap-2">
                 <Input value={guess} onChange={(e) => setGuess(e.target.value)} aria-label="Your guess" placeholder="What is it?" maxLength={40} autoComplete="off" autoFocus
                   className="h-14 min-w-0 flex-1 border-0 bg-background/60 font-display text-xl font-bold focus-visible:ring-2 focus-visible:ring-accent sm:text-2xl" />

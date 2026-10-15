@@ -16,7 +16,7 @@ import CanvasResults from '@/components/canvas/CanvasResults';
 import { AdditionTimer, ArtistHandoff, CanvasStats, NewWordBanner, PassBanner, RevealBanner, TurnPips } from '@/components/canvas/CanvasHud';
 import { canvasDb, useCanvasGame } from '@/hooks/useCanvasGame';
 import { useCanvasHostClock } from '@/hooks/useCanvasHostClock';
-import { MAX_ARTISTS, TURN_SECONDS, guesserPointsForGuess, individualAwards, evaluateGuessVerdict, isCorrectGuess, pickArtist, teamPointsForTurn } from '@/data/canvas/canvasScoring';
+import { MAX_ARTISTS, TURN_SECONDS, guesserPointsForGuess, individualAwards, evaluateGuessVerdict, pickArtist, teamPointsForTurn } from '@/data/canvas/canvasScoring';
 import { roundAction } from '@/data/canvas/canvasRound';
 import { pickPrompt, type CanvasPrompt } from '@/data/canvas/promptBanks';
 import type { CanvasGame, CanvasPlayer } from '@/types/canvas';
@@ -218,7 +218,6 @@ export default function CanvasHostView() {
       if (result !== 'correct') {
         markVerdict(guess.id, result);
         continue;
-      }
       }
       const points = guesserPointsForGuess(g.addition_index, g.addition_seconds, g.addition_started_at, guess.created_at);
       correctRef.current.push({ playerId: guess.player_id, at: new Date(guess.created_at).getTime(), points });

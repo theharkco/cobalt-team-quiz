@@ -5,7 +5,7 @@ export interface WorldContestant {
   id: string;
   name: string;
   status: ContestantStatus;
-  bubble?: { id: string; text: string };
+  bubble?: { id: string; text: string; closeness?: 'close' | 'very-close' };
   isMe: boolean;
 }
 
@@ -17,8 +17,9 @@ export function worldRoster(game: CanvasGame, players: CanvasPlayer[], guesses: 
     const correct = round.some((g) => g.player_id === p.id && g.is_correct);
     const status = correct ? 'correct' : active && p.id === game.current_artist_id ? 'drawing' : game.round_artist_ids.includes(p.id) ? 'artist' : 'guessing';
     const last = round.filter((g) => g.player_id === p.id).at(-1);
-    const bubble = status === 'guessing' && last?.verdict === 'incorrect' && now - Date.parse(last.created_at) < 4500
-      ? { id: last.id, text: last.guess } : undefined;
+    const closeness = last?.verdict === 'close' || last?.verdict === 'very-close' ? last.verdict : undefined;
+    const bubble = status === 'guessing' && (last?.verdict === 'incorrect' || closeness) && last && now - Date.parse(last.created_at) < 4500
+      ? { id: last.id, text: last.guess, closeness } : undefined;
     return { id: p.id, name: p.name, status, bubble, isMe: p.id === meId };
   });
 }

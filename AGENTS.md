@@ -4,6 +4,7 @@
 
 - Pass the Pencil (formerly Infinite Canvas) is a separate game mode (`quiz_sessions.game_mode = 'canvas'`) with its own pages and `canvas_*` tables; quiz code stays untouched. Why: keeps the two game loops independent.
 - The canvas host screen is the sole authority for the turn loop, guess checking and scoring. Why: there are no accounts, so one writer avoids races.
+- Near-miss hints are host-only spelling/whole-word phrase comparisons sent as transient verdict levels, never secret text. Why: immediate encouragement without revealing answers or changing scoring.
 - Host participation uses a session-scoped saved player ID and the shared CanvasParticipantView fed by the host's existing game subscription; promptRef remains authority-only, never a participant display source. Why: one writer and one subscription preserve scoring while the UI only reveals words to eligible artists.
 - The canvas host uses a dedicated worker pulse and wall-clock deadlines for turns and reveals, with immediate wake-up checks and a timer fallback. Why: hidden-window timer throttling must not stall the host loop; fully suspended tabs still require resumption.
 - Canvas prompts live only in `canvas_secrets` and are read through security-definer functions (artist or host token). Why: guessers' phones must not see the answer.
