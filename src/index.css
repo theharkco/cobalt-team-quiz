@@ -287,8 +287,8 @@
     .frontpage-screen > .relative { gap: 40px; }
     .frontpage-screen h1 { font-size: 128px; }
     .pencil-game-screen { --pencil-space: max(260px, calc(100svh - 465px)); }
-    .pencil-artist-screen { --pencil-space: max(280px, calc(100svh - 325px)); }
-    .pencil-observer-screen { --pencil-space: max(320px, calc(100svh - 230px)); }
+    .pencil-artist-screen { --pencil-space: max(260px, calc(100svh - 455px)); }
+    .pencil-observer-screen { --pencil-space: max(300px, calc(100svh - 330px)); }
     .pencil-game-screen .stage-content { padding-top: 12px; padding-bottom: 16px; }
     .pencil-game-content > :not([hidden]) ~ :not([hidden]) { margin-top: 10px; }
     .pencil-game-content > .border-b { padding-bottom: 10px; }
