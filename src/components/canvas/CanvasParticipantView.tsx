@@ -28,7 +28,7 @@ interface Props {
 
 export default function CanvasParticipantView({ state, playerId, now, hostControls, canvasRef }: Props) {
   const { game, players, strokes, guesses, live, loaded, sendLive, commitStroke, sendGuess } = state;
-  const [prompt, setPrompt] = useState<{ prompt: string; answer: string } | null>(null);
+  const [secret, setSecret] = useState<{ roundKey: string; prompt: string } | null>(null);
   const [guess, setGuess] = useState('');
   const [penColor, setPenColor] = useState(PEN_COLORS[0]);
   const [penWidth, setPenWidth] = useState(PEN_WIDTHS[0].value);
@@ -37,14 +37,15 @@ export default function CanvasParticipantView({ state, playerId, now, hostContro
   const isArtist = !!game && game.current_artist_id === playerId && game.phase === 'drawing';
   const knowsWord = !!game && (game.round_artist_ids ?? []).includes(playerId ?? '');
   const roundKey = game ? `${game.masterpiece_index}-${knowsWord}` : '';
+  const prompt = knowsWord && secret?.roundKey === roundKey ? secret : null;
 
   useEffect(() => {
-    setPrompt(null);
+    setSecret(null);
     if (!knowsWord || !game || !playerId) return;
     let cancelled = false;
     canvasDb.rpc('get_canvas_prompt_for_artist', { _game_id: game.id, _player_id: playerId }).then(({ data }) => {
       const row = Array.isArray(data) ? data[0] : null;
-      if (row && !cancelled) setPrompt(row);
+      if (row && !cancelled) setSecret({ roundKey, prompt: row.prompt });
     });
     return () => { cancelled = true; };
   }, [roundKey, game?.id, playerId]);
