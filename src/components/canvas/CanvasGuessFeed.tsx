@@ -14,7 +14,7 @@ export default function CanvasGuessFeed({ game, players, guesses }: { game: Canv
   return (
     <section className="pencil-chat" aria-label="Guess history">
       <h2 className="mb-3 flex items-center gap-2 font-display text-sm font-bold"><MessageCircle className="h-4 w-4 shrink-0 text-primary" /> Guesses</h2>
-      <div ref={scroll} role="log" aria-label="Team guesses" aria-live="polite" aria-relevant="additions text" className="pencil-chat-log"
+      <div ref={scroll} role="log" aria-label="Player guesses" aria-live="polite" aria-relevant="additions text" className="pencil-chat-log"
         onScroll={() => { const el = scroll.current; if (el) follow.current = el.scrollHeight - el.scrollTop - el.clientHeight < 32; }}>
         {!ordered.length && <p className="text-xs text-muted-foreground">No guesses yet.</p>}
         {ordered.map((g, i) => {

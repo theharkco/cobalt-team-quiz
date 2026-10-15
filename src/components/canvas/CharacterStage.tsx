@@ -125,7 +125,7 @@ export default function CharacterStage({ players, reduced }: { players: WorldCon
     <Framing /><ambientLight intensity={0.85} /><directionalLight position={[-6, 15, 8]} intensity={2.2} castShadow shadow-mapSize-width={1024} shadow-mapSize-height={1024} shadow-camera-left={-11} shadow-camera-right={11} shadow-camera-top={10} shadow-camera-bottom={-10} shadow-normalBias={0.04} />
     <Environment resolution={32}><Lightformer intensity={1.5} position={[0, 8, 0]} rotation-x={-Math.PI / 2} scale={[20, 20, 1]} /></Environment>
     <Ground palette={palette} />
-    <Suspense fallback={<Html center><span className="world-player-name">Getting the team ready…</span></Html>}>
+    <Suspense fallback={<Html center><span className="world-player-name">Getting the players ready…</span></Html>}>
       {players.map((player, index) => { const pool = player.status === 'correct' ? solved : unsolved; return <Character key={player.id} player={player} index={index} slot={Math.max(0, pool.findIndex((p) => p.id === player.id))} count={pool.length} reduced={reduced} palette={palette} />; })}
     </Suspense>
   </Canvas>;

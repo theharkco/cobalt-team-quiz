@@ -14,9 +14,9 @@ export default function ContestantStage({ game, players, guesses, now, meId }: P
   const roster = worldRoster(game, ranked, guesses, now, meId);
   const done = roster.filter((p) => p.status === 'correct' || p.status === 'artist').length;
   return (
-    <section className="pencil-team" aria-label="The team">
+    <section className="pencil-team" aria-label="The players">
       <div className="pencil-team-heading">
-        <h2 className="flex items-center gap-2 font-display text-sm font-bold sm:text-lg"><Sparkles className="hidden h-4 w-4 text-primary sm:block" /> The team</h2>
+        <h2 className="flex items-center gap-2 font-display text-sm font-bold sm:text-lg"><Sparkles className="hidden h-4 w-4 text-primary sm:block" /> Players</h2>
         <span className="text-xs font-bold tabular-nums text-muted-foreground">{done}/{players.length} done</span>
       </div>
       <div className="mb-2 h-1 overflow-hidden rounded-full bg-muted" role="progressbar" aria-label="Players done" aria-valuemin={0} aria-valuemax={players.length} aria-valuenow={done}>
@@ -69,7 +69,7 @@ export default function ContestantStage({ game, players, guesses, now, meId }: P
             <span className="pencil-player-score">{players.find((player) => player.id === p.id)?.canvas_score ?? 0} pts</span>
           </motion.div>
         ); })}
-        {!players.length && <p className="text-xs text-muted-foreground">Waiting for the team…</p>}
+        {!players.length && <p className="text-xs text-muted-foreground">Waiting for players…</p>}
       </div>
     </section>
   );

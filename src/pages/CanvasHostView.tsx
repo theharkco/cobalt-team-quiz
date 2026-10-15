@@ -295,7 +295,7 @@ export default function CanvasHostView() {
             <h1 className="font-display text-5xl font-bold leading-tight md:text-6xl">One word.<br />Three artists.<br /><span className="text-primary">One pencil.</span></h1>
             <p className="max-w-lg text-lg text-muted-foreground">Each artist gets {artistSeconds} seconds to draw a secret word. If nobody guesses it, the pencil passes to the next artist, who keeps drawing on the same picture.</p>
             <div className="space-y-2">
-              <p className="stage-kicker">Team points per word</p>
+              <p className="stage-kicker">Points per word</p>
               <div className="grid grid-cols-3 gap-4">
                 {[1, 2, 3].map((turn) => <div key={turn}><p className="text-sm text-muted-foreground">Artist {turn}</p><motion.p key={artistSeconds} initial={{ y: 5, opacity: 0.5 }} animate={{ y: 0, opacity: 1 }} className="font-display text-3xl font-bold tabular-nums text-secondary">+{teamPointsForTurn(turn, artistSeconds)}</motion.p></div>)}
               </div>
@@ -400,7 +400,7 @@ export default function CanvasHostView() {
         </div>
         <div className="flex flex-wrap items-start justify-between gap-5 border-t border-border/60 pt-4">
             <div className="min-w-0 flex-1">
-              <p className="stage-kicker mb-3 flex items-center gap-2"><TrendingUp className="h-4 w-4 text-secondary" /> Recent team gains</p>
+              <p className="stage-kicker mb-3 flex items-center gap-2"><TrendingUp className="h-4 w-4 text-secondary" /> Recent score gains</p>
               {gains.length === 0 && <p className="text-sm text-muted-foreground">None yet.</p>}
               <ul className="space-y-1.5">
                 {gains.map((g, i) => (
