@@ -13,7 +13,7 @@ describe('near-miss hints', () => {
     expect(evaluateGuessVerdict('elxxxant', 'elephant')).toBe('incorrect');
     expect(evaluateGuessVerdict('fire xxxine', 'fire engine')).toBe('close');
     expect(evaluateGuessVerdict('xxxx extinguisher', 'fire extinguisher')).toBe('close');
-    expect(evaluateGuessVerdict('xxxestinguisher', 'fire extinguisher')).toBe('very-close');
+    expect(evaluateGuessVerdict('xxxe extinguisher', 'fire extinguisher')).toBe('very-close');
   });
   it('does not encourage tiny fragments or unrelated guesses', () => {
     expect(evaluateGuessVerdict('c', 'cat')).toBe('incorrect');
