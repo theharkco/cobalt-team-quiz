@@ -292,7 +292,7 @@ export default function CanvasHostView() {
         <div className="mx-auto grid w-full max-w-6xl gap-10 lg:grid-cols-[1.1fr_.9fr]">
           <section className="space-y-6">
             <p className="stage-kicker flex items-center gap-2"><Paintbrush className="h-4 w-4 text-primary" /> Co-op Pictionary relay</p>
-            <h1 className="font-display text-5xl font-bold leading-tight md:text-6xl">One word.<br />Three artists.<br /><span className="text-primary">One team.</span></h1>
+            <h1 className="font-display text-5xl font-bold leading-tight md:text-6xl">One word.<br />Three artists.<br /><span className="text-primary">One pencil.</span></h1>
             <p className="max-w-lg text-lg text-muted-foreground">Each artist gets {artistSeconds} seconds to draw a secret word. If nobody guesses it, the pencil passes to the next artist, who keeps drawing on the same picture.</p>
             <div className="space-y-2">
               <p className="stage-kicker">Team points per word</p>
