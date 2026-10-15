@@ -1,6 +1,6 @@
 # Quizclash roadmap
 
-- [ ] Fit gameplay, lobbies and front-page choices comfortably on small laptops; verify at 1280×800 and 1440×900.
+- [x] Compact small-laptop layouts; verified full artist/guesser/host canvases and right-hand chat at 1280×800 and 1440×900, front page/picker/builder without overflow, live guessing and 31 regression tests.
 
 - [x] Animated host-confirmed near-miss hints; verified live rejection, continued typing, chat feedback and correct solves, plus regression tests.
 - [x] Progressive host-generated masked letter hints; verified live reveals, hidden full answer and unchanged correct-guess flow, plus time/handoff tests.
