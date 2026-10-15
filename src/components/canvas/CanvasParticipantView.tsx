@@ -89,12 +89,13 @@ export default function CanvasParticipantView({ state, playerId, now, hostContro
   if (!game || !me) return <QuizScreen showBack={false} eyebrow="Pass the Pencil"><p>We couldn't find you in this game.</p></QuizScreen>;
 
   if (game.status === 'finished') {
-    return <QuizScreen showBack={false} eyebrow="Pass the Pencil · Final"><CanvasResults game={game} players={players} compact /></QuizScreen>;
+    return <QuizScreen showBack={false} eyebrow="Pass the Pencil · Final"><PencilMusic /><CanvasResults game={game} players={players} compact /></QuizScreen>;
   }
 
   if (game.status === 'lobby') {
     return (
       <QuizScreen showBack={false} eyebrow="Pass the Pencil" contentClassName="px-4 py-10 md:px-8 md:py-16">
+        <PencilMusic />
         <div className="mx-auto max-w-2xl space-y-4 text-center">
           <p className="stage-kicker">You're in</p>
           <motion.p
@@ -156,6 +157,7 @@ export default function CanvasParticipantView({ state, playerId, now, hostContro
   return (
     <QuizScreen className={cn('pencil-game-screen', isArtist && 'pencil-artist-screen')} showBack={false} showBackdrop={false} eyebrow={`Pencil · Word ${game.masterpiece_index}`} contentClassName="py-5 md:py-8" corner={<span className="text-sm font-bold tabular-nums text-primary">{me.canvas_score} pts</span>}>
       <div className="pencil-game-content mx-auto w-full max-w-[1500px] space-y-4 px-3 md:px-8">
+        <PencilMusic />
         <div className="border-b border-border/60 pb-4">
         <CanvasStats game={game} now={now} compact />
         </div>
