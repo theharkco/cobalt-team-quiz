@@ -4,29 +4,44 @@ export const PEN_WIDTHS = [{ label: 'Thin', value: 0.004 }, { label: 'Medium', v
 export const MAX_ARTISTS = 3;
 export const EXTRA_GUESS_WINDOW_MS = 2000;
 
-/** Solving on an earlier artist awards the group more; shorter turns increase difficulty. Round to whole points. */
-export const teamPointsForTurn = (turn: number, seconds = TURN_SECONDS) => {
+/** Base award per artist turn: earlier artists are worth more (300/200/100). Normalized — turn length does not scale it. */
+export const turnBasePoints = (turn: number) => {
   const artist = Number.isFinite(turn) ? Math.min(MAX_ARTISTS, Math.max(1, Math.floor(turn))) : 1;
-  const duration = Number.isFinite(seconds) && seconds > 0 ? seconds : TURN_SECONDS;
-  return Math.round(100 * (MAX_ARTISTS - artist + 1) * TURN_SECONDS / duration);
+  return 100 * (MAX_ARTISTS - artist + 1);
+};
+
+/** Linear decay from base to 20% of base across the turn's seconds. */
+const decay = (base: number, elapsedSeconds: number, turnSeconds: number) => {
+  const seconds = Number.isFinite(turnSeconds) && turnSeconds > 0 ? turnSeconds : TURN_SECONDS;
+  const elapsed = Number.isFinite(elapsedSeconds) ? Math.max(0, elapsedSeconds) : 0;
+  const progress = Math.min(1, elapsed / seconds);
+  return Math.round(base * (1 - 0.8 * progress));
+};
+
+const elapsedInTurn = (turnStartedAt: string | null | undefined, at: string | null | undefined): number | null => {
+  const start = turnStartedAt ? Date.parse(turnStartedAt) : NaN;
+  const end = at ? Date.parse(at) : NaN;
+  return Number.isFinite(start) && Number.isFinite(end) ? Math.max(0, (end - start) / 1000) : null;
+};
+
+/**
+ * Group award for a solved word: 300/200/100 by artist turn, decaying with the
+ * time spent in that turn. Without timestamps (previews) returns the base value.
+ * The drawing artist earns the same amount as a personal award.
+ */
+export const teamPointsForTurn = (turn: number, seconds = TURN_SECONDS, turnStartedAt?: string | null, solvedAt?: string | null) => {
+  const base = turnBasePoints(turn);
+  const elapsed = elapsedInTurn(turnStartedAt, solvedAt);
+  return elapsed === null ? base : decay(base, elapsed, seconds);
 };
 
 export interface IndividualAward { playerId: string; points: number }
 
-/** 100 at word start, falling linearly to 20 across the three artist turns. */
-export function guesserPointsForTime(elapsedSeconds: number, turnSeconds = TURN_SECONDS): number {
-  const seconds = Number.isFinite(turnSeconds) && turnSeconds > 0 ? turnSeconds : TURN_SECONDS;
-  const elapsed = Number.isFinite(elapsedSeconds) ? Math.max(0, elapsedSeconds) : 0;
-  const progress = Math.min(1, elapsed / (MAX_ARTISTS * seconds));
-  return Math.round(100 - 80 * progress);
-}
-
-/** Count earlier artist turns too; the pencil handoff never resets guesser points. */
+/** Guesser points: the turn's base (300/200/100), decaying with time spent in the current turn only — handoffs reset the clock but lower the base. */
 export function guesserPointsForGuess(turn: number, turnSeconds: number, turnStartedAt: string | null, guessedAt: string): number {
-  const start = turnStartedAt ? Date.parse(turnStartedAt) : NaN;
-  const guessed = Date.parse(guessedAt);
-  const currentElapsed = Number.isFinite(start) && Number.isFinite(guessed) ? Math.max(0, (guessed - start) / 1000) : 0;
-  return guesserPointsForTime((Math.max(1, turn) - 1) * turnSeconds + currentElapsed, turnSeconds);
+  const base = turnBasePoints(turn);
+  const elapsed = elapsedInTurn(turnStartedAt, guessedAt) ?? 0;
+  return decay(base, elapsed, turnSeconds);
 }
 
 /**
