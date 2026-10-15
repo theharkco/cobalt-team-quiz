@@ -151,13 +151,14 @@ export default function CanvasHostView() {
     if (!g || !prompt || (g.phase !== 'drawing' && g.phase !== 'grace') || busyRef.current) return;
     busyRef.current = true;
     const ordered = [...correctRef.current].sort((a, b) => a.at - b.at);
-    const awards = individualAwards(g.round_artist_ids, ordered.map((c) => c.playerId), Object.fromEntries(ordered.map((c) => [c.playerId, c.points])));
+    const firstSolveAt = ordered[0] ? new Date(ordered[0].at).toISOString() : null;
+    const teamPts = teamPointsForTurn(g.addition_index, g.addition_seconds, g.addition_started_at, firstSolveAt);
+    const awards = individualAwards(g.round_artist_ids, ordered.map((c) => c.playerId), Object.fromEntries(ordered.map((c) => [c.playerId, c.points])), teamPts);
     const { data } = await canvasDb.from('players').select('id, canvas_score').in('id', awards.map((a) => a.playerId));
     await Promise.all(awards.map((a) => {
       const cur = (data as { id: string; canvas_score: number }[] | null)?.find((d) => d.id === a.playerId)?.canvas_score ?? 0;
       return canvasDb.from('players').update({ canvas_score: cur + a.points }).eq('id', a.playerId);
     }));
-    const teamPts = teamPointsForTurn(g.addition_index, g.addition_seconds);
     await saveDrawing(teamPts);
     setGains((prev) => [{ word: prompt.text, points: teamPts, artists: g.round_artist_ids.length }, ...prev].slice(0, 6));
     await patch({
