@@ -111,7 +111,7 @@ export default function CanvasParticipantView({ state, playerId, now, hostContro
           </motion.h1>
           <p className="font-display font-bold text-primary">{game.addition_seconds}s per artist · {game.duration_seconds / 60} min game</p>
           <p className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <span className="status-dot" /> {players.length} players waiting for the host…
+            <span className="status-dot" /> {players.length} {players.length === 1 ? "player" : "players"} waiting for the host…
           </p>
         </div>
         <HowToPlay
