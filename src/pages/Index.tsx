@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { QuizQuestion } from '@/data/questionTypes';
 import { canvasDb } from '@/hooks/useCanvasGame';
 import TypewriterTagline from '@/components/quiz/TypewriterTagline';
+import PencilMusic from '@/components/canvas/PencilMusic';
 import { ArrowLeft, ArrowRight, Gamepad2, Paintbrush, PenTool, Sparkles } from 'lucide-react';
 
 // Hover/tap spring for the mode cards: no delay, so the card settles back the
@@ -207,6 +208,7 @@ const Index = () => {
           </section>
         </div>
       </div>
+      <PencilMusic />
     </main>
   );
 };

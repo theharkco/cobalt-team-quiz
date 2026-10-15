@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Music, VolumeX } from 'lucide-react';
-import { isBgMusicMuted, setBgMusicMuted, startBgMusic, stopBgMusic } from '@/lib/bgMusic';
+import { isBgMusicMuted, resumeBgMusic, setBgMusicMuted, startBgMusic, stopBgMusic } from '@/lib/bgMusic';
 
 /**
  * Background music for Pass the Pencil. Browsers require a user gesture before
@@ -13,6 +13,7 @@ export default function PencilMusic() {
   const [started, setStarted] = useState(false);
 
   useEffect(() => {
+    resumeBgMusic(); // keep playing across page switches once unlocked
     const unlock = () => {
       startBgMusic();
       setStarted(true);
