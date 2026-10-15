@@ -5,6 +5,7 @@ import CanvasLeaderboard from '@/components/canvas/CanvasLeaderboard';
 import CorrectBurst from '@/components/canvas/CorrectBurst';
 import GuessWordStatus from '@/components/canvas/GuessWordStatus';
 import NearMissFeedback from '@/components/canvas/NearMissFeedback';
+import WordHintDisplay from '@/components/canvas/WordHintDisplay';
 import { Check, Eye, LockKeyhole, Pencil, Send, Trophy, Users, X } from 'lucide-react';
 import HowToPlay from '@/components/quiz/HowToPlay';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -29,7 +30,7 @@ interface Props {
 }
 
 export default function CanvasParticipantView({ state, playerId, now, hostControls, canvasRef }: Props) {
-  const { game, players, strokes, guesses, live, loaded, sendLive, commitStroke, sendGuess } = state;
+  const { game, players, strokes, guesses, live, loaded, sendLive, commitStroke, sendGuess, wordHint } = state;
   const [secret, setSecret] = useState<{ roundKey: string; prompt: string } | null>(null);
   const [guess, setGuess] = useState('');
   const [penColor, setPenColor] = useState(PEN_COLORS[0]);
@@ -158,6 +159,7 @@ export default function CanvasParticipantView({ state, playerId, now, hostContro
         <CanvasStats game={game} now={now} compact />
         </div>
         {!isArtist && !knowsWord && <GuessWordStatus game={game} now={now} />}
+        {!isArtist && !knowsWord && !solved && game.phase === 'drawing' && wordHint?.round === game.masterpiece_index && <WordHintDisplay hint={wordHint} />}
         {isArtist
           ? <ArtistBanner turn={game.addition_index} word={prompt?.prompt} />
           : <ArtistHandoff artist={artist} />}

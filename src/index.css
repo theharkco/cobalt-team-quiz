@@ -231,6 +231,9 @@
   .pencil-player-rank { position: absolute; left: 0; top: 4px; color: hsl(var(--muted-foreground)); font-size: 10px; font-weight: 700; font-variant-numeric: tabular-nums; }
   .pencil-speech.pencil-speech-wrong { display: flex; align-items: center; gap: 3px; background: hsl(var(--destructive)); color: hsl(var(--destructive-foreground)); box-shadow: 0 3px 0 hsl(var(--shadow-color)), 0 0 12px hsl(var(--destructive) / .2); }
   .pencil-guess-near { border-color: hsl(var(--near-miss)); box-shadow: 0 0 24px hsl(var(--near-miss) / .25); }
+  .pencil-word-hint { display: flex; flex-direction: column; gap: 8px; padding: 12px 0; border-bottom: 1px solid hsl(var(--border) / .6); }
+  .pencil-hint-letter { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 30px; border-bottom: 2px solid hsl(var(--border)); color: hsl(var(--muted-foreground)); font-weight: 800; font-size: 18px; }
+  .pencil-hint-revealed { color: hsl(var(--secondary)); border-color: hsl(var(--secondary)); }
   .pencil-near-feedback { display: flex; align-items: center; gap: 12px; color: hsl(var(--near-miss)); border-top: 1px solid hsl(var(--near-miss) / .3); padding: 10px 0 14px; }
   .pencil-heat-bar { display: block; width: 6px; height: 24px; transform-origin: bottom; border-radius: 3px; background: hsl(var(--muted)); }
   .pencil-heat-bar:nth-child(1) { height: 10px; }

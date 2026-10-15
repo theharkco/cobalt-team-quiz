@@ -18,6 +18,7 @@ import { canvasDb, useCanvasGame } from '@/hooks/useCanvasGame';
 import { useCanvasHostClock } from '@/hooks/useCanvasHostClock';
 import { MAX_ARTISTS, TURN_SECONDS, guesserPointsForGuess, individualAwards, evaluateGuessVerdict, pickArtist, teamPointsForTurn } from '@/data/canvas/canvasScoring';
 import { roundAction } from '@/data/canvas/canvasRound';
+import { maskedWordHint } from '@/data/canvas/wordHints';
 import { pickPrompt, type CanvasPrompt } from '@/data/canvas/promptBanks';
 import type { CanvasGame, CanvasPlayer } from '@/types/canvas';
 import { cn } from '@/lib/utils';
@@ -30,7 +31,7 @@ interface Gain { word: string; points: number; artists: number }
 export default function CanvasHostView() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const canvasState = useCanvasGame(sessionId);
-  const { game, setGame, joinCode, players, strokes, guesses, live, loaded, refreshPlayers, markCorrect, markVerdict } = canvasState;
+  const { game, setGame, joinCode, players, strokes, guesses, live, loaded, refreshPlayers, markCorrect, markVerdict, sendWordHint } = canvasState;
   const { joinSession, error: joinError, setError: setJoinError } = useQuizSession();
   const [hostPlayerId, setHostPlayerId] = useState<string | null>(() => sessionId ? sessionStorage.getItem(`canvas-host-player-${sessionId}`) : null);
   const [hostName, setHostName] = useState('');
@@ -54,6 +55,16 @@ export default function CanvasHostView() {
   const revealEndsAtRef = useRef<number | null>(null);
   const guessesRef = useRef(guesses);
   guessesRef.current = guesses;
+  const lastHintAt = useRef(0);
+
+  useEffect(() => {
+    const g = gameRef.current;
+    const prompt = promptRef.current;
+    if (!g || !prompt || g.phase !== 'drawing' || !g.addition_started_at || now - lastHintAt.current < 1000) return;
+    lastHintAt.current = now;
+    sendWordHint({ round: g.masterpiece_index, mask: maskedWordHint(prompt.answer, g.addition_index,
+      Math.max(0, (now - Date.parse(g.addition_started_at)) / 1000), g.addition_seconds) });
+  }, [now, sendWordHint]);
 
   useEffect(() => {
     if (!game || settingsGameId.current === game.id) return;
