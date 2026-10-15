@@ -301,8 +301,8 @@ export default function CanvasHostView() {
   if (game.status === 'lobby') {
     const url = `${window.location.origin}`;
     return (
-      <QuizScreen eyebrow={`${TITLE} · Lobby`} contentClassName="px-4 py-10 md:px-8 md:py-16">
-        <div className="mx-auto grid w-full max-w-6xl gap-10 lg:grid-cols-[1.1fr_.9fr]">
+      <QuizScreen className="pencil-host-lobby" eyebrow={`${TITLE} · Lobby`} contentClassName="px-4 py-10 md:px-8 md:py-16">
+        <div className="pencil-lobby-layout mx-auto grid w-full max-w-6xl gap-10 lg:grid-cols-[1.1fr_.9fr]">
           <section className="space-y-6">
             <p className="stage-kicker flex items-center gap-2"><Paintbrush className="h-4 w-4 text-primary" /> Co-op Pictionary relay</p>
             <h1 className="font-display text-5xl font-bold leading-tight md:text-6xl">One word.<br />Three artists.<br /><span className="text-primary">One pencil.</span></h1>
@@ -383,8 +383,8 @@ export default function CanvasHostView() {
   }
 
   return (
-    <QuizScreen showBackdrop={false} eyebrow={`Pencil · Word ${game.masterpiece_index}`} contentClassName="py-5 md:py-8" corner={<span className="font-display text-xl font-bold tabular-nums text-primary">{joinCode}</span>}>
-      <div className="mx-auto w-full max-w-[1500px] space-y-5 px-3 md:px-8">
+    <QuizScreen className="pencil-game-screen pencil-observer-screen" showBackdrop={false} eyebrow={`Pencil · Word ${game.masterpiece_index}`} contentClassName="py-5 md:py-8" corner={<span className="font-display text-xl font-bold tabular-nums text-primary">{joinCode}</span>}>
+      <div className="pencil-game-content mx-auto w-full max-w-[1500px] space-y-5 px-3 md:px-8">
         <div className="border-b border-border/60 pb-5">
         <CanvasStats game={game} now={now} record={record} />
         </div>

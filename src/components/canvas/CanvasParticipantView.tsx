@@ -153,13 +153,14 @@ export default function CanvasParticipantView({ state, playerId, now, hostContro
   const tools = isArtist && <DrawTools color={penColor} width={penWidth} onColor={setPenColor} onWidth={setPenWidth} />;
 
   return (
-    <QuizScreen showBack={false} showBackdrop={false} eyebrow={`Pencil · Word ${game.masterpiece_index}`} contentClassName="py-5 md:py-8" corner={<span className="text-sm font-bold tabular-nums text-primary">{me.canvas_score} pts</span>}>
-      <div className="mx-auto w-full max-w-[1500px] space-y-4 px-3 md:px-8">
+    <QuizScreen className={cn('pencil-game-screen', isArtist && 'pencil-artist-screen')} showBack={false} showBackdrop={false} eyebrow={`Pencil · Word ${game.masterpiece_index}`} contentClassName="py-5 md:py-8" corner={<span className="text-sm font-bold tabular-nums text-primary">{me.canvas_score} pts</span>}>
+      <div className="pencil-game-content mx-auto w-full max-w-[1500px] space-y-4 px-3 md:px-8">
         <div className="border-b border-border/60 pb-4">
         <CanvasStats game={game} now={now} compact />
         </div>
-        {!isArtist && !knowsWord && <GuessWordStatus game={game} now={now} />}
+        {!isArtist && !knowsWord && <div className="pencil-guess-context"><GuessWordStatus game={game} now={now} />
         {!isArtist && !knowsWord && !solved && game.phase === 'drawing' && wordHint?.round === game.masterpiece_index && <WordHintDisplay hint={wordHint} />}
+        </div>}
         {isArtist
           ? <ArtistBanner turn={game.addition_index} word={prompt?.prompt} />
           : <ArtistHandoff artist={artist} />}
@@ -184,7 +185,7 @@ export default function CanvasParticipantView({ state, playerId, now, hostContro
             <motion.form
               animate={wrong && !wrong.closeness ? { x: [0, -10, 9, -6, 4, 0] } : { x: 0 }}
               transition={{ duration: 0.45 }}
-              className={cn('relative rounded-lg border-2 bg-card p-3 transition-colors',
+              className={cn('pencil-guess-form relative rounded-lg border-2 bg-card p-3 transition-colors',
                 wrong?.closeness ? 'pencil-guess-near' : wrong ? 'border-destructive shadow-[0_0_24px_hsl(var(--destructive)/0.45)]' : 'border-accent shadow-[0_0_24px_hsl(var(--accent)/0.3)]')}
               onSubmit={(e) => { e.preventDefault(); submitGuess(); }}>
               <div className="mb-2 flex min-h-7 items-center justify-between gap-2">

@@ -113,7 +113,7 @@ const Index = () => {
   ];
 
   return (
-    <main className="quiz-screen flex min-h-screen items-center px-5 py-16 md:px-10">
+    <main className="frontpage-screen quiz-screen flex min-h-screen items-center px-5 py-16 md:px-10">
       <div className="stage-grid" aria-hidden="true" />
       <PartyBackdrop />
       <div className="relative z-10 mx-auto grid w-full max-w-6xl gap-12 lg:grid-cols-[1.1fr_.9fr] lg:items-center">
@@ -122,7 +122,7 @@ const Index = () => {
             className="inline-flex items-center gap-2 rounded-full border-[3px] border-[hsl(var(--shadow-color))] bg-primary px-4 py-1 font-extrabold text-primary-foreground shadow-[var(--shadow-ink-sm)]">
             <Sparkles className="h-4 w-4" /> Thursday game day!
           </motion.p>
-          <h1 className="font-display text-[clamp(4.5rem,13vw,10rem)] font-extrabold leading-[0.82] tracking-tight">
+          <h1 className="font-display text-7xl font-extrabold leading-[0.82] sm:text-8xl lg:text-[9rem]">
             <BouncyWord text="Go," className="block" />
             <BouncyWord text="Cobalt!" className="block text-primary [text-shadow:6px_6px_0_hsl(var(--shadow-color))]" />
           </h1>
