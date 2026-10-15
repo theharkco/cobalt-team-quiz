@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import DrawingCanvas, { type DrawingCanvasHandle } from '@/components/canvas/DrawingCanvas';
 import CanvasResults from '@/components/canvas/CanvasResults';
+import PencilMusic from '@/components/canvas/PencilMusic';
 import { AdditionTimer, ArtistBanner, ArtistFrame, ArtistHandoff, CanvasStats, DrawTools, NewWordBanner, PassBanner, RevealBanner, TurnPips } from '@/components/canvas/CanvasHud';
 import { canvasDb, useCanvasGame } from '@/hooks/useCanvasGame';
 import type { Point } from '@/types/canvas';
