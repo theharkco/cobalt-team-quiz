@@ -23,7 +23,8 @@ export default function PencilMusic() {
     return () => {
       document.removeEventListener('pointerdown', unlock);
       document.removeEventListener('keydown', unlock);
-      stopBgMusic();
+      // Deliberately no stopBgMusic() here: the loop keeps playing across
+      // page navigation so it never cuts out and restarts mid-session.
     };
   }, []);
 
