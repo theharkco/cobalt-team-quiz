@@ -4,7 +4,8 @@ import CanvasGuessFeed from '@/components/canvas/CanvasGuessFeed';
 import CanvasLeaderboard from '@/components/canvas/CanvasLeaderboard';
 import CorrectBurst from '@/components/canvas/CorrectBurst';
 import GuessWordStatus from '@/components/canvas/GuessWordStatus';
-import { Check, Eye, LockKeyhole, Send, X } from 'lucide-react';
+import { Check, Eye, LockKeyhole, Pencil, Send, Trophy, X } from 'lucide-react';
+import HowToPlay from '@/components/quiz/HowToPlay';
 import { AnimatePresence, motion } from 'framer-motion';
 import QuizScreen from '@/components/quiz/QuizScreen';
 import { Button } from '@/components/ui/button';
@@ -90,14 +91,30 @@ export default function CanvasParticipantView({ state, playerId, now, hostContro
   if (game.status === 'lobby') {
     return (
       <QuizScreen showBack={false} eyebrow="Pass the Pencil" contentClassName="px-4 py-10 md:px-8 md:py-16">
-        <div className="mx-auto max-w-md space-y-4 text-center">
+        <div className="mx-auto max-w-md space-y-3 text-center">
           <p className="stage-kicker">You're in</p>
-          <p className="font-display text-5xl font-bold text-primary">{me.name}</p>
-          <p className="text-muted-foreground">When the pencil comes to you, you'll see the secret word and get {game.addition_seconds} seconds to draw. Pick any color you like. The rest of the time, guess the word!</p>
+          <motion.p
+            initial={{ scale: 0.6, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring', bounce: 0.5 }}
+            className="break-words font-display text-5xl font-bold text-primary"
+          >
+            {me.name}
+          </motion.p>
           <p className="font-display font-bold text-primary">{game.addition_seconds}s per artist · {game.duration_seconds / 60} min game</p>
-          <p className="text-sm text-muted-foreground">Correct guesses earn 100–20 points: faster earns more. Guess as often as you like.</p>
-          <p className="text-sm text-muted-foreground">{players.length} players waiting for the host…</p>
+          <p className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <span className="status-dot" /> {players.length} players waiting for the host…
+          </p>
         </div>
+        <HowToPlay
+          className="mx-auto mt-8 max-w-2xl"
+          steps={[
+            { icon: Eye, tone: 'primary', title: 'Get the secret word', body: 'When the pencil comes to you, a secret word appears on your screen — only you can see it.' },
+            { icon: Pencil, tone: 'secondary', title: `Draw it in ${game.addition_seconds}s`, body: 'Sketch the word with any color and pen width you like. No letters or numbers allowed!' },
+            { icon: Send, tone: 'accent', title: 'Everyone else guesses', body: 'The rest of the room watches your drawing appear live and types guesses as fast as they can.' },
+            { icon: Trophy, tone: 'primary', title: 'Faster guesses, more points', body: 'Correct guesses earn 100–20 points — the quicker you solve, the more you get. Guess as often as you like!' },
+          ]}
+        />
         <div className="mx-auto mt-8 w-full max-w-4xl"><CanvasLeaderboard game={game} players={players} /></div>
       </QuizScreen>
     );
