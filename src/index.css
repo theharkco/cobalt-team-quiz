@@ -320,6 +320,10 @@
     .pencil-lobby-layout ul { max-height: 160px; overflow-y: auto; }
     .how-to-play { gap: 10px; }
     .how-to-play > li { padding: 12px; }
+    .quiz-question-display > .mb-6, .quiz-question-display > .mb-8 { margin-bottom: 16px; }
+    .quiz-question-display h2 { font-size: 30px; }
+    .quiz-question-display .md\:w-96 { width: 256px; height: 256px; }
+    .quiz-answer-options button.min-h-24 { min-height: 80px; padding: 16px; }
   }
 
   .contestant-world { background: hsl(var(--world-ink)); }

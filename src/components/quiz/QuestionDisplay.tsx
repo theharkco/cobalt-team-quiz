@@ -93,7 +93,7 @@ export default function QuestionDisplay({
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto">
+    <div className="quiz-question-display w-full max-w-3xl mx-auto">
       {/* Question header */}
       <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex flex-wrap items-center justify-center gap-2 text-center mb-6">
         <span className="stage-kicker text-primary">

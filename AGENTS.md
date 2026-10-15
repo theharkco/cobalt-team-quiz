@@ -17,6 +17,7 @@
 - Contestants render as inline vector mascots with local spring/float motion and accessible DOM labels; do not mount a WebGL scene. Why: lightweight presence integrated with the website on every device.
 - Assign contestant palette/face slots from the ID-sorted roster, independently of descending score order, using data-attribute CSS tokens. Why: standings changes preserve identity and all palette selectors survive utility compilation.
 - Both drawing screens use the shared pencil workspace grid with the contestant rail always on the right; confirmed verdicts drive bubbles and character expressions. Why: stable spatial hierarchy and no answer leakage through pending guesses.
+- Short laptop layouts constrain drawing width using the shared 4:3 aspect ratio and compact the HUD with height-aware CSS. Why: the canvas stays visible without distorting synchronized strokes or changing game logic.
 - Canvas rounds keep the current artist drawing after a solve until all eligible guessers solve or that artist's timer ends; award the word once on resolution. Why: everyone keeps a full remaining guessing window without inflated later-turn team scores.
 - Vite proxies Lovable asset paths through the hosted preview in development. Why: local Vite otherwise returns SPA HTML for CDN model requests; deployed assets remain same-origin.
 - Canvas guess history renders pending guesses without text, confirmed rejections with text, and solves without the answer. Why: shared chat must not reveal unverified correct answers.

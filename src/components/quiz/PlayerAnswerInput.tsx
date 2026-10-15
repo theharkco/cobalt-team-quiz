@@ -56,7 +56,7 @@ export default function PlayerAnswerInput({ question, onSubmit, onSubmitMultiple
     };
 
     return (
-      <div className="w-full max-w-lg mx-auto space-y-4">
+      <div className="quiz-answer-options w-full max-w-lg mx-auto space-y-4">
         <p className="text-center text-sm font-body text-muted-foreground">
           🚫 Tap all the <span className="font-bold text-destructive">WRONG</span> answers, then submit!
         </p>
@@ -103,7 +103,7 @@ export default function PlayerAnswerInput({ question, onSubmit, onSubmitMultiple
   // Multiple choice
   if (question.type === 'multiple-choice' || question.type === 'music') {
     return (
-      <div className="grid grid-cols-2 gap-3 w-full max-w-lg mx-auto">
+      <div className="quiz-answer-options grid grid-cols-2 gap-3 w-full max-w-lg mx-auto">
         {question.options?.map((option, i) => (
           <motion.button
             key={i}
