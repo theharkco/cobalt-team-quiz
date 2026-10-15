@@ -21,7 +21,8 @@ import confetti from 'canvas-confetti';
 import { playCorrect, playWrong, startTicking, stopTicking } from '@/lib/sounds';
 import QuizScreen from '@/components/quiz/QuizScreen';
 import QuestionTransitionOverlay from '@/components/quiz/QuestionTransitionOverlay';
-import { Check, Hourglass, RotateCcw } from 'lucide-react';
+import { Check, Hourglass, Medal, MonitorPlay, RotateCcw, Trophy, Zap } from 'lucide-react';
+import HowToPlay from '@/components/quiz/HowToPlay';
 
 type ResultKind = 'exact' | 'close' | 'wrong' | 'timeout' | 'deferred';
 
