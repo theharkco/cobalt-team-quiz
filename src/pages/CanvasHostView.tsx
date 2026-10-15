@@ -159,7 +159,6 @@ export default function CanvasHostView() {
       const cur = (data as { id: string; canvas_score: number }[] | null)?.find((d) => d.id === a.playerId)?.canvas_score ?? 0;
       return canvasDb.from('players').update({ canvas_score: cur + a.points }).eq('id', a.playerId);
     }));
-    const teamPts = teamPointsForTurn(g.addition_index, g.addition_seconds);
     await saveDrawing(teamPts);
     setGains((prev) => [{ word: prompt.text, points: teamPts, artists: g.round_artist_ids.length }, ...prev].slice(0, 6));
     await patch({
