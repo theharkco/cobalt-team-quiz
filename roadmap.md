@@ -1,6 +1,6 @@
 # Quizclash roadmap
 
-- [ ] Reduce hidden-host-tab stalls with a worker clock and deadline-driven reveals; test background handoffs and guessing.
+- [x] Reduce hidden-host-tab stalls with a worker clock and deadline-driven reveals; verified live handoff, rejection, correct scoring and next word with host window intervals stopped, plus four clock tests.
 
 - [x] Shared guess chat above contestants with names and hidden correct answers; verified host and three phones.
 - [x] Restore historical team record and top ten individual scores on pencil screens; verified saved scores and layouts at 390/768/1280px.
