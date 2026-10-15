@@ -301,7 +301,8 @@
     .pencil-guess-form > .mb-2 { margin-bottom: 4px; min-height: 20px; }
     .pencil-guess-form input, .pencil-guess-form button { height: 44px; }
     .pencil-near-feedback { padding: 6px 0; }
-    .pencil-workspace { grid-template-columns: minmax(0, 1fr) 292px; gap: 20px; }
+    .pencil-workspace { grid-template-columns: minmax(0, 1fr) 292px; gap: 20px; max-width: calc(var(--pencil-space) * 4 / 3 + 312px); margin-inline: auto; }
+    .pencil-game-screen:has(.pencil-near-feedback) { --pencil-space: max(240px, calc(100svh - 515px)); }
     .pencil-main > * { width: 100%; max-width: calc(var(--pencil-space) * 4 / 3); margin-inline: auto; }
     .pencil-rail { height: var(--pencil-space); display: flex; flex-direction: column; gap: 12px; }
     .pencil-chat { margin-bottom: 0; flex-shrink: 0; padding-left: 12px; }
