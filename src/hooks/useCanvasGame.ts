@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { RealtimeChannel, SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import type { CanvasGame, CanvasGuess, CanvasPlayer, CanvasStroke, LiveStroke, Point } from '@/types/canvas';
+import type { WordHint } from '@/data/canvas/wordHints';
 
 // Canvas tables are not in the generated types yet.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -15,6 +16,7 @@ export function useCanvasGame(sessionId: string | undefined) {
   const [guesses, setGuesses] = useState<CanvasGuess[]>([]);
   const [live, setLive] = useState<Record<string, LiveStroke>>({});
   const [loaded, setLoaded] = useState(false);
+  const [wordHint, setWordHint] = useState<WordHint | null>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
   const gameRef = useRef<CanvasGame | null>(null);
   gameRef.current = game;
@@ -92,9 +94,13 @@ export function useCanvasGame(sessionId: string | undefined) {
         const { id, points } = payload as { id: string; points: number };
         setGuesses((prev) => prev.map((x) => (x.id === id ? { ...x, verdict: 'correct', is_correct: true, points_earned: points } : x)));
       })
-      .on('broadcast', { event: 'incorrect' }, ({ payload }) => {
-        const { id } = payload as { id: string };
-        setGuesses((prev) => prev.map((x) => x.id === id && !x.is_correct ? { ...x, verdict: 'incorrect' } : x));
+      .on('broadcast', { event: 'word-hint' }, ({ payload }) => {
+        const hint = payload as WordHint;
+        if (typeof hint.mask === 'string' && typeof hint.round === 'number') setWordHint(hint);
+      })
+      .on('broadcast', { event: 'verdict' }, ({ payload }) => {
+        const { id, verdict } = payload as { id: string; verdict: 'incorrect' | 'close' | 'very-close' };
+        setGuesses((prev) => prev.map((x) => x.id === id && !x.is_correct ? { ...x, verdict } : x));
       })
       .subscribe();
     channelRef.current = ch;
@@ -160,13 +166,18 @@ export function useCanvasGame(sessionId: string | undefined) {
     await canvasDb.from('canvas_guesses').update({ is_correct: true, points_earned: points }).eq('id', id);
   }, []);
 
-  const markIncorrect = useCallback((id: string) => {
-    setGuesses((prev) => prev.map((x) => x.id === id && !x.is_correct ? { ...x, verdict: 'incorrect' } : x));
-    channelRef.current?.send({ type: 'broadcast', event: 'incorrect', payload: { id } });
+  const markVerdict = useCallback((id: string, verdict: 'incorrect' | 'close' | 'very-close') => {
+    setGuesses((prev) => prev.map((x) => x.id === id && !x.is_correct ? { ...x, verdict } : x));
+    channelRef.current?.send({ type: 'broadcast', event: 'verdict', payload: { id, verdict } });
+  }, []);
+
+  const sendWordHint = useCallback((hint: WordHint) => {
+    setWordHint((prev) => prev?.round === hint.round && prev.mask === hint.mask ? prev : hint);
+    channelRef.current?.send({ type: 'broadcast', event: 'word-hint', payload: hint });
   }, []);
 
   return {
-    removeStrokes, sendGuess, markCorrect, markIncorrect,
+    removeStrokes, sendGuess, markCorrect, markVerdict, sendWordHint, wordHint,
     game, setGame, joinCode, players, strokes, guesses, loaded,
     live: Object.values(live),
     refreshGame, refreshPlayers, refreshStrokes, refreshGuesses, sendLive, commitStroke, setLive,

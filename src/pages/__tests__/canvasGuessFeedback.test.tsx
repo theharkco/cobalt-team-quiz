@@ -22,6 +22,19 @@ vi.mock('@/components/canvas/CanvasHud', () => ({
 }));
 
 describe('canvas wrong-guess feedback', () => {
+  it.each(['close', 'very-close'])('shows animated %s feedback without blocking typing or exposing the answer', (verdict) => {
+    const view = render(<CanvasPlayerView />);
+    const input = screen.getByRole('textbox', { name: 'Your guess' });
+    state.guesses = [{ id: 'near', player_id: 'me', masterpiece_index: 1, guess: 'ship', verdict, is_correct: false }];
+    view.rerender(<CanvasPlayerView />);
+    expect(screen.getByText(verdict === 'close' ? 'Getting warm!' : 'So close!')).toBeInTheDocument();
+    expect(screen.queryByText('Not quite!')).not.toBeInTheDocument();
+    expect(screen.queryByText('Pirate ship')).not.toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Your guess' })).toBe(input);
+    fireEvent.change(input, { target: { value: 'boat' } });
+    fireEvent.submit(input.closest('form') as HTMLFormElement);
+    expect(state.sendGuess).toHaveBeenCalledWith('me', 'boat');
+  });
   beforeEach(() => { state.guesses = []; state.game.round_artist_ids = ['artist']; state.sendGuess.mockReset(); });
   it('clearly blocks guessing after drawing and restores it for the next word', async () => {
     state.game.round_artist_ids = ['artist', 'me'];

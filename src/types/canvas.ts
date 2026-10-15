@@ -59,7 +59,7 @@ export interface CanvasGuess {
   addition_index: number;
   guess: string;
   is_correct: boolean;
-  verdict?: 'correct' | 'incorrect';
+  verdict?: 'correct' | 'incorrect' | 'close' | 'very-close';
   points_earned: number;
   created_at: string;
 }

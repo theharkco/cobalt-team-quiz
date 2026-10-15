@@ -21,6 +21,7 @@ export default {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
+        "near-miss": { DEFAULT: "hsl(var(--near-miss))", foreground: "hsl(var(--near-miss-foreground))" },
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {

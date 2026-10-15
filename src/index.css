@@ -20,6 +20,8 @@
     --accent-foreground: 228 70% 10%;
     --destructive: 353 82% 62%;
     --destructive-foreground: 0 0% 100%;
+    --near-miss: 38 96% 65%;
+    --near-miss-foreground: 228 70% 10%;
     --border: 228 40% 34%;
     --input: 228 40% 40%;
     --ring: 46 100% 58%;
@@ -228,6 +230,21 @@
   [data-status="correct"] .mascot-body { stroke: hsl(var(--secondary)); stroke-width: 3; }
   .pencil-player-rank { position: absolute; left: 0; top: 4px; color: hsl(var(--muted-foreground)); font-size: 10px; font-weight: 700; font-variant-numeric: tabular-nums; }
   .pencil-speech.pencil-speech-wrong { display: flex; align-items: center; gap: 3px; background: hsl(var(--destructive)); color: hsl(var(--destructive-foreground)); box-shadow: 0 3px 0 hsl(var(--shadow-color)), 0 0 12px hsl(var(--destructive) / .2); }
+  .pencil-guess-near { border-color: hsl(var(--near-miss)); box-shadow: 0 0 24px hsl(var(--near-miss) / .25); }
+  .pencil-word-hint { display: flex; flex-direction: column; gap: 8px; padding: 12px 0; border-bottom: 1px solid hsl(var(--border) / .6); }
+  .pencil-hint-letter { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 30px; border-bottom: 2px solid hsl(var(--border)); color: hsl(var(--muted-foreground)); font-weight: 800; font-size: 18px; }
+  .pencil-hint-revealed { color: hsl(var(--secondary)); border-color: hsl(var(--secondary)); }
+  .pencil-near-feedback { display: flex; align-items: center; gap: 12px; color: hsl(var(--near-miss)); border-top: 1px solid hsl(var(--near-miss) / .3); padding: 10px 0 14px; }
+  .pencil-heat-bar { display: block; width: 6px; height: 24px; transform-origin: bottom; border-radius: 3px; background: hsl(var(--muted)); }
+  .pencil-heat-bar:nth-child(1) { height: 10px; }
+  .pencil-heat-bar:nth-child(2) { height: 14px; }
+  .pencil-heat-bar:nth-child(3) { height: 18px; }
+  .pencil-heat-bar:nth-child(4) { height: 22px; }
+  .pencil-heat-lit { background: hsl(var(--near-miss)); box-shadow: 0 0 8px hsl(var(--near-miss) / .35); }
+  .pencil-near-label { font-size: 11px; font-weight: 700; color: hsl(var(--near-miss)); }
+  .pencil-speech.pencil-speech-near { background: hsl(var(--near-miss)); color: hsl(var(--near-miss-foreground)); box-shadow: 0 3px 0 hsl(var(--shadow-color)); }
+  .pencil-speech-near::after { border-top-color: hsl(var(--near-miss)); }
+  .pencil-speech-near::before { content: ''; position: absolute; inset: -4px; border: 1px solid hsl(var(--near-miss)); border-radius: 10px; animation: guess-ripple .65s ease-out both; pointer-events: none; }
   .pencil-speech.pencil-speech-wrong::after { border-top-color: hsl(var(--destructive)); }
   .pencil-speech-wrong::before { content: ''; position: absolute; inset: -4px; border: 1px solid hsl(var(--destructive)); border-radius: 10px; animation: guess-ripple .65s ease-out both; pointer-events: none; }
   .pencil-speech { position: absolute; bottom: calc(100% - 10px); left: 50%; translate: -50% 0; width: max-content; max-width: 88px; overflow-wrap: anywhere; background: hsl(var(--foreground)); color: hsl(var(--background)); border-radius: 8px; padding: 5px 8px; font-size: 11px; font-weight: 700; line-height: 1.25; z-index: 2; }

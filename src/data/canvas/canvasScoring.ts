@@ -115,3 +115,26 @@ export function isCorrectGuess(guess: string, answer: string, alternates: string
   }
   return false;
 }
+
+export type GuessVerdict = 'correct' | 'very-close' | 'close' | 'incorrect';
+
+/** Host-only spelling/partial-phrase feedback; not a semantic similarity or points score. */
+export function evaluateGuessVerdict(guess: string, answer: string, alternates: string[] = []): GuessVerdict {
+  if (isCorrectGuess(guess, answer, alternates)) return 'correct';
+  const g = normalize(guess);
+  if (g.length < 3) return 'incorrect';
+  const targets = [answer, ...alternates].map(normalize).filter(Boolean);
+  let best = 0;
+  for (const t of targets) {
+    const sG = squash(g);
+    const sT = squash(t);
+    best = Math.max(best, 1 - levenshtein(sG, sT) / Math.max(sG.length, sT.length));
+    const words = g.split(' ');
+    const targetWords = t.split(' ');
+    // Whole meaningful words: "ship" is close to "pirate ship", "hip" isn't.
+    if (targetWords.length > 1 && words.every((word) => word.length >= 3 && targetWords.includes(word))) {
+      best = Math.max(best, words.length / targetWords.length >= 0.66 ? 0.85 : 0.7);
+    }
+  }
+  return best >= 0.82 ? 'very-close' : best >= 0.65 ? 'close' : 'incorrect';
+}

@@ -1,5 +1,8 @@
 # Quizclash roadmap
 
+- [x] Animated host-confirmed near-miss hints; verified live rejection, continued typing, chat feedback and correct solves, plus regression tests.
+- [x] Progressive host-generated masked letter hints; verified live reveals, hidden full answer and unchanged correct-guess flow, plus time/handoff tests.
+
 - [x] Replace mixed front-page actions with game selection followed by mode-specific actions, retaining global joining and direct quiz links.
 - [x] Verify navigation, keyboard focus, code/name joining and narrow/wide layouts without adding completed test games to records; five tests passed and live Pencil lobby joining verified at 390/768/1280 widths.
 

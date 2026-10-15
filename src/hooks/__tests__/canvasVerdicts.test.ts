@@ -5,6 +5,11 @@ import type { CanvasGuess } from '@/types/canvas';
 const guess: CanvasGuess = { id: 'g1', game_id: 'game', player_id: 'p1', masterpiece_index: 1, addition_index: 1, guess: 'cat', is_correct: false, points_earned: 0, created_at: '2026-10-14T22:00:00Z' };
 
 describe('host-confirmed canvas verdicts', () => {
+  it('preserves near-miss feedback without awarding points', () => {
+    for (const verdict of ['close', 'very-close'] as const) {
+      expect(mergeGuesses([{ ...guess, verdict }], [guess])[0]).toMatchObject({ verdict, is_correct: false, points_earned: 0 });
+    }
+  });
   it('never treats a pending database guess as incorrect', () => {
     expect(mergeGuesses([], [guess])[0].verdict).toBeUndefined();
   });
