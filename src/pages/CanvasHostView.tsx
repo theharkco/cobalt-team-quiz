@@ -5,6 +5,9 @@ import { motion } from 'framer-motion';
 import QuizScreen from '@/components/quiz/QuizScreen';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
+import { Input } from '@/components/ui/input';
+import CanvasParticipantView from '@/components/canvas/CanvasParticipantView';
+import { useQuizSession } from '@/hooks/useQuizSession';
 import DrawingCanvas, { type DrawingCanvasHandle } from '@/components/canvas/DrawingCanvas';
 import ContestantStage from '@/components/canvas/ContestantStage';
 import CanvasGuessFeed from '@/components/canvas/CanvasGuessFeed';
@@ -26,7 +29,12 @@ interface Gain { word: string; points: number; artists: number }
 
 export default function CanvasHostView() {
   const { sessionId } = useParams<{ sessionId: string }>();
-  const { game, setGame, joinCode, players, strokes, guesses, live, loaded, refreshPlayers, markCorrect, markIncorrect } = useCanvasGame(sessionId);
+  const canvasState = useCanvasGame(sessionId);
+  const { game, setGame, joinCode, players, strokes, guesses, live, loaded, refreshPlayers, markCorrect, markIncorrect } = canvasState;
+  const { joinSession, error: joinError, setError: setJoinError } = useQuizSession();
+  const [hostPlayerId, setHostPlayerId] = useState<string | null>(() => sessionId ? sessionStorage.getItem(`canvas-host-player-${sessionId}`) : null);
+  const [hostName, setHostName] = useState('');
+  const [joining, setJoining] = useState(false);
   const now = useCanvasHostClock();
   const canvasRef = useRef<DrawingCanvasHandle>(null);
   const [duration, setDuration] = useState(12);
@@ -73,8 +81,10 @@ export default function CanvasHostView() {
     if (!g) return;
     const next = { ...g, ...fields } as CanvasGame;
     gameRef.current = next;
-    setGame(next);
     await canvasDb.from('canvas_games').update(fields).eq('id', g.id);
+    // Artist prompt access depends on the saved round_artist_ids. Do not mount
+    // the host's drawing screen before that change has reached the database.
+    setGame(next);
   }, [setGame]);
 
   const timeIsUp = () => {
@@ -252,6 +262,21 @@ export default function CanvasHostView() {
     await startRound(true);
   };
 
+  const joinAsHost = async () => {
+    if (!sessionId || !token || joining || game?.status !== 'lobby') return;
+    setJoining(true);
+    setJoinError(null);
+    try {
+      const player = await joinSession(joinCode, hostName);
+      if (!player) return;
+      sessionStorage.setItem(`canvas-host-player-${sessionId}`, player.id);
+      setHostPlayerId(player.id);
+      await refreshPlayers();
+    } finally {
+      setJoining(false);
+    }
+  };
+
   if (!loaded) return <QuizScreen eyebrow={TITLE}><p className="text-muted-foreground">Loading…</p></QuizScreen>;
   if (!game) return <QuizScreen eyebrow={TITLE}><p>Game not found.</p></QuizScreen>;
   if (!token) return <QuizScreen eyebrow={TITLE}><p>This screen isn't the host for this game.</p></QuizScreen>;
@@ -281,6 +306,20 @@ export default function CanvasHostView() {
             </div>
           </section>
           <section className="stage-panel flex flex-col rounded-lg p-6">
+            <div className="mb-5 border-b border-border pb-5">
+              {hostPlayerId && players.some((p) => p.id === hostPlayerId) ? (
+                <p className="font-display text-lg font-bold text-secondary">Playing as {players.find((p) => p.id === hostPlayerId)?.name} · Host</p>
+              ) : (
+                <form onSubmit={(e) => { e.preventDefault(); joinAsHost(); }} className="space-y-3">
+                  <label htmlFor="host-player-name" className="stage-kicker">Host and play</label>
+                  <div className="flex flex-wrap gap-2">
+                    <Input id="host-player-name" aria-label="Your player name" placeholder="Your name" autoComplete="off" maxLength={24} value={hostName} onChange={(e) => setHostName(e.target.value)} className="min-w-0 flex-1" disabled={joining} />
+                    <Button type="submit" disabled={joining || !hostName.trim()}><Users /> {joining ? 'Joining…' : 'Host and play'}</Button>
+                  </div>
+                  {joinError && <p role="alert" className="text-sm text-destructive">{joinError}</p>}
+                </form>
+              )}
+            </div>
             <p className="stage-kicker flex items-center gap-2"><Users className="h-4 w-4" /> {players.length} players</p>
             <ul className="mt-4 flex flex-1 flex-wrap content-start gap-2">
               {players.map((p) => (
@@ -302,7 +341,7 @@ export default function CanvasHostView() {
                   <div className="flex justify-between text-xs text-muted-foreground"><span>3 min</span><span>30 min</span></div>
                 </div>
               </div>
-              <Button className="mt-5 w-full" size="lg" disabled={players.length < 2} onClick={startGame}>
+              <Button className="mt-5 w-full" size="lg" disabled={players.length < 2 || joining} onClick={startGame}>
                 <Play /> {players.length < 2 ? 'Need at least 2 players' : 'Start drawing'}
               </Button>
             </div>
@@ -316,6 +355,19 @@ export default function CanvasHostView() {
   const artist = players.find((p) => p.id === game.current_artist_id);
   const correctNow = guesses.filter((g) => g.is_correct && g.masterpiece_index === game.masterpiece_index);
   const timeUp = secondsLeftOf(game, now) === 0;
+
+  if (hostPlayerId) {
+    return <CanvasParticipantView state={canvasState} playerId={hostPlayerId} now={now} canvasRef={canvasRef}
+      hostControls={
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
+          <p className="stage-kicker">Host · Join code <span className="text-primary">{joinCode}</span></p>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" disabled={game.phase !== 'drawing'} onClick={() => resolveFail('skipped')}><SkipForward /> Skip word</Button>
+            <Button variant="ghost" onClick={finishGame}>End game now</Button>
+          </div>
+        </div>
+      } />;
+  }
 
   return (
     <QuizScreen showBackdrop={false} eyebrow={`Pencil · Word ${game.masterpiece_index}`} contentClassName="py-5 md:py-8" corner={<span className="font-display text-xl font-bold tabular-nums text-primary">{joinCode}</span>}>
