@@ -208,6 +208,7 @@ const Index = () => {
           </section>
         </div>
       </div>
+      <PencilMusic />
     </main>
   );
 };
