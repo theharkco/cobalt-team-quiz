@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { teamPointsForTurn, guesserPointsForTime, guesserPointsForGuess, individualAwards, pickArtist, isCorrectGuess } from '../canvasScoring';
+import { teamPointsForTurn, turnBasePoints, guesserPointsForGuess, individualAwards, pickArtist, isCorrectGuess } from '../canvasScoring';
 import { pickPrompt, ALL_PROMPTS } from '../promptBanks';
 
 const pts = (awards: { playerId: string; points: number }[]) => Object.fromEntries(awards.map((a) => [a.playerId, a.points]));
@@ -7,44 +7,53 @@ const pts = (awards: { playerId: string; points: number }[]) => Object.fromEntri
 describe('pass the pencil scoring', () => {
   it('team points by artist turn — earlier artists award the group more', () => {
     expect([1, 2, 3].map((turn) => teamPointsForTurn(turn))).toEqual([300, 200, 100]);
+    expect([1, 2, 3].map((turn) => turnBasePoints(turn))).toEqual([300, 200, 100]);
   });
 
-  it('scales team points with turn duration and rounds to integers', () => {
-    expect([1, 2, 3].map((turn) => teamPointsForTurn(turn, 15))).toEqual([600, 400, 200]);
-    expect([1, 2, 3].map((turn) => teamPointsForTurn(turn, 60))).toEqual([150, 100, 50]);
-    expect([1, 2, 3].map((turn) => teamPointsForTurn(turn, 45))).toEqual([200, 133, 67]);
-    for (let seconds = 10; seconds <= 90; seconds += 5) {
-      expect(teamPointsForTurn(1, seconds)).toBeGreaterThan(teamPointsForTurn(2, seconds));
-      expect(teamPointsForTurn(2, seconds)).toBeGreaterThan(teamPointsForTurn(3, seconds));
-    }
+  it('team points are normalized — turn length does not scale the base', () => {
+    expect([1, 2, 3].map((turn) => teamPointsForTurn(turn, 15))).toEqual([300, 200, 100]);
+    expect([1, 2, 3].map((turn) => teamPointsForTurn(turn, 60))).toEqual([300, 200, 100]);
+  });
+
+  it('team points decay with time spent in the turn, floored at 20% of base', () => {
+    const start = '2026-10-14T22:00:00Z';
+    const at = (s: number) => new Date(Date.parse(start) + s * 1000).toISOString();
+    expect(teamPointsForTurn(1, 30, start, start)).toBe(300);
+    expect(teamPointsForTurn(1, 30, start, at(15))).toBe(180);
+    expect(teamPointsForTurn(1, 30, start, at(30))).toBe(60);
+    expect(teamPointsForTurn(1, 30, start, at(45))).toBe(60);
+    expect(teamPointsForTurn(2, 30, start, at(15))).toBe(120);
+    expect(teamPointsForTurn(3, 15, start, at(15))).toBe(20);
+    // A slow turn-1 solve still beats an instant turn-2 solve.
+    expect(teamPointsForTurn(1, 30, start, at(30))).toBeLessThan(teamPointsForTurn(2, 30, start, start));
   });
 
   it('guards invalid scoring inputs', () => {
     expect(teamPointsForTurn(0, 0)).toBe(300);
     expect(teamPointsForTurn(9, NaN)).toBe(100);
     expect(teamPointsForTurn(NaN, -1)).toBe(300);
+    expect(teamPointsForTurn(1, 30, 'not-a-date', 'also-not')).toBe(300);
   });
 
   it('first artist success', () => {
     expect(pts(individualAwards(['a'], ['b', 'c']))).toEqual({ a: 100, b: 100, c: 100 });
   });
 
-  it('third artist rescue pays contributors and bonus', () => {
-    expect(pts(individualAwards(['a', 'b', 'c'], ['d', 'e', 'a']))).toEqual({ a: 50, b: 50, c: 150, d: 100, e: 100 });
+  it('third artist rescue pays contributors and the time-based drawer award', () => {
+    expect(pts(individualAwards(['a', 'b', 'c'], ['d', 'e', 'a'], {}, 120))).toEqual({ a: 50, b: 50, c: 120, d: 100, e: 100 });
   });
 
-  it('guesser points decrease with time, normalize to turn length, and have a floor', () => {
-    expect([0, 30, 45, 60, 90, 100].map((s) => guesserPointsForTime(s, 30))).toEqual([100, 73, 60, 47, 20, 20]);
-    expect(guesserPointsForTime(22.5, 15)).toBe(60);
-    expect(guesserPointsForTime(-10)).toBe(100);
-    expect(guesserPointsForTime(0, 0)).toBe(100);
-  });
-
-  it('handoffs count previous turns instead of resetting the clock', () => {
+  it('guesser points use the turn base and decay within the current turn only', () => {
     const start = '2026-10-14T22:00:00Z';
-    expect(guesserPointsForGuess(1, 30, start, start)).toBe(100);
-    expect(guesserPointsForGuess(2, 30, start, start)).toBe(73);
-    expect(guesserPointsForGuess(3, 30, start, '2026-10-14T22:00:15Z')).toBe(33);
+    const at = (s: number) => new Date(Date.parse(start) + s * 1000).toISOString();
+    expect(guesserPointsForGuess(1, 30, start, start)).toBe(300);
+    expect(guesserPointsForGuess(1, 30, start, at(15))).toBe(180);
+    expect(guesserPointsForGuess(1, 30, start, at(30))).toBe(60);
+    // Handoff resets the clock but lowers the base.
+    expect(guesserPointsForGuess(2, 30, start, start)).toBe(200);
+    expect(guesserPointsForGuess(3, 30, start, at(15))).toBe(60);
+    // Missing timestamps fall back to the full base.
+    expect(guesserPointsForGuess(1, 30, null, start)).toBe(300);
   });
 
   it('saved guesser awards match their immediate feedback, without rank or attempt penalties', () => {
