@@ -409,7 +409,7 @@ export default function PlayerView() {
       <QuizScreen showBack={false} eyebrow="Player checked in" contentClassName="max-w-2xl px-5 py-10">
         <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex min-h-[calc(100vh-8rem)] flex-col justify-center">
           <p className="stage-kicker flex items-center justify-center gap-2 text-center"><span className="status-dot"/> Connected to the room</p>
-          <div className="my-8 border-y border-border py-10 text-center"><p className="text-sm text-muted-foreground">Playing as</p><motion.h1 initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', bounce: 0.5, delay: 0.15 }} className="mt-2 break-words font-display text-5xl font-bold text-primary">{player?.name}</motion.h1></div>
+          <div className="my-8 border-y border-border py-10 text-center"><p className="text-sm text-muted-foreground">Playing as</p><motion.h1 initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', bounce: 0.5, delay: 0.15 }} className="mt-2 break-words font-display text-6xl font-bold text-primary md:text-7xl">{player?.name}</motion.h1></div>
           <HowToPlay
             steps={[
               { icon: MonitorPlay, tone: 'primary', title: 'Watch the big screen', body: 'Questions appear on the host\'s screen — and right here on your phone at the same time.' },

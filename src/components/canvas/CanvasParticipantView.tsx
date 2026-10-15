@@ -91,16 +91,24 @@ export default function CanvasParticipantView({ state, playerId, now, hostContro
   if (game.status === 'lobby') {
     return (
       <QuizScreen showBack={false} eyebrow="Pass the Pencil" contentClassName="px-4 py-10 md:px-8 md:py-16">
-        <div className="mx-auto max-w-md space-y-3 text-center">
+        <div className="mx-auto max-w-2xl space-y-4 text-center">
           <p className="stage-kicker">You're in</p>
           <motion.p
             initial={{ scale: 0.6, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: 'spring', bounce: 0.5 }}
-            className="break-words font-display text-5xl font-bold text-primary"
+            className="break-words font-display text-5xl font-bold text-primary md:text-6xl"
           >
             {me.name}
           </motion.p>
+          <motion.h1
+            initial={{ y: 24, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2, type: 'spring', bounce: 0.35 }}
+            className="font-display text-4xl font-bold leading-tight md:text-6xl"
+          >
+            One word.<br />Up to three artists.<br /><span className="text-primary">One pencil.</span>
+          </motion.h1>
           <p className="font-display font-bold text-primary">{game.addition_seconds}s per artist · {game.duration_seconds / 60} min game</p>
           <p className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
             <span className="status-dot" /> {players.length} players waiting for the host…
@@ -110,8 +118,8 @@ export default function CanvasParticipantView({ state, playerId, now, hostContro
           className="mx-auto mt-8 max-w-2xl"
           steps={[
             { icon: Eye, tone: 'primary', title: 'Get the secret word', body: 'When the pencil comes to you, a secret word appears on your screen — only you can see it.' },
-            { icon: Pencil, tone: 'secondary', title: `Draw it in ${game.addition_seconds}s`, body: 'Sketch the word with any color and pen width you like. No letters or numbers allowed!' },
-            { icon: Send, tone: 'accent', title: 'Everyone else guesses', body: 'The rest of the room watches your drawing appear live and types guesses as fast as they can.' },
+            { icon: Pencil, tone: 'secondary', title: `Draw it in ${game.addition_seconds}s`, body: 'Sketch the word with any color and pen width. Run out of time? The pencil passes to the next artist, who keeps drawing the same word!' },
+            { icon: Send, tone: 'accent', title: 'Everyone else guesses', body: 'Watch the drawing grow live and type guesses as fast as you can. Once you\'ve drawn a word, you sit out the guessing for that word.' },
             { icon: Trophy, tone: 'primary', title: 'Faster guesses, more points', body: 'Correct guesses earn 100–20 points — the quicker you solve, the more you get. Guess as often as you like!' },
           ]}
         />
