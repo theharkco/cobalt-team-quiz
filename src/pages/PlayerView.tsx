@@ -405,11 +405,19 @@ export default function PlayerView() {
   // LOBBY
   if (!session || session.status === 'lobby') {
     return (
-      <QuizScreen showBack={false} eyebrow="Player checked in" contentClassName="max-w-md px-5 py-10">
+      <QuizScreen showBack={false} eyebrow="Player checked in" contentClassName="max-w-2xl px-5 py-10">
         <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex min-h-[calc(100vh-8rem)] flex-col justify-center">
-          <p className="stage-kicker flex items-center gap-2"><span className="status-dot"/> Connected to the room</p>
-          <div className="my-8 border-y border-border py-10"><p className="text-sm text-muted-foreground">Playing as</p><h1 className="mt-2 break-words font-display text-5xl font-bold">{player?.name}</h1></div>
-          <div className="stage-panel rounded-lg p-5"><div className="flex items-center gap-4"><div className="grid h-12 w-12 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground"><Hourglass /></div><div><p className="font-bold">Waiting for the host</p><p className="text-sm text-muted-foreground">Keep this screen open. The first question will appear here.</p></div></div></div>
+          <p className="stage-kicker flex items-center justify-center gap-2 text-center"><span className="status-dot"/> Connected to the room</p>
+          <div className="my-8 border-y border-border py-10 text-center"><p className="text-sm text-muted-foreground">Playing as</p><motion.h1 initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', bounce: 0.5, delay: 0.15 }} className="mt-2 break-words font-display text-5xl font-bold text-primary">{player?.name}</motion.h1></div>
+          <HowToPlay
+            steps={[
+              { icon: MonitorPlay, tone: 'primary', title: 'Watch the big screen', body: 'Questions appear on the host\'s screen — and right here on your phone at the same time.' },
+              { icon: Zap, tone: 'secondary', title: 'Answer fast', body: 'Tap your answer before the timer runs out. Some questions reward close guesses too!' },
+              { icon: Trophy, tone: 'accent', title: 'Speed earns points', body: 'The quicker you answer correctly, the more points you score. Wrong answers cost nothing.' },
+              { icon: Medal, tone: 'primary', title: 'Climb the leaderboard', body: 'Scores update live after every question. Finish on the podium to claim eternal glory.' },
+            ]}
+          />
+          <div className="stage-panel mt-6 rounded-lg p-5"><div className="flex items-center gap-4"><div className="grid h-12 w-12 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground"><Hourglass /></div><div><p className="font-bold">Waiting for the host</p><p className="text-sm text-muted-foreground">Keep this screen open. The first question will appear here.</p></div></div></div>
         </motion.div>
       </QuizScreen>
     );
