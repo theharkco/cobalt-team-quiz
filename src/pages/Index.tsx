@@ -151,11 +151,11 @@ const Index = () => {
                   <motion.span initial={{ scale: 0 }} animate={{ scale: [0, 1.3, 1] }} className="rounded-full bg-secondary px-3 py-0.5 text-sm font-extrabold text-secondary-foreground">Game {joinCode} found!</motion.span>
                   <Button variant="ghost" size="sm" onClick={() => { setCodeOk(false); setError(null); }}><ArrowLeft /> Change</Button>
                 </div>
-                <label htmlFor="name" className="mb-3 block font-display text-2xl font-extrabold">{gameMode === 'canvas' ? "What's your name?" : "What's your team called?"}</label>
+                <label htmlFor="name" className="mb-3 block font-display text-2xl font-extrabold">{"What's your name?"}</label>
                 <div className="flex items-center gap-3 rounded-xl border-[3px] border-[hsl(var(--shadow-color))] bg-background px-4 focus-within:ring-4 focus-within:ring-primary/60">
-                  <input id="name" name="team" value={playerName}
+                  <input id="name" name="name" value={playerName}
                     onChange={(e) => { setPlayerName(e.target.value); setError(null); }}
-                    placeholder={gameMode === 'canvas' ? 'Your name…' : 'The Brainiacs…'} autoFocus autoComplete="off" maxLength={24}
+                    placeholder="Your name…" autoFocus autoComplete="off" maxLength={24}
                     onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
                     className={`${inputCls} text-3xl`} />
                   <Button onClick={handleJoin} disabled={loading || !playerName.trim()} size="icon" aria-label="Join game" className="h-12 w-12 shrink-0"><ArrowRight /></Button>
