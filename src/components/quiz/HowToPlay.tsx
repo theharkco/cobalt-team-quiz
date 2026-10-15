@@ -7,6 +7,8 @@ export interface HowToPlayStep {
   title: string;
   body: string;
   tone?: 'primary' | 'secondary' | 'accent';
+  /** Stretch this card across the full width (used for the final side-challenge note). */
+  wide?: boolean;
 }
 
 const toneClass: Record<NonNullable<HowToPlayStep['tone']>, string> = {
@@ -32,7 +34,10 @@ export default function HowToPlay({ steps, className }: Props) {
             initial={{ y: 24, opacity: 0, scale: 0.96 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             transition={{ delay: 0.35 + i * 0.14, type: 'spring', bounce: 0.4 }}
-            className="stage-panel relative overflow-hidden rounded-lg p-4 text-left"
+            className={cn(
+              'stage-panel relative overflow-hidden rounded-lg p-4 text-left',
+              (step.wide ?? i === steps.length - 1) && steps.length % 2 === 1 && 'sm:col-span-2',
+            )}
           >
             <motion.span
               aria-hidden
