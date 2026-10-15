@@ -25,7 +25,7 @@ interface Props {
 /** Animated "how the game works" strip shown on the joined/lobby screens. */
 export default function HowToPlay({ steps, className }: Props) {
   return (
-    <ol className={cn('grid gap-3 sm:grid-cols-2', className)}>
+    <ol className={cn('how-to-play grid gap-3 sm:grid-cols-2', className)}>
       {steps.map((step, i) => {
         const Icon = step.icon;
         return (

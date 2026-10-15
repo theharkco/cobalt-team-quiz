@@ -200,7 +200,7 @@ export default function QuizCreator() {
     <QuizScreen eyebrow="Quiz studio" corner={<span className="text-xs font-bold text-muted-foreground">{questions.length} questions</span>} contentClassName="max-w-6xl px-4 py-8 md:px-8">
       <div className="grid gap-6 lg:grid-cols-[20rem_1fr]">
         {/* Header */}
-        <aside className="lg:sticky lg:top-20 lg:self-start"><motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="mb-6">
+        <aside className="lg:sticky lg:top-6 lg:self-start"><motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="mb-6">
           <p className="stage-kicker">{isEditing ? 'Editing set' : 'New set'}</p><h1 className="mt-2 text-4xl font-display font-bold mb-2">
             {isEditing ? 'Edit Quiz' : 'Create Quiz'}
           </h1>

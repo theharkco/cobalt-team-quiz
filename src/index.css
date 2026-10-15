@@ -78,7 +78,7 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Bricolage Grotesque', sans-serif;
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
   }
 }
 
@@ -276,6 +276,57 @@
     .pencil-character { width: 68px; }
     .pencil-character-space { height: 76px; }
     .pencil-speech { max-width: 92px; font-size: 11px; }
+  }
+
+  /* Short laptop displays: keep the playable drawing and its right-hand rail
+     in view. Constrain width at the shared 4:3 ratio, never stretch drawings. */
+  @media (min-width: 1024px) and (max-height: 950px) {
+    .stage-chrome { height: 56px; }
+    .stage-content { padding-top: 24px; padding-bottom: 24px; }
+    .frontpage-screen { padding-top: 32px; padding-bottom: 32px; }
+    .frontpage-screen > .relative { gap: 40px; }
+    .frontpage-screen h1 { font-size: 128px; }
+    .pencil-game-screen { --pencil-space: max(260px, calc(100svh - 465px)); }
+    .pencil-artist-screen { --pencil-space: max(260px, calc(100svh - 455px)); }
+    .pencil-observer-screen { --pencil-space: max(300px, calc(100svh - 330px)); }
+    .pencil-game-screen .stage-content { padding-top: 12px; padding-bottom: 16px; }
+    .pencil-game-content > :not([hidden]) ~ :not([hidden]) { margin-top: 10px; }
+    .pencil-game-content > .border-b { padding-bottom: 10px; }
+    .pencil-game-content .stage-kicker { font-size: 12px; }
+    .pencil-guess-context { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 20px; }
+    .pencil-guess-context section[role="status"] { padding-top: 4px; padding-bottom: 4px; }
+    .pencil-guess-context h2 { font-size: 20px; }
+    .pencil-word-hint { padding: 4px 0; border-bottom: 0; gap: 4px; }
+    .pencil-guess-form { padding: 8px 12px; }
+    .pencil-guess-form > .mb-2 { margin-bottom: 4px; min-height: 20px; }
+    .pencil-guess-form input, .pencil-guess-form button { height: 44px; }
+    .pencil-near-feedback { padding: 6px 0; }
+    .pencil-workspace { grid-template-columns: minmax(0, 1fr) 292px; gap: 20px; max-width: calc(var(--pencil-space) * 4 / 3 + 312px); margin-inline: auto; }
+    .pencil-game-screen:has(.pencil-near-feedback) { --pencil-space: max(240px, calc(100svh - 515px)); }
+    .pencil-main > * { width: 100%; max-width: calc(var(--pencil-space) * 4 / 3); margin-inline: auto; }
+    .pencil-rail { height: var(--pencil-space); display: flex; flex-direction: column; gap: 12px; }
+    .pencil-chat { margin-bottom: 0; flex-shrink: 0; padding-left: 12px; }
+    .pencil-chat h2 { margin-bottom: 6px; }
+    .pencil-chat-log { height: 112px; }
+    .pencil-team { min-height: 0; display: flex; flex-direction: column; padding-left: 12px; }
+    .pencil-team-heading { padding-bottom: 6px; }
+    .pencil-cloud { min-height: 0; max-height: none; padding-top: 30px; gap: 20px 6px; }
+    .pencil-character { width: 50px; }
+    .pencil-character-space { height: 58px; }
+    .pencil-name { font-size: 12px; }
+    .pencil-host-lobby .stage-content { padding-top: 24px; }
+    .pencil-lobby-layout { gap: 32px; }
+    .pencil-lobby-layout > section > :not([hidden]) ~ :not([hidden]) { margin-top: 16px; }
+    .pencil-lobby-layout h1 { font-size: 52px; }
+    .pencil-lobby-layout .text-lg { font-size: 16px; }
+    .pencil-lobby-layout .stage-panel { padding: 20px; }
+    .pencil-lobby-layout ul { max-height: 160px; overflow-y: auto; }
+    .how-to-play { gap: 10px; }
+    .how-to-play > li { padding: 12px; }
+    .quiz-question-display > .mb-6, .quiz-question-display > .mb-8 { margin-bottom: 16px; }
+    .quiz-question-display h2 { font-size: 30px; }
+    .quiz-question-display .md\:w-96 { width: 256px; height: 256px; }
+    .quiz-answer-options button.min-h-24 { min-height: 80px; padding: 16px; }
   }
 
   .contestant-world { background: hsl(var(--world-ink)); }
