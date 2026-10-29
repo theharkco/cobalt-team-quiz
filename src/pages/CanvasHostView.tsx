@@ -271,7 +271,7 @@ export default function CanvasHostView() {
       }
     }
     if (game.phase === 'idle' && waitingRef.current && players.length > 1) { busyRef.current = true; startRound(); }
-  }, [now, game, players.length, passPencil, startRound, resolveSuccess, finishGame]);
+  }, [now, game, players, passPencil, startRound, resolveSuccess, finishGame]);
 
   const startGame = async () => {
     if (!game) return;
