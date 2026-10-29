@@ -195,11 +195,16 @@ export default function CanvasHostView() {
   const passPencil = useCallback(async () => {
     const g = gameRef.current;
     if (!g || g.phase !== 'drawing' || busyRef.current) return;
-    if (correctRef.current.length) { await resolveSuccess(); return; }
-    if (g.addition_index >= MAX_ARTISTS || timeIsUp()) { await resolveFail('fail'); return; }
+    if (g.addition_index >= MAX_ARTISTS || timeIsUp()) {
+      if (correctRef.current.length) await resolveSuccess(); else await resolveFail('fail');
+      return;
+    }
     busyRef.current = true;
     const roster = await fetchRoster(g);
-    const next = await assignArtist(roster, g.round_artist_ids);
+    // Prefer an artist who has not solved yet, so solvers keep their "Got it!".
+    const solvers = correctRef.current.map((c) => c.playerId);
+    const next = await assignArtist(roster, [...g.round_artist_ids, ...solvers])
+      ?? await assignArtist(roster, g.round_artist_ids);
     if (!next) { busyRef.current = false; await resolveFail('fail'); return; }
     await patch({
       addition_index: g.addition_index + 1, current_artist_id: next, round_artist_ids: [...g.round_artist_ids, next],
@@ -259,7 +264,9 @@ export default function CanvasHostView() {
     if ((game.phase === 'drawing' || game.phase === 'grace') && game.addition_started_at) {
       const end = new Date(game.addition_started_at).getTime() + game.addition_seconds * 1000;
       if (now >= end || timeIsUp()) {
-        if (correctRef.current.length) resolveSuccess();
+        const eligible = players.filter((p) => !game.round_artist_ids.includes(p.id)).map((p) => p.id);
+        const action = roundAction(eligible, correctRef.current.map((c) => c.playerId), true, game.addition_index, MAX_ARTISTS);
+        if (action === 'success' || (timeIsUp() && correctRef.current.length)) resolveSuccess();
         else passPencil();
       }
     }
