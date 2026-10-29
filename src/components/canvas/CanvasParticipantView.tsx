@@ -123,7 +123,7 @@ export default function CanvasParticipantView({ state, playerId, now, hostContro
           className="mx-auto mt-8 max-w-2xl"
           steps={[
             { icon: Eye, tone: 'primary', title: 'Get the secret word', body: 'When the pencil comes to you, a secret word appears on your screen — only you can see it.' },
-            { icon: Pencil, tone: 'secondary', title: `Draw it in ${game.addition_seconds}s`, body: 'Sketch the word with any color and pen width. Run out of time? The pencil passes to the next artist, who keeps drawing the same word!' },
+            { icon: Pencil, tone: 'secondary', title: `Draw it in ${game.addition_seconds}s`, body: 'Sketch the word with any color and pen width. Most of you need to get it, or the pencil passes to the next artist, who keeps drawing the same word!' },
             { icon: Send, tone: 'accent', title: 'Everyone else guesses', body: 'Watch the drawing grow live and type guesses as fast as you can. Once you\'ve drawn a word, you sit out the guessing for that word.' },
             { icon: Trophy, tone: 'primary', title: 'Faster guesses, more points', body: 'Correct guesses earn up to 300 points — the earlier the artist and the quicker you solve, the more you get. Guess as often as you like!' },
             { icon: Users, tone: 'secondary', wide: true, title: 'Side challenge: the group score', body: 'Everyone also plays for one shared group score. A solved word adds up to 300 points — more for earlier artists and faster solves. The drawing artist earns the same as a personal bonus. Try to beat the group record!' },
