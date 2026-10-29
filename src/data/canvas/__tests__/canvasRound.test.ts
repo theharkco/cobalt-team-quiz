@@ -8,9 +8,15 @@ describe('everyone can solve the word', () => {
     expect(roundAction(['b', 'c'], ['b'], false)).toBe('continue');
     expect(roundAction(['b', 'c'], ['b', 'c'], false)).toBe('success');
   });
-  it('finishes successfully at the artist timeout if anyone solved, otherwise passes', () => {
-    expect(roundAction(['b', 'c'], ['b'], true)).toBe('success');
-    expect(roundAction(['b', 'c'], [], true)).toBe('pass');
+  it('at timeout ends the word only when more than half solved, otherwise passes', () => {
+    expect(roundAction(['b', 'c', 'd', 'e'], ['b', 'c', 'd'], true, 1)).toBe('success');
+    expect(roundAction(['b', 'c', 'd', 'e'], ['b', 'c'], true, 1)).toBe('pass');
+    expect(roundAction(['b', 'c'], ['b'], true, 2)).toBe('pass');
+    expect(roundAction(['b', 'c'], [], true, 1)).toBe('pass');
+  });
+  it('after the third artist, one solver is enough and none fails', () => {
+    expect(roundAction(['b', 'c', 'd'], ['b'], true, 3)).toBe('success');
+    expect(roundAction(['b', 'c', 'd'], [], true, 3)).toBe('pass');
   });
   it('awards later guessers their own elapsed-time points exactly once', () => {
     const start = '2026-10-14T22:00:00Z';

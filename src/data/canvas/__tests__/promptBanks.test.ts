@@ -9,9 +9,10 @@ describe('amateur-friendly drawing words', () => {
     for (const word of removed) expect(ALL_PROMPTS.some((p) => p.answer === word)).toBe(false);
     expect(ALL_PROMPTS.every((p) => p.text && p.answer)).toBe(true);
   });
-  it('favors concrete medium prompts and keeps more involved scenes occasional', () => {
-    expect(pickPrompt([], () => 0.1)).toEqual(EASY[Math.floor(.1 * EASY.length)]);
+  it('weights words 10% easy, 50% medium, 40% hard', () => {
+    expect(pickPrompt([], () => 0.05)).toEqual(EASY[Math.floor(.05 * EASY.length)]);
     expect(pickPrompt([], () => 0.5)).toEqual(MEDIUM[Math.floor(.5 * MEDIUM.length)]);
+    expect(pickPrompt([], () => 0.65)).toEqual(HARD[Math.floor(.65 * HARD.length)]);
     expect(pickPrompt([], () => 0.95)).toEqual(HARD[Math.floor(.95 * HARD.length)]);
   });
   it('avoids repeats until the whole bank is exhausted', () => {

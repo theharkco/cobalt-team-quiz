@@ -17,11 +17,11 @@ const make = (difficulty: Difficulty) => (list: (string | string[])[]): CanvasPr
 
 export const EASY = make('easy')([
   'pizza', ['bicycle', 'bike'], 'elephant', 'umbrella', ['sunglasses', 'shades', 'glasses'], ['snowman', 'snow man'],
-  'rocket', 'banana peel', ['cat', 'kitten', 'kitty'], ['dog', 'puppy'], 'goldfish bowl', 'treehouse', 'palm tree', 'sunflower', ['moon', 'crescent'],
+  'rocket', 'banana peel', ['cat', 'kitten', 'kitty'], ['dog', 'puppy'], 'goldfish bowl', 'treehouse', 'palm tree', 'sunflower', 
   'starfish', 'flower pot', ['car', 'automobile'], 'sailboat', ['airplane', 'plane', 'aeroplane', 'jet'], 'pineapple', ['ice cream', 'icecream'],
-  'birthday cake', 'balloon', 'snake', ['spider', 'tarantula'], 'ghost', 'robot', 'crown', 'top hat', 'roller skate', 'padlock', 'alarm clock', 'bookshelf',
-  'rocking chair', 'guitar', 'drum', 'love letter', 'thunderstorm', 'rainbow', ['duck', 'duckling'], 'frog', 'penguin', 'giraffe', 'mushroom',
-  'carrot', 'fried egg', 'burger', 'cookie', 'bunk bed', 'desk lamp', 'kite', 'castle', 'football goal', 'telephone', 'candlestick',
+  'birthday cake', ['spider', 'tarantula'], 'robot', 'crown', 'top hat', 'roller skate', 'padlock', 'alarm clock', 'bookshelf',
+  'rocking chair', 'guitar', 'love letter', 'thunderstorm', 'rainbow', ['duck', 'duckling'], 'frog', 'penguin', 'giraffe', 'mushroom',
+  'carrot', 'fried egg', 'burger', 'bunk bed', 'desk lamp', 'castle', 'football goal', 'telephone', 'candlestick',
 ]);
 
 export const MEDIUM = make('medium')([
@@ -41,6 +41,7 @@ export const HARD = make('hard')([
   'shooting star', 'solar eclipse', 'ski lift', ['rabbit in a hat', 'rabbit out of a hat'], 'picnic', 'sleepwalking', 'airport',
   'milkshake', 'photo booth', 'camper van', 'pillow fight', 'bow and arrow', 'wedding cake', 'lifeguard', 'hourglass',
   'hammock', 'fire extinguisher', 'karaoke', 'washing line',
+  'dog walking a human', 'lost luggage', 'sinking ship', 'sleeping in class', 'bank robbery', 'alien abduction', 'window cleaner', 'dentist', 'chess game', 'bubble bath', 'snowball fight', 'tug of war', 'pizza delivery', 'haircut', 'escalator', 'taking a selfie', 'shopping cart', 'car wash', 'parking ticket', 'traffic light', 'mountain climber', 'jellyfish', 'tightrope walker', 'deep sea diver', 'magic carpet', 'cuckoo clock', 'flat tyre', 'beekeeper', 'sandwich', 'garden gnome', 'wind turbine', 'marathon', 'sushi', 'high five', 'ice skating', 'message in a bottle', 'postman', 'stage dive', 'sword fight', 'bird nest', 'hide and seek', 'sunburn',
 ]);
 
 export const ALL_PROMPTS: CanvasPrompt[] = [...EASY, ...MEDIUM, ...HARD];
@@ -49,7 +50,7 @@ export const ALL_PROMPTS: CanvasPrompt[] = [...EASY, ...MEDIUM, ...HARD];
 export function pickPrompt(usedAnswers: string[], rand: () => number = Math.random): CanvasPrompt {
   const used = new Set(usedAnswers.map((a) => a.toLowerCase()));
   const r = rand();
-  const bank = r < 0.25 ? EASY : r < 0.9 ? MEDIUM : HARD;
+  const bank = r < 0.1 ? EASY : r < 0.6 ? MEDIUM : HARD;
   const fresh = (b: CanvasPrompt[]) => b.filter((p) => !used.has(p.answer.toLowerCase()));
   const pool = fresh(bank).length ? fresh(bank) : fresh(ALL_PROMPTS).length ? fresh(ALL_PROMPTS) : ALL_PROMPTS;
   return pool[Math.floor(rand() * pool.length)];
